@@ -34,13 +34,14 @@ else
         if [ -n "$video_id" -a -n "$audio_id" ];then
             map=" -map $video_id:0.0 -map $audio_id:0.1 "
         fi
-        ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -vcodec copy -acodec copy $map ${MC_DIR_TS}/${job_file_ts}.temp.ts > /dev/null 2>&1
-        if [ $? -eq 0 ];then
-            mv -f ${MC_DIR_TS}/${job_file_ts}.temp.ts ${MC_DIR_TS}/${job_file_ts}
-        else
-            rm -f ${MC_DIR_TS}/${job_file_ts}.temp.ts
-        fi
-
+        for i in 0 5 10;do
+            ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -ss $i -vcodec copy -acodec copy $map ${MC_DIR_TS}/${job_file_ts}.temp.ts > /dev/null 2>&1
+            if [ $? -eq 0 ];then
+                mv -f ${MC_DIR_TS}/${job_file_ts}.temp.ts ${MC_DIR_TS}/${job_file_ts}
+                break
+            fi
+        done
+        rm -f ${MC_DIR_TS}/${job_file_ts}.temp.ts
         thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
         ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
         mv ${thumb_file}.png $thumb_file
