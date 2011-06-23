@@ -1,0 +1,5 @@
+#!/bin/bash -e
+bcas
+sudo modprobe pt1_drv
+echo "exec recpt1 --strip $@"
+exec recpt1 --strip $@

@@ -1,0 +1,45 @@
+#!/usr/bin/python
+
+import sys
+import time
+import os
+import traceback
+
+found = False
+count = 0
+if len(sys.argv) > 1:
+    count = 1 + int(sys.argv[1])
+    if count > 3:
+        print "aborted"
+        sys.exit(1)
+
+try:
+    import smartcard
+    import smartcard.util
+except ImportError:
+    traceback.print_exc(file=sys.stdout)
+except:
+    traceback.print_exc(file=sys.stdout)
+    ret = os.spawnlp(os.P_WAIT, "sudo", "sudo", "/etc/init.d/pcscd", "restart")
+    if 0 != ret:
+        print "faild while starting pcscd: return_code=%d" % (ret)
+        sys.exit(1)
+    program_name = os.path.realpath(sys.argv[0])
+    os.execv(program_name, [program_name, str(count)])
+
+for reader in smartcard.System.readers():
+    try:
+        connection=reader.createConnection()
+        connection.connect()
+        if '3B F0 12 00 FF 91 81 B1 7C 45 1F 03 99' == smartcard.util.toHexString( connection.getATR() ):
+            found = True
+            break
+    except smartcard.Exceptions.NoCardException:
+        print reader, 'no card inserted'
+
+if found:
+    print "found bcas card count=%d" % count
+    sys.exit(0)
+else:
+    print "not found bcas card count=%d" % count
+    sys.exit(1)

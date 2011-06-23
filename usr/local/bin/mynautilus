@@ -1,0 +1,28 @@
+#!/bin/bash
+
+function print_help() {
+cat <<EOF
+USAGE: $(basename $0) [OPTIONS]
+       -l location
+       -h print help
+EOF
+exit
+}
+
+location=.
+while getopts 'hl:' opt;do
+    case $opt in
+        l)
+            location=$OPTARG
+            ;;
+        h)
+            print_help
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+# killall -s HUP nautilus
+# nautilus --quit
+# killall nautilus
+nautilus --sm-client-disable --no-desktop $location

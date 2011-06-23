@@ -1,0 +1,33 @@
+#!/bin/bash
+
+sink_degital=alsa_output.pci-0000_00_14.2.iec958-stereo
+sink_hdmi=alsa_output.pci-0000_01_05.1.hdmi-stereo
+sink_usb=alsa_output.usb-GYROCOM_C_C_Co.__LTD_Audiotrak_DR.DAC2_DX-01-DX.iec958-stereo
+
+sink=
+while getopts 'ihu' opt;do
+    case $opt in
+        i)
+            sink=$sink_degital
+            ;;
+        h)
+            sink=$sink_hdmi
+            ;;
+        u)
+            sink=$sink_usb
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+pacmd "set-default-sink $sink"
+pacmd "suspend 0"
+pacmd "suspend 1"
+pacmd "suspend-sink $sink 0"
+mplayer /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg &
+sleep 1
+
+for app in $(pacmd list-sink-inputs | sed -n -e 's/index:[[:space:]]\([[:digit:]]\)/\1/p');
+do
+    pacmd "move-sink-input $app $sink"
+done

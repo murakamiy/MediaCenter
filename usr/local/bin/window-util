@@ -1,0 +1,42 @@
+#!/bin/bash
+
+function print_help() {
+cat <<EOF
+USAGE: $(basename $0) [OPTIONS]
+       -c close window
+       -n launch nautilus
+       -h print help
+EOF
+exit
+}
+
+while getopts 'chln:' opt;do
+    case $opt in
+        c)
+            printf 'KeyStrPress Alt_L\n KeyStrPress F4\n KeyStrRelease F4\n KeyStrRelease Alt_L\n' | xmacroplay :0
+            exit
+            ;;
+        n)
+            location=.
+            location=$OPTARG
+            ;;
+        h)
+            print_help
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+
+base=$(basename $location)
+id=$(xwininfo -root -tree | \
+egrep '\("nautilus" "Nautilus"\).+1920x' | fgrep "\"$base\"" | awk '{ print $1 }')
+
+if [ -z "$id" ];then
+    exec nautilus $location
+else
+#     xdotool windowmap $id
+#     xdotool windowraise $id
+#     xdotool windowfocus $id
+    xdotool windowactivate $id
+fi

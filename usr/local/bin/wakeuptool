@@ -1,0 +1,142 @@
+#!/bin/bash
+
+function set_wakeup_time() {
+    wakeup=$1
+    kexec -l /boot/vmlinuz-$(uname -r) --initrd=/boot/initrd.img-$(uname -r)-alarm --append="root=/dev/mapper/pdc_jfcjdjhc2 ro hpet=disable break=bottom wakeup=${wakeup}"
+}
+
+function do_wakeup() {
+    status gdm | grep -q start/running
+    if [ $? -eq 0 ];then
+        stop gdm
+        sleep 3
+    fi
+    sync;sync
+    echo telinit 0 >> $log
+    telinit 0
+}
+
+function do_shutdown() {
+    set_wakeup_time 0
+    do_wakeup
+}
+
+function make_initrd() {
+
+for rd in $(ls /boot/initrd.img* | grep -v alarm);do
+
+    temp_dir=$(mktemp -d)
+(
+    cd $temp_dir
+    gunzip -c $rd | cpio -id -H newc
+    /bin/cp /bin/busybox bin/
+    mv init init.0
+    awk '/maybe_break[[:space:]]+bottom/ { exit } { print $0 }' init.0 > init
+
+    if [ $break_bottom = "true" ];then
+        echo 'maybe_break bottom' >> init
+    fi
+
+cat << 'EOF'>> init
+#echo "wakeup-orig=$wakeup"
+#wakeup=$(busybox grep -Eo 'wakeup=[0-9]+' /proc/cmdline | busybox sed -e 's/wakeup=//')
+umount $rootmnt
+busybox mkswap /dev/mapper/pdc_jfcjdjhc4
+busybox swapon /dev/mapper/pdc_jfcjdjhc4 || echo -n disk > /sys/power/state
+[ -n "$wakeup" -a "$wakeup" -gt 0 ]      || echo -n disk > /sys/power/state
+
+echo 0 > /sys/class/rtc/rtc0/wakealarm
+echo -n $wakeup > /sys/class/rtc/rtc0/wakealarm
+#echo "wakeup-parsed=$wakeup"
+#busybox head -n 6 /proc/driver/rtc
+#sleep 10
+echo -n disk > /sys/power/state
+EOF
+    chmod 755 init
+    find . | cpio -o -H newc | gzip > ${rd}-alarm 
+)
+    echo "CREATED : ${rd}-alarm"
+    echo "TEMP_DIR: $temp_dir"
+
+done
+
+}
+
+
+function print_help() {
+
+cat <<EOF
+USAGE: $(basename $0) OPTIONS
+       -b               make initramfs break (debug mode)
+       -h               print help
+       -l               print next wakeup time
+       -m               make initramfs
+       -r               print rc0.d directory
+       -s               shutdown and will not be wake
+       -t WAKEUP_TIME   set wakeup time(seconds since the epoch time)
+       -w               shutdown and will be wake
+EOF
+exit
+}
+
+function print_rc0d() {
+cat <<EOF
+K18kexec-load@       K50pcscd@                S35networking@
+K19lirc@             K74bluetooth@            S40umountfs@
+K19samba@            K99laptop-mode@          S48cryptdisks@
+K19setserial@        README                   S59cryptdisks-early@
+K20kerneloops@       S10unattended-upgrades@  S60umountroot@
+K20multipath-tools@  S15wpa-ifupdown@         S85kexec@
+K30etc-setserial@    S20sendsigs@             S90reboot@
+K31atieventsd@       S30urandom@
+K50alsa-utils@       S31umountnfs.sh@
+EOF
+exit
+}
+
+
+if [ $# -eq 0 ];then
+    print_help
+fi
+
+break_bottom=false
+will_be_wakeup=false
+wakeup_time=
+while getopts 'bhlmrst:w' opt;do
+    case $opt in
+        b)
+            break_bottom=true
+            ;;
+        h)
+            print_help
+            ;;
+        l)
+            awk -v wakeup=$(cat /sys/class/rtc/rtc0/wakealarm) 'BEGIN { printf("current  %s\nresume   %s\n", strftime("%Y/%m/%d %H:%M:%S", systime(), 0), strftime("%Y/%m/%d %H:%M:%S", wakeup, 0)) }'
+            head -n 6 /proc/driver/rtc
+            exit
+            ;;
+        m)
+            make_initrd
+            ;;
+        s)
+            do_shutdown
+            exit
+            ;;
+        r)
+            print_rc0d
+            ;;
+        t)
+            wakeup_time=$OPTARG
+            ;;
+        w)
+            will_be_wakeup=true
+            ;;
+    esac
+done
+
+if [ -n "$wakeup_time" ];then
+    set_wakeup_time $wakeup_time
+fi
+if [ "$will_be_wakeup" = "true" ];then
+    do_wakeup
+fi
