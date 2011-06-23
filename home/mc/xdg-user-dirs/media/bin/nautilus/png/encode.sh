@@ -17,7 +17,6 @@ if [ $? -eq 0 ];then
         exit
     fi
 
-    #/bin/mv -f "$png_file" $MC_DIR_DO_NOT_DELETE
     /bin/cp -f $xml $MC_DIR_ENCODE_RESERVED
 fi
 
