@@ -1,0 +1,28 @@
+概要:アースソフト PT2を利用して作成した地デジ録画システム
+
+環境:
+    OS                     :Ubuntu 11.04 64bit
+    ハードウェア:
+        マザーボード       :Gigabyte Technology GA-MA785GT-UD3H
+        CPU                :AMD Athlon(tm) II X4 605e Processor
+        メモリ             :4GB
+        ブルーレイドライブ :PIONEER BD-RW BDR-206
+        ハードディスク     :Hitachi HDS72105 500GB 2台 RAID 0
+        PCケース           :Silverstone SST-LC16S-MR
+        カードリーダー     :NTTME SCR3310-NTTCom
+        チューナー         :アースソフト PT2 
+        リモコン           :Victor RM-A1500
+
+システム詳細:
+    1. 録画
+        1. 毎日13:00にEPG(電子番組表)を取得する。
+        2. キーワード指定した番組を録画予約する。
+        3. PCシャットダウン。
+        4. BIOSのRTC alarmを利用して、5分前にPC起動。
+        5. 予約した番組を録画。
+        6. PCシャットダウン。
+
+    2. ユーザーインターフェイス
+        1. lircを利用して、nautilusを起動する。
+        2. nautilus上で、録画した番組を選択する。
+        3. mplayerで録画した番組を再生する。
