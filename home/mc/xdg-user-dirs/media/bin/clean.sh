@@ -28,7 +28,6 @@ while true;do
     ((count++))
 
     find ~/.local/share/Trash -type f -delete
-    find $MC_DIR_FLV -type f -links 1 -ctime +30 -delete
     find $MC_DIR_RESUME -type f -delete
 
     for f in $(find $MC_DIR_JOB_FINISHED -type f);do
