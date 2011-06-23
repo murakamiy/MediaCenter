@@ -1,0 +1,327 @@
+begin irxevent
+    begin
+        prog   = irxevent
+        button = KEY_VIDEO
+        config = Key Delete CurrentWindow
+        delay  = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_ENTER
+        config = Key Return CurrentWindow
+        delay  = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_UP
+        config = Key Up CurrentWindow
+        repeat = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_DOWN
+        config = Key Down CurrentWindow
+        repeat = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_RIGHT
+        config = Key Right CurrentWindow
+        repeat = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_LEFT
+        config = Key Left CurrentWindow
+        repeat = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_CAMERA
+        config = Key Tab CurrentWindow
+        repeat = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_NUMERIC_9
+        config = Key Next CurrentWindow
+        repeat = 3
+    end
+    begin
+        prog   = irxevent
+        button = KEY_NUMERIC_6
+        config = Key Prior CurrentWindow
+        repeat = 3
+    end
+end irxevent
+
+begin irexec
+    begin
+        prog   = irexec
+        button = KEY_POWER
+        config = bash /home/mc/xdg-user-dirs/media/bin/safe_shutdown.sh -t 5 &
+    end
+    begin
+        prog   = irexec
+        button = KEY_CYCLEWINDOWS
+        config = window-util -n /home/mc/xdg-user-dirs/media/video/title_encode &
+        config = window-util -n /home/mc/xdg-user-dirs/media/video/dislike &
+        config = window-util -n /home/mc/xdg-user-dirs/media/video/favorite &
+        config = window-util -n /home/mc/xdg-user-dirs/media/video/removed &
+        config = window-util -n /home/mc/xdg-user-dirs/picture &
+    end
+    begin
+        prog   = irexec
+        button = KEY_EJECTCLOSECD
+        config = window-util -n /home/mc/xdg-user-dirs/media/video/title_ts &
+    end
+    begin
+        prog   = irexec
+        button = KEY_DASHBOARD
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -m &
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -v &
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -d &
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -f &
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -e &
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -b &
+        config = bash /home/mc/xdg-user-dirs/media/bin/tool.sh -a &
+    end
+    begin
+        prog   = irexec
+        button = KEY_ESC
+        config = window-util -c &
+    end
+    begin
+        prog   = irexec
+        button = KEY_NUMERIC_1
+        config = rhythmbox &
+    end
+    begin
+        prog   = irexec
+        button = KEY_AUDIO
+        config = mypactl -u
+        config = mypactl -h
+        config = mypactl -i
+    end
+end irexec
+
+begin mplayer
+    begin
+        prog   = mplayer
+        button = KEY_NUMERIC_4
+        config = vo_fullscreen 0
+    end
+    begin
+        prog   = mplayer
+        button = KEY_NUMERIC_5
+        config = vo_fullscreen 1
+    end
+    begin
+        prog   = mplayer
+        button = KEY_REWIND
+        config = audio_delay -0.1 0
+    end
+    begin
+        prog   = mplayer
+        button = KEY_FASTFORWARD
+        config = audio_delay 0.1 0
+    end
+    begin
+        prog   = mplayer
+        button = KEY_PREVIOUS
+        config = seek_chapter -1
+    end
+    begin
+        prog   = mplayer
+        button = KEY_NEXT
+        config = seek_chapter +1
+    end
+    begin
+        prog   = mplayer
+        button = KEY_UP
+        config = seek +60
+    end
+    begin
+        prog   = mplayer
+        button = KEY_DOWN
+        config = seek -50
+    end
+    begin
+        prog   = mplayer
+        button = KEY_RIGHT
+        config = seek +20
+    end
+    begin
+        prog   = mplayer
+        button = KEY_LEFT
+        config = seek -17
+    end
+    begin
+        prog   = mplayer
+        button = KEY_CHANNELUP
+        config = seek +600
+    end
+    begin
+        prog   = mplayer
+        button = KEY_CHANNELDOWN
+        config = seek -600
+    end
+    begin
+        prog   = mplayer
+        button = KEY_STOP
+        config = get_time_length\nget_percent_pos\nstop
+    end
+    begin
+        prog   = mplayer
+        button = KEY_PAUSE
+        config = pause
+    end
+    begin
+        prog   = mplayer
+        button = KEY_PLAY
+        config = speed_set 1
+    end
+    begin
+        prog   = mplayer
+        button = KEY_MUTE
+        config = mute
+    end
+    begin
+        prog   = mplayer
+        button = KEY_VOLUMEUP
+        config = volume +1
+        repeat = 1
+    end
+    begin
+        prog   = mplayer
+        button = KEY_VOLUMEDOWN
+        config = volume -1
+        repeat = 1
+    end
+    begin
+        prog   = mplayer
+        button = KEY_RECORD
+        config = screenshot 1\nosd_show_property_text Screenshot 2000
+    end
+end mplayer
+
+begin vlc
+    begin
+        prog = vlc
+        button = KEY_PLAY
+        config = key-play
+    end
+    begin
+        prog = vlc
+        button = KEY_PAUSE
+        config = key-play-pause
+    end
+    begin
+        prog = vlc
+        button = KEY_STOP
+        config = key-stop
+    end
+    begin
+        prog = vlc
+        button = KEY_ENTER
+        config = key-toggle-fullscreen
+    end
+    begin
+        prog = vlc
+        button = KEY_LEFT
+        config = key-jump-extrashort
+    end
+    begin
+        prog = vlc
+        button = KEY_RIGHT
+        config = key-jump+extrashort
+    end
+    begin
+        prog = vlc
+        button = KEY_DOWN
+        config = key-jump-short
+    end
+    begin
+        prog = vlc
+        button = KEY_UP
+        config = key-jump+short
+    end
+    begin
+        prog = vlc
+        button = KEY_PREVIOUS
+        config = key-jump-medium
+    end
+    begin
+        prog = vlc
+        button = KEY_NEXT
+        config = key-jump+medium
+    end
+    begin
+        prog = vlc
+        button = KEY_CHANNELDOWN
+        config = key-jump-long
+    end
+    begin
+        prog = vlc
+        button = KEY_CHANNELDOWN
+        config = key-jump+long
+    end
+end vlc
+
+begin rhythmbox
+    begin
+        prog = rhythmbox
+        button = KEY_PLAY
+        config = play
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_PAUSE
+        config = pause
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_RECORD
+        config = shuffle
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_STOP
+        config = repeat
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_NEXT
+        config = next
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_PREVIOUS
+        config = previous
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_FASTFORWARD
+        config = seek_forward
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_REWIND
+        config = seek_backward
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_VOLUMEUP
+        config = volume_up
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_VOLUMEDOWN
+        config = volume_down
+    end
+    begin
+        prog = rhythmbox
+        button = KEY_MUTE
+        config = mute
+    end
+end rhythmbox
