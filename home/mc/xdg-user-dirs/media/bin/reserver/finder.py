@@ -48,12 +48,17 @@ class Finder:
 class AnimeFinder(Finder):
     deny_list = [
         u'アスタロッテのおもちゃ',
-        u'オー！マイキー',
+        u'オー!マイキー',
         u'蒼天航路',
         u'タイムボカン',
+        u'世界一初恋',
+        u'日常',
+        u'TIGER&BUNNY',
+        u'戦国乙女',
+        u'DOG　DAYS',
     ]
     def like(self, pinfo):
-        if pinfo.category_en == 'anime' and pinfo.start.hour < 6:
+        if pinfo.category_1 == 'アニメ／特撮' and pinfo.start.hour < 6:
             if not re.search(self.deny_pattern, pinfo.title):
                 return True
         return False
@@ -64,7 +69,7 @@ class TitleFinder(Finder):
         u'鋼の錬金術師',
         u'刀語',
         u'ドラゴンボール',
-        u'ＮＡＲＵＴＯ',
+        u'NARUTO',
         u'はじめの一歩',
     ]
     def like(self, pinfo):
@@ -85,7 +90,7 @@ class CreditFinder(Finder):
         u'堀北真希',
         u'長澤まさみ',
         u'YUI',
-        u'ＹＵＩ',
+        u'ユイ',
         u'蒼井優',
         u'名越康文',
         u'上野樹里',
@@ -95,18 +100,17 @@ class CreditFinder(Finder):
         u'安田美沙子',
     ]
     def like(self, pinfo):
-        for c in pinfo.credits:
-            if re.search(self.allow_pattern, c):
-                return True
+        if re.search(self.allow_pattern, pinfo.desc):
+            return True
         return False
 
 class F1Finder(Finder):
     priority = 60
     allow_list = [
-        u'Ｆ１',
+        u'F1',
     ]
     def like(self, pinfo):
-        if pinfo.category_en == 'sports' and re.search(self.allow_pattern, pinfo.title):
+        if pinfo.category_2 == 'モータースポーツ' and re.search(self.allow_pattern, pinfo.title):
             return True
         return False
 
@@ -126,10 +130,10 @@ class VarietyFinder(Finder):
         u'リンカーン',
         u'ダウンタウンのガキの使いやあらへんで',
         u'とんねるずのみなさんのおかげでした',
-        u'さんまのスーパーからくりＴＶ',
+        u'さんまのスーパーからくりTV',
     ]
     def like(self, pinfo):
-        if pinfo.category_en == 'variety':
+        if pinfo.category_1 == 'バラエティ':
             if re.search(self.allow_pattern, pinfo.title):
                 return True
             if re.search(self.allow_pattern, pinfo.desc):
@@ -214,9 +218,7 @@ class TestChannelFinder(Finder):
 # channel      =  self.get_text(el.get('channel'))
 # title        =  self.get_text(el.find('title').text)
 # desc         =  self.get_text(el.find('desc').text)
-# category_en  =  self.get_text(c.text)
-# category_jp  =  self.get_text(c.text)
+# categories   =  self.categories = [] for c in el.findall('category'): self.categories.append(self.get_text(c.text))
 # priority     = found_by.how_much_like()
 # found_by     = found_by.__class__.__name__
 # rectime      = self.epoch_end - self.epoch_start - 10
-# credits      = self.credits = [] for e in el.find('credits'): for ee in e.getchildren(): self.credits.append(ee.text)

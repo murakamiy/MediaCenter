@@ -48,17 +48,15 @@ class ProgramInfo:
         self.title = self.get_text(el.find('title').text)
         self.desc = self.get_text(el.find('desc').text)
         self.rectime = self.epoch_end - self.epoch_start - 10
-        self.credits = []
-        c = el.find('credits')
-        if c != None:
-            for e in c.getchildren():
-                self.credits.append(self.get_text(e.text))
+        self.category_1 = ''
+        self.category_2 = ''
+        i = 0
         for c in el.findall('category'):
-            lang = c.get('lang')
-            if lang == 'en':
-                self.category_en = self.get_text(c.text)
-            elif lang == 'ja_JP':
-                self.category_jp = self.get_text(c.text)
+            if i == 0:
+                self.category_1 = self.get_text(c.text)
+            elif i == 1:
+                self.category_2 = self.get_text(c.text)
+            i += 1
     def set_reserve_info(self):
         self.time_start = self.start.strftime("%Y/%m/%d %H:%M:%S")
         self.time_end = self.end.strftime("%Y/%m/%d %H:%M:%S")
@@ -160,7 +158,7 @@ class ReserveMaker:
     def modify_priority(self, rinfo_list, modify_list, modifier):
         for rinfo in rinfo_list:
             for pinfo in modify_list:
-                if rinfo.pinfo.channel == pinfo.channel and rinfo.pinfo.category_en == pinfo.category_en and re.search(pinfo.title_pattern, rinfo.pinfo.title):
+                if rinfo.pinfo.channel == pinfo.channel and rinfo.pinfo.category_1 == pinfo.category_1 and re.search(pinfo.title_pattern, rinfo.pinfo.title):
                     rinfo.pinfo.priority += modifier
                     self.log(" %s %3d %2d %d %s" % (rinfo.pinfo.start, rinfo.pinfo.rectime / 60, int(rinfo.pinfo.channel), rinfo.pinfo.priority, rinfo.pinfo.title))
         return rinfo_list

@@ -1,11 +1,8 @@
 import reserve
 import finder
-import xmltv
 import os
 
 DEBUG_ENABLED = os.environ["MC_DEBUG_ENABLED"] == "true"
-
-xmltv.Credits.merge()
 
 finders_list = []
 if DEBUG_ENABLED:
