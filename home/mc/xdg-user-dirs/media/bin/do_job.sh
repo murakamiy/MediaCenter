@@ -35,7 +35,7 @@ else
             map=" -map $video_id:0.0 -map $audio_id:0.1 "
         fi
         for i in 0 5 10;do
-            ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -ss $i -vcodec copy -acodec copy $map ${MC_DIR_TS}/${job_file_ts}.temp.ts > /dev/null 2>&1
+            ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -copyts -ss $i -vcodec copy -acodec copy $map ${MC_DIR_TS}/${job_file_ts}.temp.ts > /dev/null 2>&1
             if [ $? -eq 0 ];then
                 mv -f ${MC_DIR_TS}/${job_file_ts}.temp.ts ${MC_DIR_TS}/${job_file_ts}
                 break
