@@ -84,20 +84,18 @@ class CreditFinder(Finder):
         u'ダウンタウン',
         u'星野真里',
         u'多部未華子',
-        u'今井りか',
-        u'戸田恵梨香',
         u'宮崎あおい',
         u'堀北真希',
-        u'長澤まさみ',
         u'YUI',
         u'ユイ',
         u'蒼井優',
         u'名越康文',
-        u'上野樹里',
-        u'前田敦子',
         u'菊川怜',
         u'新垣結衣',
         u'安田美沙子',
+        u'西尾維新',
+        u'麻枝准',
+        u'大塚愛',
     ]
     def like(self, pinfo):
         if re.search(self.allow_pattern, pinfo.desc):

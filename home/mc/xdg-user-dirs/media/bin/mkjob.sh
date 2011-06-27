@@ -9,10 +9,8 @@ done
 log 'starting epgdump_py'
 for ts in ${MC_DIR_EPG}/*.ts;do
     channel=$(basename $ts .ts)
+    echo "python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml"
     python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
-#     temp_file=$(mktemp)
-#     xmlstarlet format --encode utf-8 ${MC_DIR_EPG}/${channel}.xml > $temp_file
-#     /bin/mv $temp_file ${MC_DIR_EPG}/${channel}.xml
 done
 
 log 'starting find program'
@@ -24,6 +22,39 @@ for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
     xmlstarlet format --encode utf-8 $f > $temp_file
     /bin/mv $temp_file $f
 done
+
+
+function seltime() {
+    xmlstarlet sel --encode utf-8 -t -m '//programme' -v '@start' -n $@ |
+    python -c '
+import datetime
+import sys
+for line in sys.stdin:
+    str = line.split()
+    if str:
+        print datetime.datetime.strptime(str[0], "%Y%m%d%H%M%S")'
+}
+log 'starting epgdump'
+(
+cd ${MC_DIR_EPG}/work
+for ts in ${MC_DIR_EPG}/*.ts;do
+    channel=$(basename $ts .ts)
+    epgdump $channel $ts ${MC_DIR_EPG}/work/${channel}.xml
+    temp_file=$(mktemp)
+    xmlstarlet format --encode utf-8 ${MC_DIR_EPG}/work/${channel}.xml > $temp_file
+    /bin/mv $temp_file ${MC_DIR_EPG}/work/${channel}.xml
+    seltime ${MC_DIR_EPG}/${channel}.xml > ${channel}p
+    seltime ${MC_DIR_EPG}/work/${channel}.xml > ${channel}e
+    diff -u ${channel}e ${channel}p > ${channel}.diff
+    if [ $? -eq 0 ];then
+        log "$channel epgdump epgdump_py are identical"
+    else
+        cat ${channel}.diff >> $MC_FILE_LOG
+    fi
+    rm -f ${channel}e ${channel}p ${channel}.diff 
+done
+)
+
 
 log 'starting clean'
 bash $MC_BIN_CLEAN
