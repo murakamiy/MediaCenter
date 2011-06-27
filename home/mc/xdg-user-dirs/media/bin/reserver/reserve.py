@@ -232,8 +232,7 @@ class ReserveMaker:
         self.log("reserved:")
         for r in rinfo_list:
             if not os.path.exists(r.pinfo.file_reserved):
-                if not DEBUG_ENABLED:
-                    os.system(r.at_command)
+                os.system(r.at_command)
             fd = open(r.pinfo.file_reserved, "w")
             ElementTree(r.element).write(fd, 'utf-8')
             fd.close()
