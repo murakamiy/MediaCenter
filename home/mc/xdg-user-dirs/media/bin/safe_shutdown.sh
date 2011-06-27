@@ -59,18 +59,14 @@ if [ $wakeup_time -ne -1 ];then
         logcat
         screen_command=screen
     fi
-    if [ "$MC_DEBUG_ENABLED" != "true" ];then
-        echo "next wakeup time: $next_wakeup_time\n\nStop ShutDown ?"
-        zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nStop ShutDown ?</span>"
-        if [ $? -ne 0 ];then
-            gnome-session-save --logout
-            killall -s HUP lcdclock
-            sleep 5
-            sudo lcdprint -q -w $wakeup_time
-            $screen_command sudo wakeuptool -w -t $wakeup_time
-        fi
-    else
-        echo $screen_command sudo wakeuptool -w -t $wakeup_time
+    echo "next wakeup time: $next_wakeup_time\n\nStop ShutDown ?"
+    zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nStop ShutDown ?</span>"
+    if [ $? -ne 0 ];then
+        gnome-session-save --logout
+        killall -s HUP lcdclock
+        sleep 5
+        sudo lcdprint -q -w $wakeup_time
+        $screen_command sudo wakeuptool -w -t $wakeup_time
     fi
 else
     log

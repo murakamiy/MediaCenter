@@ -22,7 +22,6 @@ DIR_FAVORITE = os.environ["MC_DIR_FAVORITE"]
 DIR_REMOVED = os.environ["MC_DIR_REMOVED"]
 FILE_CHANNEL = os.environ["MC_FILE_CHANNEL"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
-DEBUG_ENABLED = os.environ["MC_DEBUG_ENABLED"] == "true"
 LOG_FILE = os.environ["MC_FILE_LOG"]
 RESERVE_SPAN = 60 * 60 * 30 #30hours
 
@@ -37,10 +36,7 @@ class ProgramInfo:
     def is_in_reserve_span(self):
         if self.is_past_program():
             return False
-        if DEBUG_ENABLED:
-            return True
-        else:
-            return (self.epoch_start - self.epoch_now) <= RESERVE_SPAN
+        return (self.epoch_start - self.epoch_now) <= RESERVE_SPAN
     def set_program_info(self, el):
         self.end   = datetime.strptime(string.split(el.get('stop'))[0],  '%Y%m%d%H%M%S')
         self.epoch_end = int(time.mktime(self.end.timetuple()))

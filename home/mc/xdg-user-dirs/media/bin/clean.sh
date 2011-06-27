@@ -4,9 +4,6 @@ source $(dirname $0)/00.conf
 function has_free_space() {
     used=$(df -Ph --sync | grep '/home' | awk '{ print $5 }' | tr -d '%' | egrep -o '^[0-9]+$')
     log "used: $used"
-    if [ "$MC_DEBUG_ENABLED" = "true" ];then
-        return 1
-    fi
     if [ -z "$used" ];then
         return 0
     fi
@@ -84,7 +81,4 @@ while true;do
         /bin/rm -f $f
     done
 
-    if [ "$MC_DEBUG_ENABLED" = "true" ];then
-        exit
-    fi
 done
