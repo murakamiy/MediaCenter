@@ -107,7 +107,7 @@ case $command in
             mv "${MC_DIR_THUMB}/${base}.png" "${MC_DIR_THUMB}/${base}"
             title=$base
             if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
-                title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
+                title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml | sed -e 's@/@_@g')
                 title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
             fi
             ln -f "${MC_DIR_THUMB}/${base}" "${MC_DIR_TITLE_ENCODE}/${title}.png"
@@ -130,7 +130,7 @@ case $command in
             mv "${MC_DIR_THUMB}/${base}.png" "${MC_DIR_THUMB}/${base}"
             title=$base
             if [ -f "${MC_DIR_JOB_FINISHED}/${base}.xml" ];then
-                title=$(print_title ${MC_DIR_JOB_FINISHED}/${base}.xml)
+                title=$(print_title ${MC_DIR_JOB_FINISHED}/${base}.xml | sed -e 's@/@_@g')
                 title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
             fi
             ln -f "${MC_DIR_THUMB}/${base}" "${MC_DIR_TITLE_TS}/${title}.png"

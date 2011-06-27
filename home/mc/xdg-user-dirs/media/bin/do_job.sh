@@ -5,7 +5,7 @@ job_file_base=$1
 job_file_xml=${job_file_base}.xml
 job_file_ts=${job_file_base}.ts
 
-title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
+title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's@/@_@g')
 rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 sleep_time=$(xmlsel -t -m '//sleep' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
