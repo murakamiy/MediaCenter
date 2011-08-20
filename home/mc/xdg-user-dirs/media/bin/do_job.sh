@@ -42,6 +42,7 @@ else
             fi
         done
         rm -f ${MC_DIR_TS}/${job_file_ts}.temp.ts
+
         thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
         ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
         mv ${thumb_file}.png $thumb_file

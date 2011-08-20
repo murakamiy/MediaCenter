@@ -118,6 +118,9 @@ class ReserveMaker:
             u'＜.+＞',
             u'【.+】',
             u'\[.+\]',
+            u'\(.+\)',
+            u'<.+>',
+            u'#[0-9]+',
             ]
         pattern_list = []
         for s in str_list:
@@ -187,6 +190,7 @@ class ReserveMaker:
         for r in remove_list:
             self.log(" %s %3d %2d %d %s" % (r.pinfo.start, r.pinfo.rectime / 60, int(r.pinfo.channel), r.pinfo.priority, r.pinfo.title))
             fd = open(DIR_REMOVED + '/' + r.pinfo.title + '.txt', "w")
+            print >> fd, "%s %s %3d %2d %d %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, int(r.pinfo.channel), r.pinfo.priority, r.pinfo.title)
             fd.close()
             try:
                 rinfo_list.remove(r)

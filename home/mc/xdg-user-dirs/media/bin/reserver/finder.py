@@ -63,6 +63,20 @@ class AnimeFinder(Finder):
                 return True
         return False
 
+class BaseBallFinder(Finder):
+    priority = 1
+    next_flag = False
+    def like(self, pinfo):
+        if self.next_flag:
+            self.next_flag = False
+            if pinfo.channel != '22' and pinfo.start.hour >= 17:
+                return True
+            else:
+                return False
+        if pinfo.channel != '22' and pinfo.start.hour >= 17 and pinfo.category_2 == '野球':
+            self.next_flag = True
+        return False
+
 class TitleFinder(Finder):
     priority = PRIORITY_HIGH
     allow_list = [
@@ -96,6 +110,9 @@ class CreditFinder(Finder):
         u'西尾維新',
         u'麻枝准',
         u'大塚愛',
+        u'レディー・ガガ',
+        u'LADY GAGA',
+        u'LADY　GAGA',
     ]
     def like(self, pinfo):
         if re.search(self.allow_pattern, pinfo.desc):
@@ -216,7 +233,8 @@ class TestChannelFinder(Finder):
 # channel      =  self.get_text(el.get('channel'))
 # title        =  self.get_text(el.find('title').text)
 # desc         =  self.get_text(el.find('desc').text)
-# categories   =  self.categories = [] for c in el.findall('category'): self.categories.append(self.get_text(c.text))
+# category_1   =  i = 0 for c in el.findall('category'): if i == 0: self.category_1 = self.get_text(c.text)
+# category_2   =  i = 0 for c in el.findall('category'): elif i == 1: self.category_2 = self.get_text(c.text)
 # priority     = found_by.how_much_like()
 # found_by     = found_by.__class__.__name__
 # rectime      = self.epoch_end - self.epoch_start - 10
