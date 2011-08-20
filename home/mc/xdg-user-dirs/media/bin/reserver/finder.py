@@ -38,7 +38,11 @@ class Finder:
         buf = '(' + buf + re.escape(plist[-1].encode('utf-8')) + ')'
         return re.compile(buf)
     def like(self, pinfo):
-        return False
+        if (pinfo.epoch_end - pinfo.epoch_start) > (60 * 60 * 3):
+            return False
+        return self.allow(pinfo)
+    def allow(self, pinfo):
+        raise NotImplementedError('abstract method')
     def how_much_like(self):
         return self.priority
 
@@ -57,7 +61,7 @@ class AnimeFinder(Finder):
         u'戦国乙女',
         u'DOG　DAYS',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if pinfo.category_1 == 'アニメ／特撮' and pinfo.start.hour < 6:
             if not re.search(self.deny_pattern, pinfo.title):
                 return True
@@ -66,7 +70,7 @@ class AnimeFinder(Finder):
 class BaseBallFinder(Finder):
     priority = 1
     next_flag = False
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if self.next_flag:
             self.next_flag = False
             if pinfo.channel != '22' and pinfo.start.hour >= 17:
@@ -86,7 +90,7 @@ class TitleFinder(Finder):
         u'NARUTO',
         u'はじめの一歩',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
             return True
         return False
@@ -114,7 +118,7 @@ class CreditFinder(Finder):
         u'LADY GAGA',
         u'LADY　GAGA',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.desc):
             return True
         return False
@@ -124,7 +128,7 @@ class F1Finder(Finder):
     allow_list = [
         u'F1',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if pinfo.category_2 == 'モータースポーツ' and re.search(self.allow_pattern, pinfo.title):
             return True
         return False
@@ -134,7 +138,7 @@ class DarwinFinder(Finder):
     allow_list = [
         u'ダーウィンが来た',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if pinfo.start.hour == 19 and re.search(self.allow_pattern, pinfo.title):
             return True
         return False
@@ -147,7 +151,7 @@ class VarietyFinder(Finder):
         u'とんねるずのみなさんのおかげでした',
         u'さんまのスーパーからくりTV',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if pinfo.category_1 == 'バラエティ':
             if re.search(self.allow_pattern, pinfo.title):
                 return True
@@ -165,7 +169,7 @@ class EnglishFinder(Finder):
         u'高校講座',
         u'トラッドジャパン',
     ]
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if pinfo.start.hour < 18:
             return False
         if re.search(self.deny_pattern, pinfo.title):
@@ -191,7 +195,7 @@ class RandomFinder(Finder):
     random_hour = RandomGenerator.getRandomHour()
     rectime = 29 * 60
     reserved = False
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if self.reserved == False and \
            pinfo.channel == self.random_channel and \
            self.rectime < pinfo.rectime and \
@@ -205,18 +209,18 @@ class RandomFinder(Finder):
 
 class TestTimeFinder(Finder):
     priority = PRIORITY_MIDDLE
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if (pinfo.epoch_start - pinfo.epoch_now) < (60 * 60):
             return True
         return False
 
 class TestAllFinder(Finder):
     priority = PRIORITY_LOW
-    def like(self, pinfo):
+    def allow(self, pinfo):
         return True
 class TestChannelFinder(Finder):
     priority = PRIORITY_LOW
-    def like(self, pinfo):
+    def allow(self, pinfo):
         if pinfo.channel == '13' or pinfo.channel == '14' or pinfo.channel == '15':
             return True
         return False
