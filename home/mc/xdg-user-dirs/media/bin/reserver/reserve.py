@@ -31,6 +31,7 @@ class ProgramInfo:
         self.epoch_start = int(time.mktime(self.start.timetuple()))
         self.now = now
         self.epoch_now = int(time.mktime(self.now.timetuple()))
+        self.channel = self.get_text(el.get('channel'))
     def is_past_program(self):
         return self.epoch_start < self.epoch_now 
     def is_in_reserve_span(self):
@@ -40,7 +41,6 @@ class ProgramInfo:
     def set_program_info(self, el):
         self.end   = datetime.strptime(string.split(el.get('stop'))[0],  '%Y%m%d%H%M%S')
         self.epoch_end = int(time.mktime(self.end.timetuple()))
-        self.channel = self.get_text(el.get('channel'))
         self.title = self.get_text(el.find('title').text)
         self.desc = self.get_text(el.find('desc').text)
         self.rectime = self.epoch_end - self.epoch_start - 10
@@ -69,15 +69,18 @@ class ReserveInfo:
         self.at_command = at_command
 
 class ChannelSleepTime:
-    def __init__(self):
-        fd = open(FILE_CHANNEL)
-        channel_list = fd.readlines()
-        fd.close()
+    def __init__(self, channel=None):
+        if channel == None:
+            fd = open(FILE_CHANNEL)
+            channel_list = fd.readlines()
+            fd.close()
+        else:
+            channel_list = channel
         sleep = 0
         self.channel_map = {}
         for c in channel_list:
             self.channel_map[c.rstrip()] = str(sleep)
-            sleep += 5
+            sleep += 2
     def get(self, channel):
         return self.channel_map.get(channel, "0")
 
@@ -111,6 +114,7 @@ class ReserveMaker:
         self.now = datetime.today()
         self.logfd = open(LOG_FILE, "a")
         self.title_sub_list = self.create_title_sub_list()
+        self.include_channel = None
     def create_title_sub_list(self):
         str_list = [
             u'「.+」',
@@ -129,9 +133,9 @@ class ReserveMaker:
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
-    def reserve(self):
+    def reserve(self, xml_glob):
         rinfo_list = []
-        for xml_file in glob(DIR_EPG + '/[0-9]*.xml'):
+        for xml_file in glob(DIR_EPG + '/' + xml_glob):
             tree = self.parse_xml(xml_file)
             if tree == None:
                 continue
@@ -219,11 +223,20 @@ class ReserveMaker:
             if len(buf_2) == 0 or buf_2[-1] != b:
                 buf_2.append(b)
         return buf_2
+    def set_include_channel(self, channel):
+        self.include_channel = channel
+        self.sleep = ChannelSleepTime(self.include_channel)
+    def is_include_channel(self, pinfo):
+        if self.include_channel == None:
+            return True
+        return pinfo.channel in self.include_channel
     def find(self, tree):
         rinfo_list = []
         for el in tree.findall("programme"):
             pinfo = ProgramInfo(el, self.now)
             if not pinfo.is_in_reserve_span():
+                continue
+            if not self.is_include_channel(pinfo):
                 continue
             pinfo.set_program_info(el)
             pinfo = self.finder.like(pinfo)

@@ -13,4 +13,9 @@ finders_list.append(finder.CreditFinder())
 
 cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif)
-r.reserve()
+# degital
+r.reserve('[0-9]*.xml')
+# bs
+c = ("101", "103", "141", "151", "161", "171", "181", "211")
+r.set_include_channel(c)
+r.reserve('bs.xml')

@@ -5,13 +5,14 @@ log 'starting create ts file'
 for c in $(cat $MC_FILE_CHANNEL);do
     rec $c 60 ${MC_DIR_EPG}/${c}.ts
 done
+rec 101 60 ${MC_DIR_EPG}/bs.ts
 
 log 'starting epgdump_py'
-for ts in ${MC_DIR_EPG}/*.ts;do
+for ts in ${MC_DIR_EPG}/[0-9]*.ts;do
     channel=$(basename $ts .ts)
-    echo "python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml"
-    python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
+    python $MC_BIN_EPGDUMP -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
 done
+python $MC_BIN_EPGDUMP -b -i ${MC_DIR_EPG}/bs.ts -o ${MC_DIR_EPG}/bs.xml
 
 log 'starting find program'
 python $MC_BIN_RESERVER

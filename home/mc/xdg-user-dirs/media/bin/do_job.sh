@@ -15,7 +15,7 @@ now=$(awk 'BEGIN { print systime() }')
 
 bash $MC_BIN_ENCODE $sleep_time &
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
-if [ $running -ge 2 ];then
+if [ $running -ge 4 ];then
     log "failed: $job_file_xml"
     log "caused by: $(find $MC_DIR_RECORDING -type f -name '*.xml')"
     mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_FAILED
