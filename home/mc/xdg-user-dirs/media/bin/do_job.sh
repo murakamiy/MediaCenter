@@ -11,7 +11,7 @@ sleep_time=$(xmlsel -t -m '//sleep' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
-((now = now - 30))
+((now = now - 120))
 
 bash $MC_BIN_ENCODE $sleep_time &
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
@@ -60,7 +60,7 @@ else
         bash $MC_BIN_SAFE_SHUTDOWN
     else
         log "failed: $job_file_xml"
-        log "caused by: not in time"
+        log "caused by: not in time now=$now start=$start"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_FAILED
     fi
 fi
