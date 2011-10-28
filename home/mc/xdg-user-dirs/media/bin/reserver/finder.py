@@ -98,6 +98,7 @@ class TitleFinder(Finder):
 class CreditFinder(Finder):
     priority = 40
     allow_list = [
+        u'西尾維新',
         u'浜田雅功',
         u'ダウンタウン',
         u'星野真里',
