@@ -27,7 +27,11 @@ while true;do
     find ~/.local/share/Trash -type f -delete
     find $MC_DIR_RESUME -type f -delete
 
-    rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,10d')
+    (
+        cd $MC_DIR_MP4
+        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,20d')
+    )
+
     for f in $(find $MC_DIR_JOB_FINISHED -type f);do
         base=$(basename ${f} .xml)
         if [ ! -f ${MC_DIR_TS}/${base}.ts ];then

@@ -5,7 +5,7 @@ job_file_base=$1
 job_file_xml=${job_file_base}.xml
 job_file_ts=${job_file_base}.ts
 
-title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's@/@_@g')
+title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/[/"*[:space:]]/_/g')
 rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 sleep_time=$(xmlsel -t -m '//sleep' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
@@ -48,41 +48,20 @@ else
         audio_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Audio:' | awk -F ',' '{ print $5" "$1 }' | sort -n -k 1 | head -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
         if [ -n "$video_id" -a -n "$audio_id" ];then
             map=" -map $video_id:0.0 -map $audio_id:0.1 "
-            mp4_file=${job_file_base}.mp4
             tmp1=$(mktemp).mp4
             tmp2=$(mktemp).mp4
-            tmp3=$(mktemp).mp4
             for i in 10 20 30;do
                 echo ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -ss $i -vcodec copy -acodec copy $map $tmp1
                 ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -ss $i -vcodec copy -acodec copy $map $tmp1 > /dev/null 2>&1
                 if [ -s $tmp1 ];then
                     echo ffmpeg -y -i $tmp1 -f mp4 -vcodec copy -acodec libfaac $tmp2
                     ffmpeg -y -i $tmp1 -f mp4 -vcodec copy -acodec libfaac $tmp2 > /dev/null 2>&1
-                    delay_opt=$(MP4Box -info $tmp2 | grep TrackID |
-                    awk '
-                    {
-                        id[FNR] = $3
-                        split($13, array, ":")
-                        time[FNR] = array[1] * 60 * 60 + array[2] * 60 + array[3]
-                    }
-                    END {
-                        # printf("%i:%.3f\n%i:%.3f\n", id[1], time[1], id[2], time[2])
-                        if (time[1] < time[2]) {
-                            printf("-delay %i=%i\n", id[1], (time[2] - time[1]) * 1000)
-                        }
-                        else if (time[2] < time[1]) {
-                            printf("-delay %i=%i\n", id[2], (time[1] - time[2]) * 1000)
-                        }
-                    }')
-                    echo MP4Box $delay_opt -add $tmp2 -new $tmp3
-                    MP4Box $delay_opt -add $tmp2 -new $tmp3 > /dev/null 2>&1
-                    mv $tmp3 ${MC_DIR_MP4}/${mp4_file}
+                    mv $tmp2 "${MC_DIR_MP4}/${title}.mp4"
                     break
                 fi
             done
             rm -f $tmp1
             rm -f $tmp2
-            rm -f $tmp3
         fi
 
         thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
@@ -94,14 +73,14 @@ else
             cp $MC_FILE_THUMB $thumb_file
         fi
         i=00
-        if [ -e ${MC_DIR_TITLE_TS}/${title}${i}.png ];then
+        if [ -e "${MC_DIR_TITLE_TS}/${title}${i}.png" ];then
             for i in $(seq -w 1 99);do
-                if [ ! -e ${MC_DIR_TITLE_TS}/${title}${i}.png ];then
+                if [ ! -e "${MC_DIR_TITLE_TS}/${title}${i}.png" ];then
                     break
                 fi
             done
         fi
-        ln $thumb_file ${MC_DIR_TITLE_TS}/${title}${i}.png
+        ln $thumb_file "${MC_DIR_TITLE_TS}/${title}${i}.png"
         sleep $sleep_time
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         bash $MC_BIN_SAFE_SHUTDOWN
