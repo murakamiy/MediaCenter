@@ -5,7 +5,7 @@ sleep 1
 irexec &
 sudo renice -n -20 -p $!
 
-killall -s HUP irxevent
-sleep 1
-irxevent &
-sudo renice -n -20 -p $!
+# killall -s HUP irxevent
+# sleep 1
+# irxevent &
+# sudo renice -n -20 -p $!

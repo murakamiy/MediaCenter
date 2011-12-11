@@ -1,61 +1,58 @@
-begin irxevent
-    begin
-        prog   = irxevent
-        button = KEY_VIDEO
-        config = Key Delete CurrentWindow
-        delay  = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_ENTER
-        config = Key Return CurrentWindow
-        delay  = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_UP
-        config = Key Up CurrentWindow
-        repeat = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_DOWN
-        config = Key Down CurrentWindow
-        repeat = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_RIGHT
-        config = Key Right CurrentWindow
-        repeat = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_LEFT
-        config = Key Left CurrentWindow
-        repeat = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_CAMERA
-        config = Key Tab CurrentWindow
-        repeat = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_NUMERIC_9
-        config = Key Next CurrentWindow
-        repeat = 3
-    end
-    begin
-        prog   = irxevent
-        button = KEY_NUMERIC_6
-        config = Key Prior CurrentWindow
-        repeat = 3
-    end
-end irxevent
-
 begin irexec
+    begin
+        prog   = irexec
+        button = KEY_VIDEO
+        config = xdotool key Delete
+        delay  = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_ENTER
+        config = xdotool key Return
+        delay  = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_UP
+        config = xdotool key Up
+        repeat = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_DOWN
+        config = xdotool key Down
+        repeat = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_RIGHT
+        config = xdotool key Right
+        repeat = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_LEFT
+        config = xdotool key Left
+        repeat = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_CAMERA
+        config = xdotool key Tab
+        repeat = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_NUMERIC_9
+        config = xdotool key Next
+        repeat = 3
+    end
+    begin
+        prog   = irexec
+        button = KEY_NUMERIC_6
+        config = xdotool key Prior
+        repeat = 3
+    end
     begin
         prog   = irexec
         button = KEY_POWER
