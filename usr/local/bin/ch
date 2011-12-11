@@ -1,0 +1,36 @@
+#!/bin/bash
+
+channel_dir=/home/mc/xdg-user-dirs/media/job/channel
+
+function print_help() {
+cat<<EOF
+USAGE: ch [OPTION]
+       -b  print bs channels 
+       -c  print cs channels
+       -d  print degital channels
+       -h  print help message
+EOF
+exit
+}
+
+while getopts 'bcdh' opt;do
+    case $opt in
+        b)
+            cat ${channel_dir}/bs
+            exit
+            ;;
+        c)
+            cat ${channel_dir}/cs
+            exit
+            ;;
+        d)
+            cat ${channel_dir}/degital
+            exit
+            ;;
+        h)
+            print_help
+            ;;
+    esac
+done
+
+print_help

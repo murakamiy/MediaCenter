@@ -1,0 +1,110 @@
+/etc/modprobe.d/blacklist.conf earth_pt1 追加
+
+pt1 dkmsに追加、ビルド、インストール
+
+ログイン画面の設定
+    cp /usr/share/applications/gnome-appearance-properties.desktop /usr/share/gdm/autostart/LoginWindow
+
+pcscツールインストール
+    dpkg -i libccid_1.3.11-1_amd64.deb libpcsc-perl_1.4.8-1_amd64.deb libpcsclite1_1.5.5-3ubuntu2.1_amd64.deb pcsc-tools_1.4.16-1_amd64.deb pcscd_1.5.5-3ubuntu2.1_amd64.deb libpcsclite-dev_1.5.5-3ubuntu2.1_amd64.deb
+
+    echo "libccid hold" | dpkg --set-selections
+    echo "libpcsc-perl hold" | dpkg --set-selections
+    echo "libpcsclite1 hold" | dpkg --set-selections
+    echo "libpcsclite-dev hold" | dpkg --set-selections
+    echo "pcsc-tools hold" | dpkg --set-selections
+    echo "pcscd hold" | dpkg --set-selections
+
+
+ログインno_effect 2D
+ATI FGLRX ドライバーのインストール
+画面オーバースキャン最大に設定
+
+raid 設定
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 4096 /dev/sda /dev/sdd 
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+
+ハードディスクスリープ設定
+hdparm -S 240 /dev/sda
+hdparm -S 240 /dev/sdd 
+hdparm -S 240 /dev/sdb 
+hdparm -S 60 /dev/sdc
+
+自動起動するアプリに追加
+    myirexec
+    lcdprint
+    mymediatomb
+
+起動用のラムディスク作成
+    wakeuptool -m
+
+mediubuntuレポジトリの追加
+    sudo -E wget --output-document=/etc/apt/sources.list.d/medibuntu.list http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list && sudo apt-get --quiet update && sudo apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring && sudo apt-get --quiet update
+    sudo apt-get install app-install-data-medibuntu apport-hooks-medibuntu
+
+ファイアーウオールの設定
+    ufw allow from 192.168.0.0/24
+    ufw enable
+
+/etcファイル編集
+    /etc/fstab
+
+    visudo
+    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /etc/init.d/mediatomb,/usr/local/bin/wakeuptool,/usr/local/bin/lcdprint
+
+    groupadd media
+    vigr
+    vigr -s
+    media:x:1001:mc
+
+    BCASカード
+    /etc/rc.local
+    cmd=$(lsusb | grep 'SCM Microsystems, Inc.' | awk -F ':' '{ print $1 }' | awk '{ printf("chown root:media /dev/bus/usb/%s/%s", $2, $4) }')
+    $cmd
+
+    /etc/init/hwclock-save.conf
+    #exec hwclock --rtc=/dev/rtc0 --systohc $tz --noadjfile $badyear
+
+    wakeuptool -w -t $(awk 'BEGIN { print systime() + 180 }')
+
+    rm -rf rc0.d/ 
+    cp -a rc6.d/ rc0.d
+
+crontabの編集
+    PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+    0 13 * * * bash /home/mc/xdg-user-dirs/media/bin/mkjob.sh
+
+nautilus pngファイルの設定
+    /home/mc/xdg-user-dirs/media/bin/nautilus/png/main.sh
+
+gconf-editor
+    /apps/nautilus/preferences/show_desktop 無効
+
+アプリのインストール
+autoconf automake autotools-dev
+htop iotop kexec-tools
+gawk
+ffmpeg 
+nkf 
+lirc
+lirc-x
+openssh-server
+rhythmbox
+smplayer
+vlc
+screen
+git
+xbase-clients
+xdotool
+xmacro
+xmlstarlet
+python-pyscard
+pcsc-tools pcscd
+libfuse-dev
+libpcsclite-dev
+mdadm
+gdisk
+vim
+screen
+dconf-tools
+ethtool
