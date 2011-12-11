@@ -20,7 +20,6 @@ DIR_FAILED = os.environ["MC_DIR_FAILED"]
 DIR_DISLIKE = os.environ["MC_DIR_DISLIKE"]
 DIR_FAVORITE = os.environ["MC_DIR_FAVORITE"]
 DIR_REMOVED = os.environ["MC_DIR_REMOVED"]
-FILE_CHANNEL = os.environ["MC_FILE_CHANNEL"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
 RESERVE_SPAN = 60 * 60 * 30 #30hours
@@ -32,6 +31,8 @@ class ProgramInfo:
         self.now = now
         self.epoch_now = int(time.mktime(self.now.timetuple()))
         self.channel = self.get_text(el.get('channel'))
+        self.channel = re.sub('^BS_', '',  self.channel)
+        self.channel = re.sub('^CS_', '7', self.channel)
     def is_past_program(self):
         return self.epoch_start < self.epoch_now 
     def is_in_reserve_span(self):
@@ -68,22 +69,6 @@ class ReserveInfo:
         self.element = element
         self.at_command = at_command
 
-class ChannelSleepTime:
-    def __init__(self, channel=None):
-        if channel == None:
-            fd = open(FILE_CHANNEL)
-            channel_list = fd.readlines()
-            fd.close()
-        else:
-            channel_list = channel
-        sleep = 0
-        self.channel_map = {}
-        for c in channel_list:
-            self.channel_map[c.rstrip()] = str(sleep)
-            sleep += 2
-    def get(self, channel):
-        return self.channel_map.get(channel, "0")
-
 def timeline_sort(x, y):
     ret = x.pinfo.epoch_start - y.pinfo.epoch_start
     if ret == 0:
@@ -110,7 +95,6 @@ def priority_sort(x, y):
 class ReserveMaker:
     def __init__(self, finder):
         self.finder = finder
-        self.sleep = ChannelSleepTime()
         self.now = datetime.today()
         self.logfd = open(LOG_FILE, "a")
         self.title_sub_list = self.create_title_sub_list()
@@ -133,13 +117,14 @@ class ReserveMaker:
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
-    def reserve(self, xml_glob):
+    def reserve(self, *xml_glob_list):
         rinfo_list = []
-        for xml_file in glob(DIR_EPG + '/' + xml_glob):
-            tree = self.parse_xml(xml_file)
-            if tree == None:
-                continue
-            rinfo_list.extend(self.find(tree))
+        for xml_glob in xml_glob_list:
+            for xml_file in glob(DIR_EPG + '/' + xml_glob):
+                tree = self.parse_xml(xml_file)
+                if tree == None:
+                    continue
+                rinfo_list.extend(self.find(tree))
         rinfo_list.sort(cmp=timeline_sort, reverse=False)
         rinfo_list = self.apply_dislike(rinfo_list)
         rinfo_list = self.apply_favorite(rinfo_list)
@@ -193,7 +178,7 @@ class ReserveMaker:
         self.log("removed: ")
         for r in remove_list:
             self.log(" %s %3d %2d %d %s" % (r.pinfo.start, r.pinfo.rectime / 60, int(r.pinfo.channel), r.pinfo.priority, r.pinfo.title))
-            fd = open(DIR_REMOVED + '/' + r.pinfo.title + '.txt', "w")
+            fd = open(DIR_REMOVED + '/' + re.sub('[\'"#$%&()!/*=~<>]', '_', r.pinfo.title) + '.txt', "w")
             print >> fd, "%s %s %3d %2d %d %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, int(r.pinfo.channel), r.pinfo.priority, r.pinfo.title)
             fd.close()
             try:
@@ -225,7 +210,6 @@ class ReserveMaker:
         return buf_2
     def set_include_channel(self, channel):
         self.include_channel = channel
-        self.sleep = ChannelSleepTime(self.include_channel)
     def is_include_channel(self, pinfo):
         if self.include_channel == None:
             return True
@@ -289,8 +273,6 @@ class ReserveMaker:
         found_by_element.text = pinfo.found_by
         priority_element = Element("priority")
         priority_element.text = str(pinfo.priority)
-        sleep_element = Element("sleep")
-        sleep_element.text = self.sleep.get(pinfo.channel)
         do_job_element = Element("dojob")
         do_job_element.text = do_job_command
         at_element = Element("at")
@@ -307,7 +289,6 @@ class ReserveMaker:
         reserved_element.append(el)
         reserved_element.append(priority_element)
         reserved_element.append(found_by_element)
-        reserved_element.append(sleep_element)
         reserved_element.append(time_start_element)
         reserved_element.append(time_stop_element)
         reserved_element.append(epoch_start_element)

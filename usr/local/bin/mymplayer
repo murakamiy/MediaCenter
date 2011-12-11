@@ -93,8 +93,7 @@ fi
 
 cd /home/mc/xdg-user-dirs/picture/mplayer
 eval mplayer $media $quiet $seek $delay $volume \
--input nodefault-bindings -volstep 10 \
--nomouseinput -noconsolecontrols -nojoystick -noar \
+-volstep 10 \
 -fs -geometry 960x540+0+50 -monitoraspect 16:9 \
 -cache 500000 -cache-min 50 -cache-seek-min 10 \
 -dr -vf pp=fast/ffmpegdeint,screenshot \
@@ -103,6 +102,9 @@ $tsprog $aid $sid $audio $message_level \
 $input $output
 
 )
+
+# -input nodefault-bindings
+# -nomouseinput -noconsolecontrols -nojoystick -noar \
 
 # -autosync 30 -mc 2.0 \
 # -vo gl:lscale=5:cscale=5:filter-strength=1.0:swapinterval=1:yuv=3 \

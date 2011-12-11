@@ -1,5 +1,55 @@
-#!/bin/bash -e
-bcas
-sudo modprobe pt1_drv
-echo "exec recpt1 --strip $@"
-exec recpt1 --strip $@
+#!/bin/bash
+
+if [ $# -ne 3 ];then
+cat <<EOF
+USAGE: rec channel time output
+EOF
+exit 1
+fi
+
+channel=$1
+time=$2
+output=$3
+
+lock_dir=/tmp/dvb-pt1-adapter
+mkdir -p $lock_dir
+if [ $channel -gt 100 ];then
+    lock_file=bs_cs
+    adapter_1=/dev/dvb/adapter0
+    adapter_2=/dev/dvb/adapter2
+else
+    lock_file=degital
+    adapter_1=/dev/dvb/adapter1
+    adapter_2=/dev/dvb/adapter3
+fi
+
+adapter=$adapter_1
+while [ -f ${lock_dir}/${lock_file} ];do
+    sleep 1
+done
+touch ${lock_dir}/${lock_file}
+fuser -s $adapter/*
+if [ $? -eq 0 ];then
+    adapter=$adapter_2
+    fuser -s $adapter/*
+    if [ $? -eq 0 ];then
+        /bin/rm -f ${lock_dir}/${lock_file}
+        echo resource is busy
+        exit 1
+    fi
+fi
+/bin/rm -f ${lock_dir}/${lock_file}
+
+id=$(echo $adapter | sed -e 's/[^0-9]//g')
+tune $id $channel &
+pid_tune=$!
+
+sleep 1
+
+cat ${adapter}/dvr0 > $output &
+pid_cat=$!
+
+sleep $time
+
+kill -TERM $pid_cat
+kill -TERM $pid_tune

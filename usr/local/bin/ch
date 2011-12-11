@@ -4,7 +4,7 @@ channel_dir=/home/mc/xdg-user-dirs/media/job/channel
 
 function print_help() {
 cat<<EOF
-USAGE: ch [OPTION]
+USAGE: ch [OPTION] [CHANNEL]
        -b  print bs channels 
        -c  print cs channels
        -d  print degital channels
@@ -13,24 +13,32 @@ EOF
 exit
 }
 
+file=none
 while getopts 'bcdh' opt;do
     case $opt in
         b)
-            cat ${channel_dir}/bs
-            exit
+            file=${channel_dir}/bs
             ;;
         c)
-            cat ${channel_dir}/cs
-            exit
+            file=${channel_dir}/cs
             ;;
         d)
-            cat ${channel_dir}/degital
-            exit
+            file=${channel_dir}/degital
             ;;
         h)
             print_help
             ;;
     esac
 done
+shift $(($OPTIND -1))
 
-print_help
+if [ "$file" = "none" ];then
+    print_help
+fi
+
+grep_command=
+if [ $# -gt 0 ];then
+   grep_command=" | grep ^$1"
+fi
+
+eval sort -k 1 -n $file $grep_command

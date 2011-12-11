@@ -2,7 +2,7 @@
 source $(dirname $0)/00.conf
 
 function has_free_space() {
-    used=$(df -Ph --sync | grep '/home' | awk '{ print $5 }' | tr -d '%' | egrep -o '^[0-9]+$')
+    used=$(df -Ph --sync | grep '/home$' | awk '{ print $5 }' | tr -d '%' | egrep -o '^[0-9]+$')
     log "used: $used"
     if [ -z "$used" ];then
         return 0

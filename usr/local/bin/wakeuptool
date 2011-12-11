@@ -2,17 +2,11 @@
 
 function set_wakeup_time() {
     wakeup=$1
-    kexec -l /boot/vmlinuz-$(uname -r) --initrd=/boot/initrd.img-$(uname -r)-alarm --append="root=/dev/mapper/pdc_jfcjdjhc2 ro hpet=disable break=bottom wakeup=${wakeup}"
+    kexec -l /boot/vmlinuz-$(uname -r) --initrd=/boot/initrd.img-$(uname -r)-alarm --append="root=/dev/sdb1 ro hpet=disable break=bottom wakeup=${wakeup}"
 }
 
 function do_wakeup() {
-    status gdm | grep -q start/running
-    if [ $? -eq 0 ];then
-        stop gdm
-        sleep 3
-    fi
     sync;sync
-    echo telinit 0 >> $log
     telinit 0
 }
 
@@ -41,8 +35,8 @@ cat << 'EOF'>> init
 #echo "wakeup-orig=$wakeup"
 #wakeup=$(busybox grep -Eo 'wakeup=[0-9]+' /proc/cmdline | busybox sed -e 's/wakeup=//')
 umount $rootmnt
-busybox mkswap /dev/mapper/pdc_jfcjdjhc4
-busybox swapon /dev/mapper/pdc_jfcjdjhc4 || echo -n disk > /sys/power/state
+busybox mkswap /dev/sdb3
+busybox swapon /dev/sdb3                 || echo -n disk > /sys/power/state
 [ -n "$wakeup" -a "$wakeup" -gt 0 ]      || echo -n disk > /sys/power/state
 
 echo 0 > /sys/class/rtc/rtc0/wakealarm

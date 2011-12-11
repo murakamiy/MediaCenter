@@ -44,11 +44,6 @@ function is_encoding_job_running() {
     return $ret
 }
 
-sleep_time=$1
-if [ -n "$sleep_time" ];then
-    sleep $sleep_time
-fi
-
 is_encoding_job_running
 if [ $? -eq 0 ];then
     exit

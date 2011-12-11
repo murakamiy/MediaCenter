@@ -147,7 +147,8 @@ case $command in
         for f in $MC_DIR_RESERVED/*;do
             title=$(print_title $f)
             time=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
-            echo "$time $title"
-        done
+            channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
+            echo -e "$time\t$channel\t$title"
+        done | column -t -s '	'
         ;;
 esac
