@@ -30,11 +30,41 @@ raid 設定
 mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 4096 /dev/sda /dev/sdd 
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 
+mdadm --misc --stop /dev/md0 
+cat /proc/mdstat 
+
 ハードディスクスリープ設定
 hdparm -S 240 /dev/sda
 hdparm -S 240 /dev/sdd 
 hdparm -S 240 /dev/sdb 
 hdparm -S 60 /dev/sdc
+
+パーティション
+# gdisk /dev/md0
+GPT fdisk (gdisk) version 0.6.14
+
+Partition table scan:
+  MBR: protective
+  BSD: not present
+  APM: not present
+  GPT: present
+
+Found valid GPT with protective MBR; using GPT.
+
+Command (? for help): p
+Disk /dev/md0: 9767550976 sectors, 4.5 TiB
+Logical sector size: 512 bytes
+Disk identifier (GUID): 96827572-D1B3-4455-88F5-77D1D9083062
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 9767550942
+Partitions will be aligned on 8-sector boundaries
+Total free space is 12 sectors (6.0 KiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1              40      9767550936   4.5 TiB     0700  Linux/Windows data
+
+フォーマット
+# mkfs.ext4 -b 4096 /dev/md0p1 
 
 自動起動するアプリに追加
     myirexec
@@ -114,3 +144,4 @@ vim
 screen
 dconf-tools
 ethtool
+imagemagick
