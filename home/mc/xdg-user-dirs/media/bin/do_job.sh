@@ -33,8 +33,8 @@ else
         audio_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Audio:' | awk -F ',' '{ print $5" "$1 }' | sort -n -k 1 | head -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
         if [ -n "$video_id" -a -n "$audio_id" ];then
             map=" -map $video_id:0.0 -map $audio_id:0.1 "
-            tmp1=$(mktemp --tmpdir=$MC_DIR_MP4).mp4
-            tmp2=$(mktemp --tmpdir=$MC_DIR_MP4).mp4
+            tmp1=${MC_DIR_MP4}/${job_file_base}_tmp_1.mp4
+            tmp2=${MC_DIR_MP4}/${job_file_base}_tmp_2.mp4
             for i in 10 20 30;do
                 echo ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -ss $i -vcodec copy -acodec copy $map $tmp1
                 ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -ss $i -vcodec copy -acodec copy $map $tmp1 > /dev/null 2>&1
