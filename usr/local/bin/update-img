@@ -26,51 +26,54 @@ font_name=/usr/share/fonts/truetype/ricoh/tlgothic.ttc
 font_size=128
 font_color=black
 x=150
-y1=150
-y2=300
+
+gsettings set org.gnome.desktop.background picture-uri file://${job_file}
+gsettings set org.gnome.desktop.background picture-options "$STYLE"
+gsettings set org.gnome.desktop.background primary-color "$PRIMARY_COLOR"
+gsettings set org.gnome.desktop.background secondary-color "$SECONDARY_COLOR"
 
 while [ true ];do
 
     run_file=$(ls -t $run_dir | tail -n 1)
-    for f in $(find $job_dir -type f -name '*.xml');do
-        title=$(xmlsel -t -m '//title' -v '.' $f | tr -d '[[:punct:]]')
-        channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
-        start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
-        stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f)
-        epoch=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
-cat << EOF
-$epoch	$start	$stop	$channel	$title
-EOF
-    done | sort -k 1 -n | tail -n 4 > ${run_dir}/${run_file}
-
+    ls $job_dir > ${run_dir}/${run_file}
     diff -q ${run_dir}/* > /dev/null
     if [ $? -eq 0 ];then
         continue
     fi
 
-    meta_work=
-    meta_in=1234
-    job_count=$(cat ${run_dir}/${run_file} | wc -l)
-    for ((i=1; i<=$job_count; i++));do
+    i=1
+    meta_work=$(for f in $(find $job_dir -type f -name '*.xml');do
+        epoch=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
+cat << EOF
+$epoch	$f
+EOF
+    done | sort -k 1 -n | tail -n 4 | awk '{ print $2 }' |
+    while read f;do
+
         if [ $i -eq 1 ];then
             y1=160
             y2=320
+        else
+            y1=150
+            y2=300
         fi
 
-        meta_in=${meta_in/$i/}
-        meta_work=${meta_work}${i}
-
-        start=$(sed -ne ${i}p ${run_dir}/${run_file} | awk -F '\t' '{ print substr($2, 12, 5) }')
-        stop=$(sed -ne ${i}p ${run_dir}/${run_file} | awk -F '\t' '{ print substr($3, 12, 5) }')
-        channel=$(sed -ne ${i}p ${run_dir}/${run_file} | awk -F '\t' '{ print $4 }')
-        title=$(sed -ne ${i}p ${run_dir}/${run_file} | awk -F '\t' '{ print $5 }' | sed -e 's/　/ /g')
+        title=$(xmlsel -t -m '//title' -v '.' $f | tr -d '[[:punct:]]' | sed -e 's/　/ /g')
+        channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
+        start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f | awk '{ print substr($2, 1, 5) }')
+        stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f   | awk '{ print substr($2, 1, 5) }')
 
         convert ${input_dir}/${i}.bmp -font $font_name -pointsize $font_size -fill $font_color \
-        -draw "text $x,$y1 '$start    $stop    $channel'" \
+        -draw "text $x,$y1 '[ $start >> $stop ]  @$channel'" \
         -draw "text $x,$y2 '$title'" \
         ${work_dir}/${i}.bmp
-    done
 
+        echo -n $i
+        ((i++))
+    done)
+
+    meta_in=1234
+    meta_in=${meta_in/$meta_work/}
     list_work=
     list_in=
     if [ -n "$meta_in" ];then
@@ -81,11 +84,6 @@ EOF
     fi
 
     convert -append $list_work $list_in $job_file
-
-    gsettings set org.gnome.desktop.background picture-uri file://${job_file}
-    gsettings set org.gnome.desktop.background picture-options "$STYLE"
-    gsettings set org.gnome.desktop.background primary-color "$PRIMARY_COLOR"
-    gsettings set org.gnome.desktop.background secondary-color "$SECONDARY_COLOR"
-
     sleep 60
+
 done
