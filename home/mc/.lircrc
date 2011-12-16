@@ -1,6 +1,12 @@
 begin irexec
     begin
         prog   = irexec
+        button = KEY_NUMERIC_8
+        config = killall main.sh
+        repeat = 3
+    end
+    begin
+        prog   = irexec
         button = KEY_VIDEO
         config = xdotool key Delete
         delay  = 3
