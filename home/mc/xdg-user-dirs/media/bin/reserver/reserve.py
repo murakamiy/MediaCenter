@@ -9,7 +9,6 @@ from datetime import datetime
 import time
 from xml.etree.cElementTree import ElementTree
 from xml.etree.cElementTree import Element
-from constant import *
 
 DIR_EPG = os.environ["MC_DIR_EPG"]
 DIR_TS = os.environ["MC_DIR_TS"]

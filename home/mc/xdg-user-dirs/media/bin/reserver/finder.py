@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from constant import *
 import re
 import random
 
@@ -21,7 +20,7 @@ class FindresCheif:
             return pinfo
 
 class Finder:
-    priority = PRIORITY_MIDDLE
+    priority = 50
     allow_list = None
     deny_list = None
     allow_pattern = None
@@ -50,6 +49,7 @@ class Finder:
 ####################################################################################################
 
 class AnimeFinder(Finder):
+    priority = 50
     deny_list = [
         u'アスタロッテのおもちゃ',
         u'オー!マイキー',
@@ -82,7 +82,7 @@ class BaseBallFinder(Finder):
         return False
 
 class TitleFinder(Finder):
-    priority = PRIORITY_HIGH
+    priority = 100
     allow_list = [
         u'鋼の錬金術師',
         u'刀語',
@@ -119,8 +119,18 @@ class CreditFinder(Finder):
         u'LADY GAGA',
         u'LADY　GAGA',
     ]
+    deny_list = [
+        u'BSプレマップ',
+    ]
     def allow(self, pinfo):
-        if re.search(self.allow_pattern, pinfo.desc):
+        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
+            return True
+        return False
+
+class SportFinder(Finder):
+    priority = 40
+    def allow(self, pinfo):
+        if pinfo.category_2 == 'サッカー' and int(pinfo.channel) > 100:
             return True
         return False
 
@@ -191,7 +201,7 @@ class RandomGenerator:
     getRandomHour = staticmethod(getRandomHour)
 
 class RandomFinder(Finder):
-    priority = PRIORITY_LOW
+    priority = 1
     random_channel = RandomGenerator.getRandomChannel()
     random_hour = RandomGenerator.getRandomHour()
     rectime = 29 * 60
@@ -209,18 +219,18 @@ class RandomFinder(Finder):
 ####################################################################################################
 
 class TestTimeFinder(Finder):
-    priority = PRIORITY_MIDDLE
+    priority = 50
     def allow(self, pinfo):
         if (pinfo.epoch_start - pinfo.epoch_now) < (60 * 60):
             return True
         return False
 
 class TestAllFinder(Finder):
-    priority = PRIORITY_LOW
+    priority = 1
     def allow(self, pinfo):
         return True
 class TestChannelFinder(Finder):
-    priority = PRIORITY_LOW
+    priority = 1
     def allow(self, pinfo):
         if pinfo.channel == '13' or pinfo.channel == '14' or pinfo.channel == '15':
             return True
@@ -235,7 +245,6 @@ class TestChannelFinder(Finder):
 # epoch_now    =  int(time.mktime(self.now.timetuple()))
 # end          =  datetime.strptime(string.split(el.get('stop'))[0],   '%Y%m%d%H%M%S')
 # epoch_end    =  int(time.mktime(self.end.timetuple()))
-# channel      =  self.get_text(el.get('channel'))
 # title        =  self.get_text(el.find('title').text)
 # desc         =  self.get_text(el.find('desc').text)
 # category_1   =  i = 0 for c in el.findall('category'): if i == 0: self.category_1 = self.get_text(c.text)
@@ -243,3 +252,6 @@ class TestChannelFinder(Finder):
 # priority     = found_by.how_much_like()
 # found_by     = found_by.__class__.__name__
 # rectime      = self.epoch_end - self.epoch_start - 10
+# channel      = self.get_text(el.get('channel'))
+# channel      = re.sub('^BS_', '',  self.channel)
+# channel      = re.sub('^CS_', '7', self.channel)

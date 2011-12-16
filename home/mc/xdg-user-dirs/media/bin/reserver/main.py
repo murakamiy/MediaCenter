@@ -10,6 +10,8 @@ finders_list.append(finder.F1Finder())
 finders_list.append(finder.VarietyFinder())
 # finders_list.append(finder.EnglishFinder())
 finders_list.append(finder.CreditFinder())
+finders_list.append(finder.SportFinder())
+
 
 cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif)
