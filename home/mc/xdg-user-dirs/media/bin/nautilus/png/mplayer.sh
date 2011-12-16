@@ -12,4 +12,5 @@ if [ -f $resume ];then
     fi
 fi
 
+echo mymplayer -t -r $resume $seek $2
 mymplayer -t -r $resume $seek $2
