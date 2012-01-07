@@ -46,10 +46,20 @@ pid_tune=$!
 
 sleep 1
 
-cat ${adapter}/dvr0 > $output &
-pid_cat=$!
+pid_cat_file=$(mktemp)
+while true;do
+    LANG=C cat ${adapter}/dvr0 >> $output &
+    pid_cat=$!
+    echo $pid_cat > $pid_cat_file
+    wait $pid_cat
+    sleep 1
+done &
+pid_while=$!
 
 sleep $time
 
-kill -TERM $pid_cat
+kill -TERM $pid_while
+kill -TERM $(cat $pid_cat_file)
 kill -TERM $pid_tune
+
+rm -f $pid_cat_file
