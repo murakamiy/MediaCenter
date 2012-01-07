@@ -32,6 +32,7 @@ pacmd "set-default-source $source"
 pacmd "suspend 0"
 pacmd "suspend 1"
 pacmd "suspend-sink $sink 0"
+pacmd "suspend-source $source 0"
 mplayer /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg > /dev/null 2>&1 &
 sleep 1
 
