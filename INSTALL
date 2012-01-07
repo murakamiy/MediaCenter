@@ -147,3 +147,6 @@ ethtool
 imagemagick
 mediatomb
 vobcopy
+gpac
+linux-source-3.0.0
+kernel-package
