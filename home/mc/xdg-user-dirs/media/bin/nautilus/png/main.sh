@@ -7,10 +7,10 @@ base=$(basename $(find $MC_DIR_THUMB -inum $inode))
 
 if [ -n "$base" ];then
     title_dir=$(dirname $png_file)
-    if [ "$title_dir" = $MC_DIR_TITLE_TS ];then
-        dir=$MC_DIR_TS
-    elif [ "$title_dir" = $MC_DIR_TITLE_ENCODE ];then
+    if [ "$title_dir" = $MC_DIR_TITLE_ENCODE ];then
         dir=$MC_DIR_ENCODE
+    else
+        dir=$MC_DIR_TS
     fi
 
     num=$(find $dir -type f -name "$base.*" | wc -l)

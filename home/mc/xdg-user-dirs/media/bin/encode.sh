@@ -60,7 +60,7 @@ if [ -n "$xml" ];then
 #     do_encode_mencoder $base
 
     if [ $? -eq 0 ];then
-        title=$(print_title ${MC_DIR_ENCODING}/${base}.xml | sed -e 's/[/"*[:space:]]/_/g')_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
+        title=$(print_title ${MC_DIR_ENCODING}/${base}.xml)
         ln -f "${MC_DIR_THUMB}/${base}" "${MC_DIR_TITLE_ENCODE}/${title}.png"
         touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
         time_end=$(awk 'BEGIN { print systime() }')

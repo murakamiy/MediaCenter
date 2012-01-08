@@ -5,7 +5,8 @@ job_file_base=$1
 job_file_xml=${job_file_base}.xml
 job_file_ts=${job_file_base}.ts
 
-title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/[/"*[:space:]]/_/g')
+title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
+category=$(print_category ${MC_DIR_RESERVED}/${job_file_xml})
 rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
@@ -71,15 +72,18 @@ else
         else
             cp $MC_FILE_THUMB $thumb_file
         fi
+        category_dir="${MC_DIR_TITLE_TS}/${category}"
+        mkdir -p "$category_dir"
         i=00
-        if [ -e "${MC_DIR_TITLE_TS}/${title}${i}.png" ];then
+        if [ -e "${category_dir}/${title}${i}.png" ];then
             for i in $(seq -w 1 99);do
-                if [ ! -e "${MC_DIR_TITLE_TS}/${title}${i}.png" ];then
+                if [ ! -e "${category_dir}/${title}${i}.png" ];then
                     break
                 fi
             done
         fi
-        ln $thumb_file "${MC_DIR_TITLE_TS}/${title}${i}.png"
+        ln $thumb_file "${category_dir}/${title}${i}.png"
+
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         bash $MC_BIN_SAFE_SHUTDOWN
     else
