@@ -42,16 +42,27 @@ fi
 
 /bin/rm -f ${lock_dir}/${lock_file}
 
+
+
+####################################################################################################
+# recording start
+####################################################################################################
+
+fifo_cat=/tmp/fifo_cat$$
+mkfifo -m 644 $fifo_cat
+
 id=$(echo $adapter | sed -e 's/[^0-9]//g')
 tune $id $channel &
-pid_tune=$!
-
 sleep 1
-
-cat ${adapter}/dvr0 > $output &
+pid_tune=$!
+b25 -v 0 $fifo_cat $output &
+pid_b25=$!
+LANG=C cat ${adapter}/dvr0 > $fifo_cat &
 pid_cat=$!
 
 sleep $time
 
 kill -TERM $pid_cat
 kill -TERM $pid_tune
+kill -TERM $pid_b25
+/bin/rm -f $fifo_cat
