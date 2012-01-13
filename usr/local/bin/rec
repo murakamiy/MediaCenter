@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 3 ];then
+if [ $# -lt 3 ];then
 cat <<EOF
-USAGE: rec channel time output
+USAGE: rec channel time output [fifo]
 EOF
 exit 1
 fi
@@ -10,6 +10,10 @@ fi
 channel=$1
 time=$2
 output=$3
+fifo_param=
+if [ $# -eq 4 ];then
+    fifo_param=$4
+fi
 
 lock_dir=/tmp/dvb-pt1-adapter
 mkdir -p $lock_dir
@@ -42,8 +46,6 @@ fi
 
 /bin/rm -f ${lock_dir}/${lock_file}
 
-
-
 ####################################################################################################
 # recording start
 ####################################################################################################
@@ -55,10 +57,15 @@ id=$(echo $adapter | sed -e 's/[^0-9]//g')
 tune $id $channel &
 sleep 1
 pid_tune=$!
+touch $output
 b25 -v 0 $fifo_cat $output &
 pid_b25=$!
 LANG=C cat ${adapter}/dvr0 > $fifo_cat &
 pid_cat=$!
+if [ -n "$fifo_param" ];then
+    tail -f $output > $fifo_param &
+    pid_tail=$!
+fi
 
 sleep $time
 
@@ -66,3 +73,6 @@ kill -TERM $pid_cat
 kill -TERM $pid_tune
 kill -TERM $pid_b25
 /bin/rm -f $fifo_cat
+if [ -n "$fifo_param" ];then
+    kill -TERM $pid_tail
+fi
