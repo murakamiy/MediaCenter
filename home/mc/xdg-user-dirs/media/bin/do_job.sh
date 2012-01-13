@@ -11,6 +11,7 @@ rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
+mp4_time=$(( ($end - $start) / 3 ))
 ((now = now - 120))
 
 bash $MC_BIN_ENCODE &
@@ -24,49 +25,21 @@ else
         log "start: $job_file_xml"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
         sudo lcdprint -s $start -e $end
-        $rec
+
+        mp4_tmp=${MC_DIR_MP4}/${job_file_base}_tmp.mp4
+        fifo_rec=/tmp/fifo_rec$$
+        mkfifo -m 644 $fifo_rec
+        echo "ffmpeg -y -i $fifo_rec -f mp4 -t $mp4_time -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 $mp4_tmp"
+        ffmpeg -y -i $fifo_rec -f mp4 -t $mp4_time -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 $mp4_tmp > /dev/null 2>&1 &
+        pid_ffmpeg=$!
+
+        $rec $fifo_rec
+
+        kill -TERM $pid_ffmpeg
+        /bin/rm -f $fifo_rec
+        /bin/mv -f $mp4_tmp "${MC_DIR_MP4}/${title}.mp4" 
+
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
-        echo b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.temp
-        b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.temp
-        mv -f ${MC_DIR_TS}/${job_file_ts}.temp ${MC_DIR_TS}/${job_file_ts}
-
-        video_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Video:' | grep h264 | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-        audio_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Audio:' | awk -F ',' '{ print $5" "$1 }' | sort -n -k 1 | head -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-        if [ -n "$video_id" -a -n "$audio_id" ];then
-            map=" -map $video_id:0.0 -map $audio_id:0.1 "
-            tmp1=${MC_DIR_MP4}/${job_file_base}_tmp_1.mp4
-            tmp2=${MC_DIR_MP4}/${job_file_base}_tmp_2.mp4
-            tmp3=${MC_DIR_MP4}/${job_file_base}_tmp_3.mp4
-            for i in 10 20 30;do
-                echo ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -copytb -ss $i -vcodec copy -acodec copy $map $tmp1
-                ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -copytb -ss $i -vcodec copy -acodec copy $map $tmp1 > /dev/null 2>&1
-                if [ -s $tmp1 ];then
-                    echo ffmpeg -y -i $tmp1 -f mp4 -vcodec copy -acodec libfaac $tmp2
-                    ffmpeg -y -i $tmp1 -f mp4 -vcodec copy -acodec libfaac $tmp2 > /dev/null 2>&1
-                    echo ffmpeg -y -i $tmp2 -itsoffset 00:00:01.0 -i $tmp2 -vcodec copy -acodec copy -map 1:0 -map 0:1 $tmp3
-                    ffmpeg -y -i $tmp2 -itsoffset 00:00:01.0 -i $tmp2 -vcodec copy -acodec copy -map 1:0 -map 0:1 $tmp3 > /dev/null 2>&1
-                    mv $tmp3 "${MC_DIR_MP4}/${title}.mp4"
-                    break
-                fi
-            done
-            rm -f $tmp1
-            rm -f $tmp2
-            rm -f $tmp3
-        fi
-
-#         video_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Video:' | grep mpeg2video | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-#         audio_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Audio:' | awk -F ',' '{ print $5" "$1 }' | sort -n -k 1 | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-#         if [ -n "$video_id" -a -n "$audio_id" ];then
-#             map=" -map $video_id:0.0 -map $audio_id:0.1 "
-#             for i in 0 5 10;do
-#                 ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -copyts -ss $i -vcodec copy -acodec copy $map ${MC_DIR_TS}/${job_file_ts}.temp.ts > /dev/null 2>&1
-#                 if [ $? -eq 0 ];then
-#                     mv -f ${MC_DIR_TS}/${job_file_ts}.temp.ts ${MC_DIR_TS}/${job_file_ts}
-#                     break
-#                 fi
-#             done
-#             rm -f ${MC_DIR_TS}/${job_file_ts}.temp.ts
-#         fi
 
         thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
         echo ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png
