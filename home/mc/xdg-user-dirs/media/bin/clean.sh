@@ -15,6 +15,13 @@ function has_free_space() {
 
 count=0
 while true;do
+    find ~/.local/share/Trash -type f -delete
+    find $MC_DIR_RESUME -type f -delete
+    (
+        cd $MC_DIR_MP4
+        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,20d')
+    )
+
     has_free_space
     if [ $? -eq 0 ];then
         exit
@@ -23,14 +30,6 @@ while true;do
         break
     fi
     ((count++))
-
-    find ~/.local/share/Trash -type f -delete
-    find $MC_DIR_RESUME -type f -delete
-
-    (
-        cd $MC_DIR_MP4
-        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,20d')
-    )
 
     for f in $(find $MC_DIR_JOB_FINISHED -type f);do
         base=$(basename ${f} .xml)

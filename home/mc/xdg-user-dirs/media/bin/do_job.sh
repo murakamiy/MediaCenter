@@ -36,18 +36,22 @@ else
             map=" -map $video_id:0.0 -map $audio_id:0.1 "
             tmp1=${MC_DIR_MP4}/${job_file_base}_tmp_1.mp4
             tmp2=${MC_DIR_MP4}/${job_file_base}_tmp_2.mp4
+            tmp3=${MC_DIR_MP4}/${job_file_base}_tmp_3.mp4
             for i in 10 20 30;do
-                echo ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -ss $i -vcodec copy -acodec copy $map $tmp1
-                ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -ss $i -vcodec copy -acodec copy $map $tmp1 > /dev/null 2>&1
+                echo ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -copytb -ss $i -vcodec copy -acodec copy $map $tmp1
+                ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f mp4 -copyts -copytb -ss $i -vcodec copy -acodec copy $map $tmp1 > /dev/null 2>&1
                 if [ -s $tmp1 ];then
                     echo ffmpeg -y -i $tmp1 -f mp4 -vcodec copy -acodec libfaac $tmp2
                     ffmpeg -y -i $tmp1 -f mp4 -vcodec copy -acodec libfaac $tmp2 > /dev/null 2>&1
-                    mv $tmp2 "${MC_DIR_MP4}/${title}.mp4"
+                    echo ffmpeg -y -i $tmp2 -itsoffset 00:00:01.0 -i $tmp2 -vcodec copy -acodec copy -map 1:0 -map 0:1 $tmp3
+                    ffmpeg -y -i $tmp2 -itsoffset 00:00:01.0 -i $tmp2 -vcodec copy -acodec copy -map 1:0 -map 0:1 $tmp3 > /dev/null 2>&1
+                    mv $tmp3 "${MC_DIR_MP4}/${title}.mp4"
                     break
                 fi
             done
             rm -f $tmp1
             rm -f $tmp2
+            rm -f $tmp3
         fi
 
 #         video_id=$(ffmpeg -i ${MC_DIR_TS}/${job_file_ts} 2>&1 | grep 'Video:' | grep mpeg2video | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
