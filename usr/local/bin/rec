@@ -23,11 +23,12 @@ else
     adapter_2=/dev/dvb/adapter3
 fi
 
-adapter=$adapter_1
 while [ -f ${lock_dir}/${lock_file} ];do
     sleep 1
 done
 touch ${lock_dir}/${lock_file}
+
+adapter=$adapter_1
 fuser -s $adapter/*
 if [ $? -eq 0 ];then
     adapter=$adapter_2
@@ -38,6 +39,7 @@ if [ $? -eq 0 ];then
         exit 1
     fi
 fi
+
 /bin/rm -f ${lock_dir}/${lock_file}
 
 id=$(echo $adapter | sed -e 's/[^0-9]//g')
