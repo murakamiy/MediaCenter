@@ -2,8 +2,8 @@
 log=/home/mc/log
 
 echo -n > $log
-echo gnome-session-save --logout >> $log
-gnome-session-save --logout
+echo "gnome-session-quit --logout" >> $log
+gnome-session-quit --logout
 echo killall -s HUP lcdclock >> $log
 killall -s HUP lcdclock
 echo sleep 10 >> $log
