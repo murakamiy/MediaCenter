@@ -62,9 +62,9 @@ if [ $wakeup_time -ne -1 ];then
     echo "next wakeup time: $next_wakeup_time\n\nStop ShutDown ?"
     zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nStop ShutDown ?</span>"
     if [ $? -ne 0 ];then
-        gnome-session-quit --logout
+        gnome-session-quit --logout --no-prompt
         killall -s HUP lcdclock
-        sleep 5
+        sleep 10
         sudo lcdprint -q -w $wakeup_time
         $screen_command sudo wakeuptool -w -t $wakeup_time
     fi
