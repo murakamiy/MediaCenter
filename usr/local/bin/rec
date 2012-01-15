@@ -51,7 +51,6 @@ if [ -f $run_file ];then
     fi
 fi
 touch $run_file
-pcscd
 
 kill -TERM $pid_lock
 lockfile-remove $lock_file
