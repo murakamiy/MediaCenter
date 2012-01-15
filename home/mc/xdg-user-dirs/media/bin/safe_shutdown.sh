@@ -64,7 +64,7 @@ if [ $wakeup_time -ne -1 ];then
     if [ $? -ne 0 ];then
         gnome-session-quit --logout --no-prompt
         killall -s HUP lcdclock
-        sleep 10
+        sleep 20
         sudo lcdprint -q -w $wakeup_time
         $screen_command sudo wakeuptool -w -t $wakeup_time
     fi
