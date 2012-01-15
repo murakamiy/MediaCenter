@@ -1,5 +1,19 @@
 #!/bin/bash
 
+function safe_finish() {
+    sync
+    kill -TERM $pid_dd
+    kill -TERM $pid_tune
+    if [ -n "$fifo_param" ];then
+        sync
+        kill -TERM $pid_tail
+        sync
+        kill -TERM $pid_b25
+        /bin/rm -f $fifo_tail
+    fi
+    /bin/rm -f $run_file
+}
+
 if [ $# -lt 3 ];then
 cat <<EOF
 USAGE: rec channel time output [fifo]
@@ -13,66 +27,74 @@ output=$3
 fifo_param=
 if [ $# -eq 4 ];then
     fifo_param=$4
-fi
-
-lock_dir=/tmp/dvb-pt1-adapter
-mkdir -p $lock_dir
-if [ $channel -gt 100 ];then
-    lock_file=bs_cs
-    adapter_1=/dev/dvb/adapter0
-    adapter_2=/dev/dvb/adapter2
-else
-    lock_file=degital
-    adapter_1=/dev/dvb/adapter1
-    adapter_2=/dev/dvb/adapter3
-fi
-
-while [ -f ${lock_dir}/${lock_file} ];do
-    sleep 1
-done
-touch ${lock_dir}/${lock_file}
-
-adapter=$adapter_1
-fuser -s $adapter/*
-if [ $? -eq 0 ];then
-    adapter=$adapter_2
-    fuser -s $adapter/*
-    if [ $? -eq 0 ];then
-        /bin/rm -f ${lock_dir}/${lock_file}
-        echo resource is busy
+    if [ ! -p $fifo_param ];then
+        echo "$0 ERROR: $fifo_param is not named pipe"
         exit 1
     fi
 fi
 
-/bin/rm -f ${lock_dir}/${lock_file}
+if [ $channel -gt 100 ];then
+    tuner=bs_cs
+    aid_1=0
+    aid_2=2
+else
+    tuner=degital
+    aid_1=1
+    aid_2=3
+fi
+
+work_dir=/tmp/dvb-pt2
+run_dir=${work_dir}/run
+fifo_dir=${work_dir}/fifo
+lock_file=${work_dir}/adapter
+mkdir -p $run_dir $fifo_dir
+
+lockfile-create $lock_file
+lockfile-touch $lock_file &
+pid_lock=$!
+
+aid=$aid_1
+run_file=${run_dir}/${tuner}_${aid}
+if [ -f $run_file ];then
+    aid=$aid_2
+    run_file=${run_dir}/${tuner}_${aid}
+    if [ -f $run_file ];then
+        echo "$0: resource is busy $(echo ${run_dir}/*)"
+        kill -TERM $pid_lock
+        lockfile-remove $lock_file
+        exit 1
+    fi
+fi
+touch $run_file
+
+kill -TERM $pid_lock
+lockfile-remove $lock_file
 
 ####################################################################################################
 # recording start
 ####################################################################################################
+echo "$0: $run_file" 
 
-fifo_cat=/tmp/fifo_cat$$
-mkfifo -m 644 $fifo_cat
-
-id=$(echo $adapter | sed -e 's/[^0-9]//g')
-tune $id $channel &
-sleep 1
+tune $aid $channel &
 pid_tune=$!
-touch $output
-b25 -v 0 $fifo_cat $output &
-pid_b25=$!
-LANG=C cat ${adapter}/dvr0 > $fifo_cat &
-pid_cat=$!
+sleep 1
+LANG=C dd if=/dev/dvb/adapter${aid}/dvr0 of=$output \
+    ibs=1 obs=409600 \
+    oflag=noatime &
+pid_dd=$!
+
 if [ -n "$fifo_param" ];then
-    tail -f $output > $fifo_param &
+    fifo_tail=${fifo_dir}/tail_$$
+    mkfifo -m 644 $fifo_tail
+
+    tail --follow --retry --sleep-interval=1.0 $output > $fifo_tail &
     pid_tail=$!
+
+    echo "b25 -v 0 $fifo_tail $fifo_param &"
+    b25 -v 0 $fifo_tail $fifo_param &
+    pid_b25=$!
 fi
 
+trap safe_finish 1 2 3 15
 sleep $time
-
-kill -TERM $pid_cat
-kill -TERM $pid_tune
-kill -TERM $pid_b25
-/bin/rm -f $fifo_cat
-if [ -n "$fifo_param" ];then
-    kill -TERM $pid_tail
-fi
+safe_finish
