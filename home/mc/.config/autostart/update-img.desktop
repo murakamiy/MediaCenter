@@ -1,0 +1,11 @@
+
+[Desktop Entry]
+Type=Application
+Exec=/usr/local/bin/update-img
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[ja_JP]=update-img
+Name=update-img
+Comment[ja_JP]=
+Comment=
