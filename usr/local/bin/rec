@@ -4,19 +4,12 @@ function safe_finish() {
     sync
     kill -TERM $pid_dd
     kill -TERM $pid_tune
-    if [ -n "$fifo_param" ];then
-        sync
-        kill -TERM $pid_tail
-        sync
-        kill -TERM $pid_b25
-        /bin/rm -f $fifo_tail
-    fi
     /bin/rm -f $run_file
 }
 
 if [ $# -lt 3 ];then
 cat <<EOF
-USAGE: rec channel time output [fifo]
+USAGE: rec channel time output
 EOF
 exit 1
 fi
@@ -24,14 +17,6 @@ fi
 channel=$1
 time=$2
 output=$3
-fifo_param=
-if [ $# -eq 4 ];then
-    fifo_param=$4
-    if [ ! -p $fifo_param ];then
-        echo "$0 ERROR: $fifo_param is not named pipe"
-        exit 1
-    fi
-fi
 
 if [ $channel -gt 100 ];then
     tuner=bs_cs
@@ -82,18 +67,6 @@ LANG=C dd if=/dev/dvb/adapter${aid}/dvr0 of=$output \
     ibs=1 obs=409600 \
     oflag=noatime &
 pid_dd=$!
-
-if [ -n "$fifo_param" ];then
-    fifo_tail=${fifo_dir}/tail_$$
-    mkfifo -m 644 $fifo_tail
-
-    tail --follow --retry --sleep-interval=1.0 $output > $fifo_tail &
-    pid_tail=$!
-
-    echo "b25 -v 0 $fifo_tail $fifo_param &"
-    b25 -v 0 $fifo_tail $fifo_param &
-    pid_b25=$!
-fi
 
 trap safe_finish 1 2 3 15
 sleep $time
