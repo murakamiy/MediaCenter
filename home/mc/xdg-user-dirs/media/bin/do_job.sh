@@ -26,20 +26,37 @@ else
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
         sudo lcdprint -s $start -e $end
 
+        fifo_dir=/tmp/dvb-pt2/fifo
+        mkdir -p $fifo_dir
+        fifo_tail=${fifo_dir}/tail_$$
+        mkfifo -m 644 $fifo_tail
+        fifo_b25=${fifo_dir}/b25_$$
+        mkfifo -m 644 $fifo_b25
+
         mp4_tmp=${MC_DIR_MP4}/${job_file_base}_tmp.mp4
-        fifo_rec=/tmp/fifo_rec$$
-        mkfifo -m 644 $fifo_rec
-        echo "ffmpeg -y -i $fifo_rec -f mp4 -t $mp4_time -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 $mp4_tmp"
-        ffmpeg -y -i $fifo_rec -f mp4 -t $mp4_time -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 $mp4_tmp > /dev/null 2>&1 &
+        ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 $mp4_tmp > /dev/null 2>&1 &
         pid_ffmpeg=$!
+        b25 -v 0 $fifo_tail $fifo_b25 &
+        pid_b25=$!
+        touch ${MC_DIR_TS}/${job_file_ts}
+        tail --follow --retry --sleep-interval=0.1 ${MC_DIR_TS}/${job_file_ts} > $fifo_tail &
+        pid_tail=$!
 
-        $rec $fifo_rec
-
-        kill -TERM $pid_ffmpeg
-        /bin/rm -f $fifo_rec
-        /bin/mv -f $mp4_tmp "${MC_DIR_MP4}/${title}.mp4" 
+        $rec
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
+
+        sync
+        sleep 20
+        kill -TERM $pid_ffmpeg
+        kill -TERM $pid_b25
+        kill -TERM $pid_tail
+        /bin/rm -f $fifo_tail
+        /bin/rm -f $fifo_b25
+
+        /bin/mv -f ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.orig
+        b25 -v 0 ${MC_DIR_TS}/${job_file_ts}.orig ${MC_DIR_TS}/${job_file_ts}
+
 
         thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
         echo ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png
