@@ -51,6 +51,7 @@ if [ -f $run_file ];then
     fi
 fi
 touch $run_file
+pcscd
 
 kill -TERM $pid_lock
 lockfile-remove $lock_file
@@ -64,7 +65,7 @@ tune $aid $channel &
 pid_tune=$!
 sleep 1
 LANG=C dd if=/dev/dvb/adapter${aid}/dvr0 of=$output \
-    ibs=1 obs=409600 \
+    ibs=4096 obs=4096 \
     oflag=noatime &
 pid_dd=$!
 
