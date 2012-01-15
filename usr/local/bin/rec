@@ -30,9 +30,8 @@ fi
 
 work_dir=/tmp/dvb-pt2
 run_dir=${work_dir}/run
-fifo_dir=${work_dir}/fifo
 lock_file=${work_dir}/adapter
-mkdir -p $run_dir $fifo_dir
+mkdir -p $run_dir
 
 lockfile-create $lock_file
 lockfile-touch $lock_file &
