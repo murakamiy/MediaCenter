@@ -54,6 +54,7 @@ else
         /bin/rm -f $fifo_tail
         /bin/rm -f $fifo_b25
 
+        /bin/mv -f $mp4_tmp "${MC_DIR_MP4}/${title}"
         /bin/mv -f ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.orig
         b25 -v 0 ${MC_DIR_TS}/${job_file_ts}.orig ${MC_DIR_TS}/${job_file_ts}
 
