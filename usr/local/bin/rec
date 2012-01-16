@@ -9,7 +9,7 @@ function safe_finish() {
 
 if [ $# -lt 3 ];then
 cat <<EOF
-USAGE: rec channel time output
+USAGE: rec channel time output [fuse_b25]
 EOF
 exit 1
 fi
@@ -17,15 +17,26 @@ fi
 channel=$1
 time=$2
 output=$3
+fuse=$4
 
 if [ $channel -gt 100 ];then
     tuner=bs_cs
-    aid_1=0
-    aid_2=2
+    if [ "$fuse" = "fuse_b25" ];then
+        aid_1=8
+        aid_2=10
+    else
+        aid_1=0
+        aid_2=2
+    fi
 else
     tuner=degital
-    aid_1=1
-    aid_2=3
+    if [ "$fuse" = "fuse_b25" ];then
+        aid_1=9
+        aid_2=11
+    else
+        aid_1=1
+        aid_2=3
+    fi
 fi
 
 work_dir=/tmp/dvb-pt2
@@ -59,9 +70,15 @@ lockfile-remove $lock_file
 ####################################################################################################
 echo "$0: $run_file" 
 
-tune $aid $channel &
+tid=$aid
+if [ "$fuse" = "fuse_b25" ];then
+    tid=$(($aid - 8))
+fi
+tune $tid $channel &
 pid_tune=$!
+
 sleep 1
+
 LANG=C dd if=/dev/dvb/adapter${aid}/dvr0 of=$output \
     ibs=4096 obs=4096 \
     oflag=noatime &

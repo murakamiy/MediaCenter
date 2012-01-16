@@ -55,9 +55,16 @@ else
         /bin/rm -f $fifo_b25
 
         /bin/mv -f $mp4_tmp "${MC_DIR_MP4}/${title}"
-        /bin/mv -f ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.orig
-        b25 -v 0 ${MC_DIR_TS}/${job_file_ts}.orig ${MC_DIR_TS}/${job_file_ts}
+        b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.b25
 
+        ts_orig=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts})
+        ts_b25=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts}.b25)
+        ts_valid=$(( $ts_orig / 188 * 188 ))
+        if [ $ts_b25 -eq $ts_valid ];then
+            /bin/mv -f ${MC_DIR_TS}/${job_file_ts}.b25 ${MC_DIR_TS}/${job_file_ts}
+        else
+            /bin/rm -f ${MC_DIR_TS}/${job_file_ts}.b25
+        fi
 
         thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
         echo ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png

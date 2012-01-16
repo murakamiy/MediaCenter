@@ -1,0 +1,16 @@
+#!/bin/bash
+
+mount | grep -q ^fuse_b25
+if [ $? -ne 0 ];then
+
+    /usr/sbin/pcscd
+    DIR=/dev/dvb/adapter
+    for ((i=8; i<=11; i++));do
+
+        /bin/mkdir ${DIR}${i}
+        /bin/chgrp video ${DIR}${i}
+        /bin/chmod 0775 ${DIR}${i}
+        /usr/local/bin/fuse_b25 -oallow_other ${DIR}${i}
+
+    done
+fi
