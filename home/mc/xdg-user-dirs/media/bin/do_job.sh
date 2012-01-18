@@ -33,8 +33,13 @@ else
         fifo_b25=${fifo_dir}/b25_$$
         mkfifo -m 644 $fifo_b25
 
-        mp4_tmp=${MC_DIR_MP4}/${job_file_base}_tmp.mp4
-        ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 $mp4_tmp > /dev/null 2>&1 &
+        for i in $(seq -w 1 99);do
+            if [ ! -e "${MC_DIR_MP4}/${title}${i}.mp4" ];then
+                break
+            fi
+        done
+        
+        ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 "${MC_DIR_MP4}/${title}${i}.mp4" > /dev/null 2>&1 &
         pid_ffmpeg=$!
         b25 -v 0 $fifo_tail $fifo_b25 &
         pid_b25=$!
@@ -54,7 +59,6 @@ else
         /bin/rm -f $fifo_tail
         /bin/rm -f $fifo_b25
 
-        /bin/mv -f $mp4_tmp "${MC_DIR_MP4}/${title}"
         b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.b25
 
         ts_orig=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts})
@@ -76,14 +80,11 @@ else
         fi
         category_dir="${MC_DIR_TITLE_TS}/${category}"
         mkdir -p "$category_dir"
-        i=00
-        if [ -e "${category_dir}/${title}${i}.png" ];then
-            for i in $(seq -w 1 99);do
-                if [ ! -e "${category_dir}/${title}${i}.png" ];then
-                    break
-                fi
-            done
-        fi
+        for i in $(seq -w 1 99);do
+            if [ ! -e "${category_dir}/${title}${i}.png" ];then
+                break
+            fi
+        done
         ln $thumb_file "${category_dir}/${title}${i}.png"
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
