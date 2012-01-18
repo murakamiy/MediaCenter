@@ -19,7 +19,7 @@ while true;do
     find $MC_DIR_RESUME -type f -delete
     (
         cd $MC_DIR_MP4
-        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,20d')
+        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,30d')
     )
 
     has_free_space
