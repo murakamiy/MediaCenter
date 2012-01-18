@@ -1,7 +1,7 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/usr/local/bin/mymediatomb
+Exec=sudo /usr/local/bin/mymediatomb
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
