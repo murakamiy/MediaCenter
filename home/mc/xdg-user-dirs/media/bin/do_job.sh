@@ -33,13 +33,10 @@ else
         fifo_b25=${fifo_dir}/b25_$$
         mkfifo -m 644 $fifo_b25
 
-        for i in $(seq -w 1 99);do
-            if [ ! -e "${MC_DIR_MP4}/${title}${i}.mp4" ];then
-                break
-            fi
-        done
-        
-        ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 "${MC_DIR_MP4}/${title}${i}.mp4" > /dev/null 2>&1 &
+        today=$(date +%d)
+
+        echo "ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 ${MC_DIR_MP4}/${today}_${title}.mp4"
+        ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 "${MC_DIR_MP4}/${today}_${title}.mp4" > /dev/null 2>&1 &
         pid_ffmpeg=$!
         b25 -v 0 $fifo_tail $fifo_b25 &
         pid_b25=$!
