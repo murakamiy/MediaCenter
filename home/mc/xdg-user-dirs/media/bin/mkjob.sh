@@ -1,6 +1,8 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
+touch ${MC_DIR_RECORDING}/mkjob.xml
+
 log 'starting create ts file'
 for cc in $(sort -k 4 $MC_FILE_CHANNEL_CS | awk 'BEGIN { prev = 0 } { group = substr($4, 3, 2); if (prev != group) print $1; prev = group }');do
     rec $cc 60 ${MC_DIR_EPG}/cs_${cc}.ts
@@ -33,5 +35,7 @@ done
 
 log 'starting clean'
 bash $MC_BIN_CLEAN
+
+/bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 log 'starting safe shutdown'
 bash $MC_BIN_SAFE_SHUTDOWN
