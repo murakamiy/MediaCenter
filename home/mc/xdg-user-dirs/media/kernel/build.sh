@@ -4,7 +4,7 @@
 
 src_dir=linux-source-3.0.0
 
-/bin/cp $(ls /boot/config* | sort | tail -n 1) $src_dir/.config
+/bin/cp $(ls /boot/config* | grep generic | sort | tail -n 1) $src_dir/.config
 
 (
 export CONCURRENCY_LEVEL=3
@@ -15,5 +15,5 @@ if [ $? -ne 0 ];then
     exit
 fi  
 patch -Np1 -i ../dvr_buffer_size.patch 
-sudo make-kpkg --jobs 3 --initrd --revision=$(date +%Y%m%d) kernel_image
+make-kpkg --jobs 3 --rootcmd fakeroot --initrd --revision=$(date +%Y%m%d) kernel_image
 )
