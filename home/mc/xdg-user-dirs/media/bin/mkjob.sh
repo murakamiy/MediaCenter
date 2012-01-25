@@ -15,13 +15,13 @@ done
 log 'starting epgdump_py'
 for ts in ${MC_DIR_EPG}/[0-9]*.ts;do
     channel=$(basename $ts .ts)
-    python $MC_BIN_EPGDUMP -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
+    python $MC_BIN_EPGDUMP -e -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
 done
 for ts in ${MC_DIR_EPG}/cs_[0-9]*.ts;do
     channel=$(basename $ts .ts)
-    python $MC_BIN_EPGDUMP -d -s -i $ts -o ${MC_DIR_EPG}/${channel}.xml
+    python $MC_BIN_EPGDUMP -e -d -s -i $ts -o ${MC_DIR_EPG}/${channel}.xml
 done
-python $MC_BIN_EPGDUMP -d -b -i ${MC_DIR_EPG}/bs.ts -o ${MC_DIR_EPG}/bs.xml
+python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_EPG}/bs.ts -o ${MC_DIR_EPG}/bs.xml
 
 log 'starting find program'
 python $MC_BIN_RESERVER
