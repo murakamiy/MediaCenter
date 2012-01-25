@@ -39,8 +39,6 @@ alias psa='ps -eo comm,rsz,vsz,%cpu,pid,user,args'
 alias psm='ps -ao comm,rsz,vsz,%cpu,pid,user,args'
 
 alias vimemo='vi ~/work/memo'
-alias vip='vi -p $(find $@ -type f)'
-alias vio='vi -o $@'
 
 alias xml='xmlstarlet'
 alias myindent='indent -kr --no-tabs --line-length 100'
@@ -56,6 +54,12 @@ alias cdvideo='cd /home/mc/xdg-user-dirs/media/video'
 #####################################################################################################
 # Function
 #####################################################################################################
+function vip() {
+    vi -p $(find $@ -type f)
+}
+function vio() {
+    vi -o $@
+}
 function nautilus() {
     /usr/bin/nautilus $@ > /dev/null 2>&1 &
 }
