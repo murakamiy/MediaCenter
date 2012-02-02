@@ -150,3 +150,8 @@ vobcopy
 gpac
 linux-source-3.0.0
 kernel-package
+earch mplayer
+sqlite3
+python2.7-pysqlite2
+python2.7-sqlite
+sqlite
