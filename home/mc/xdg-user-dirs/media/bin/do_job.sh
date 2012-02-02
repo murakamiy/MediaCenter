@@ -67,8 +67,8 @@ else
             /bin/rm -f ${MC_DIR_TS}/${job_file_ts}.b25
         fi
 
-        thumb_file=${MC_DIR_THUMB}/$(basename $job_file_ts .ts)
-        echo ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png
+        thumb_file=${MC_DIR_THUMB}/${job_file_ts}
+        echo "ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
         ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
         if [ $? -eq 0 ];then
             mv ${thumb_file}.png $thumb_file

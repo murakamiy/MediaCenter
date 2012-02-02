@@ -42,8 +42,9 @@ while true;do
 
     for f in $(find $MC_DIR_ENCODE -type f);do
         base=$(basename $f | awk -F . '{ print $1 }')
-        if [ -f "${MC_DIR_THUMB}/${base}" ];then
-            inode=$(stat --format='%i' ${MC_DIR_THUMB}/${base})
+        thumb_file=$(basename $f)
+        if [ -f "${MC_DIR_THUMB}/${thumb_file}" ];then
+            inode=$(stat --format='%i' ${MC_DIR_THUMB}/${thumb_file})
             title=$(find $MC_DIR_TITLE_ENCODE -inum $inode)
             if [ ! -f "$title" ];then
                 log "delete: $base encode"
@@ -58,8 +59,9 @@ while true;do
 
     for f in $(find $MC_DIR_TS -type f | sort);do
         base=$(basename $f | awk -F . '{ print $1 }')
-        if [ -f "${MC_DIR_THUMB}/${base}" ];then
-            inode=$(stat --format='%i' ${MC_DIR_THUMB}/${base})
+        thumb_file=$(basename $f)
+        if [ -f "${MC_DIR_THUMB}/${thumb_file}" ];then
+            inode=$(stat --format='%i' ${MC_DIR_THUMB}/${thumb_file})
             title=$(find $MC_DIR_TITLE_TS -inum $inode)
             if [ ! -f "$title" ];then
                 title_jp=ts

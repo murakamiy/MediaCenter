@@ -61,7 +61,7 @@ if [ -n "$xml" ];then
 
     if [ $? -eq 0 ];then
         title=$(print_title ${MC_DIR_ENCODING}/${base}.xml)
-        ln -f "${MC_DIR_THUMB}/${base}" "${MC_DIR_TITLE_ENCODE}/${title}.png"
+        ln -f "${MC_DIR_THUMB}/${base}.ts" "${MC_DIR_TITLE_ENCODE}/${title}.png"
         touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
         time_end=$(awk 'BEGIN { print systime() }')
         (( took = (time_end - time_start) / 60 ))
