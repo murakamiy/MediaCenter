@@ -102,16 +102,21 @@ case $command in
         shift
         for f in $@;do
             base=$(basename $f | awk -F . '{ print $1 }')
-            thumb_file=$(basename $f)
-            echo $base
-            ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${MC_DIR_THUMB}/${thumb_file}.png > /dev/null 2>&1
-            mv "${MC_DIR_THUMB}/${thumb_file}.png" "${MC_DIR_THUMB}/${thumb_file}"
+
+            thumb_file=${MC_DIR_THUMB}/${base}.mp4
+            echo "ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
+            ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+            if [ $? -eq 0 ];then
+                mv ${thumb_file}.png $thumb_file
+            else
+                cp $MC_FILE_THUMB $thumb_file
+            fi
             title=$base
             if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
                 title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
                 title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
             fi
-            ln -f "${MC_DIR_THUMB}/${thumb_file}" "${MC_DIR_TITLE_ENCODE}/${title}.png"
+            ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
             touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
         done
         ;;

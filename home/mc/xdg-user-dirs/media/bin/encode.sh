@@ -60,13 +60,26 @@ if [ -n "$xml" ];then
 #     do_encode_mencoder $base
 
     if [ $? -eq 0 ];then
-        title=$(print_title ${MC_DIR_ENCODING}/${base}.xml)
-        ln -f "${MC_DIR_THUMB}/${base}.ts" "${MC_DIR_TITLE_ENCODE}/${title}.png"
-        touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
         time_end=$(awk 'BEGIN { print systime() }')
         (( took = (time_end - time_start) / 60 ))
         log "encoding $base $title time: $took minutes"
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_ENCODE_FINISHED
+
+        thumb_file=${MC_DIR_THUMB}/${base}.mp4
+        echo "ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
+        ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+        if [ $? -eq 0 ];then
+            mv ${thumb_file}.png $thumb_file
+        else
+            cp $MC_FILE_THUMB $thumb_file
+        fi
+        title=$base
+        if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
+            title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
+            title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
+        fi
+        ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
+        touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
     else
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_FAILED
     fi
