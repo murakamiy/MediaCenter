@@ -153,5 +153,3 @@ kernel-package
 earch mplayer
 sqlite3
 python2.7-pysqlite2
-python2.7-sqlite
-sqlite
