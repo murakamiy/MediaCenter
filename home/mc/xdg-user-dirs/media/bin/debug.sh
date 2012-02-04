@@ -104,7 +104,7 @@ case $command in
             base=$(basename $f | awk -F . '{ print $1 }')
             thumb_file=$(basename $f)
             echo $base
-            ffmpeg -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${MC_DIR_THUMB}/${thumb_file}.png > /dev/null 2>&1
+            ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${MC_DIR_THUMB}/${thumb_file}.png > /dev/null 2>&1
             mv "${MC_DIR_THUMB}/${thumb_file}.png" "${MC_DIR_THUMB}/${thumb_file}"
             title=$base
             if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
@@ -125,8 +125,8 @@ case $command in
             category=$(print_category ${MC_DIR_JOB_FINISHED}/${job_file_xml})
 
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
-            echo "ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
-            ffmpeg -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+            echo "ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
+            ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
             if [ $? -eq 0 ];then
                 mv ${thumb_file}.png $thumb_file
             else
