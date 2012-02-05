@@ -1,9 +1,8 @@
 CREATE TABLE play (
-    id INTEGER PRIMARY KEY, 
-    series_id INTEGER DEFAULT -1,
-    category_id INTEGER DEFAULT -1,
     service_id INTEGER,
     event_id INTEGER,
+    series_id INTEGER DEFAULT -1,
+    category_id INTEGER DEFAULT -1,
     channel TEXT,
     title TEXT,
     desc TEXT,
@@ -13,13 +12,18 @@ CREATE TABLE play (
     stop INTEGER,
     priority INTEGER,
     foundby TEXT,
-    play_time INTEGER,
+    play_time_total INTEGER DEFAULT 0,
+    play_time_queue INTEGER DEFAULT 0,
     length INTEGER,
     created_at INTEGER DEFAULT (strftime('%s','now')),
-    updated_at INTEGER DEFAULT (strftime('%s','now'))
+    updated_at INTEGER DEFAULT (strftime('%s','now')),
+    PRIMARY KEY (service_id, event_id)
 );
 
-CREATE INDEX idx_play ON play(series_id, category_id, play_time);
+CREATE INDEX idx_play_series_id ON play (series_id);
+CREATE INDEX idx_play_category_id ON play (category_id);
+CREATE INDEX idx_play_play_time_total ON play (play_time_total);
+CREATE INDEX idx_play_play_time_queue ON play (play_time_queue);
 
 /*
 

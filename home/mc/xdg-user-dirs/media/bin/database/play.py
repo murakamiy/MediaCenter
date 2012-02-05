@@ -4,58 +4,58 @@
 import sys
 import signal
 from time import sleep
-from time import localtime
-from time import strftime
 from xml.etree.cElementTree import ElementTree
 from xml.etree.cElementTree import Element
 import sqlite3
 
 ####################################################################################################
-sql_insert = u"""
-insert into 
-    play (
-        service_id,
-        event_id,
-        channel,
-        title,
-        desc,
-        category_1,
-        category_2,
-        start,
-        stop,
-        priority,
-        foundby,
-        play_time,
-        length
-    )
-    values (
-        ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?,
-        ?, ?, ?
-    )
+sql = u"""
+update play set
+    play_time_total =
+    (
+        select
+            case
+                when length < play_time_total + ? then
+                    length
+                else
+                    play_time_total + ?
+            end
+        from play
+        where service_id = ?
+        and event_id = ?
+    ),
+    play_time_queue =
+    (
+        select
+            case
+                when length < play_time_total + ? then
+                    play_time_queue + (length - play_time_total)
+                else
+                    play_time_queue + ?
+            end
+        from play
+        where service_id = ?
+        and event_id = ?
+    ),
+    updated_at = strftime('%s','now')
+where service_id = ? 
+and event_id = ?
 """
 ####################################################################################################
-def insert(signum, frame):
-    global play_time
-    global length
-    if length < play_time:
-        play_time = length
+def update(signum, frame):
     con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db", isolation_level=None)
-    con.execute(sql_insert,
+    con.execute(sql,
             (
+                play_time,
+                play_time,
                 service_id,
                 event_id,
-                channel,
-                title,
-                desc,
-                category_1,
-                category_2,
-                start,
-                stop,
-                priority,
-                foundby,
                 play_time,
-                length
+                play_time,
+                service_id,
+                event_id,
+                service_id,
+                event_id,
             ))
     con.close()
     sys.exit()
@@ -68,29 +68,12 @@ tree.parse(xml_file)
 el = tree.find("programme")
 service_id = int(el.find("service-id").text)
 event_id = int(el.find("event-id").text)
-channel = el.get("channel")
-title = el.find("title").text
-desc = el.find("desc").text
-category_1 = ""
-category_2 = ""
-i = 0
-for c in el.findall('category'):
-    if i == 0:
-        category_1 = c.text
-    elif i == 1:
-        category_2 = c.text
-    i += 1
-priority = int(tree.find("priority").text)
-foundby = tree.find("foundby").text
 play_time = 0
-start = int(tree.find("epoch[@type='start']").text)
-stop = int(tree.find("epoch[@type='stop']").text)
-length = stop - start
 
-signal.signal(signal.SIGHUP, insert)
-signal.signal(signal.SIGINT, insert)
-signal.signal(signal.SIGQUIT, insert)
-signal.signal(signal.SIGTERM, insert)
+signal.signal(signal.SIGHUP, update)
+signal.signal(signal.SIGINT, update)
+signal.signal(signal.SIGQUIT, update)
+signal.signal(signal.SIGTERM, update)
 
 while True:
     sleep(10)

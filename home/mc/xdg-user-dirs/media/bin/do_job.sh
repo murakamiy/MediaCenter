@@ -84,6 +84,8 @@ else
         done
         ln $thumb_file "${category_dir}/${title}${i}.png"
 
+        python ${MC_DIR_DB}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB}/log 2>&1
+
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         bash $MC_BIN_SAFE_SHUTDOWN
     else
