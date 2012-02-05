@@ -2,7 +2,7 @@ begin irexec
     begin
         prog   = irexec
         button = KEY_NUMERIC_8
-        config = killall main.sh
+        config = killall -KILL main.sh
         repeat = 3
     end
     begin
