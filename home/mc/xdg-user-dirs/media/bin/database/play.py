@@ -21,7 +21,8 @@ update play set
                     play_time_total + ?
             end
         from play
-        where service_id = ?
+        where transport_stream_id = ?
+        and service_id = ?
         and event_id = ?
     ),
     play_time_queue =
@@ -34,29 +35,35 @@ update play set
                     play_time_queue + ?
             end
         from play
-        where service_id = ?
+        where transport_stream_id = ?
+        and service_id = ?
         and event_id = ?
     ),
     updated_at = strftime('%s','now')
-where service_id = ? 
+where transport_stream_id = ?
+and service_id = ? 
 and event_id = ?
 """
 ####################################################################################################
 def update(signum, frame):
-    con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db", isolation_level=None)
+    con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db")
     con.execute(sql,
             (
                 play_time,
                 play_time,
+                transport_stream_id,
                 service_id,
                 event_id,
                 play_time,
                 play_time,
+                transport_stream_id,
                 service_id,
                 event_id,
+                transport_stream_id,
                 service_id,
                 event_id,
             ))
+    con.commit()
     con.close()
     sys.exit()
 ####################################################################################################
@@ -66,6 +73,10 @@ tree = ElementTree()
 tree.parse(xml_file)
 
 el = tree.find("programme")
+transport_stream_id = -1
+v = el.find("transport-stream-id")
+if v != None:
+    transport_stream_id = int(v.text)
 service_id = int(el.find("service-id").text)
 event_id = int(el.find("event-id").text)
 play_time = 0

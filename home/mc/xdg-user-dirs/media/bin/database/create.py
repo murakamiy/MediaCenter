@@ -10,6 +10,7 @@ import sqlite3
 sql = u"""
 insert into 
     play (
+        transport_stream_id,
         service_id,
         event_id,
         channel,
@@ -26,7 +27,7 @@ insert into
     values (
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, ?
+        ?, ?, ?
     )
 """
 ####################################################################################################
@@ -36,6 +37,10 @@ tree = ElementTree()
 tree.parse(xml_file)
 
 el = tree.find("programme")
+transport_stream_id = -1
+v = el.find("transport-stream-id")
+if v != None:
+    transport_stream_id = int(v.text)
 service_id = int(el.find("service-id").text)
 event_id = int(el.find("event-id").text)
 channel = el.get("channel")
@@ -59,6 +64,7 @@ length = stop - start
 con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db", isolation_level=None)
 con.execute(sql,
         (
+            transport_stream_id,
             service_id,
             event_id,
             channel,
