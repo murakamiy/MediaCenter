@@ -31,7 +31,7 @@ CREATE TABLE rating_series (
     service_id INTEGER,
     title TEXT,
     play_time INTEGER DEFAULT 0,
-    length INTEGER,
+    length INTEGER DEFAULT 0,
     rating INTEGER DEFAULT 0,
     created_at INTEGER DEFAULT (strftime('%s','now')),
     updated_at INTEGER DEFAULT (strftime('%s','now'))
@@ -46,21 +46,11 @@ CREATE TABLE rating_category (
     category_1 TEXT,
     category_2 TEXT,
     play_time INTEGER DEFAULT 0,
-    length INTEGER,
+    length INTEGER DEFAULT 0,
     rating INTEGER DEFAULT 0,
     created_at INTEGER DEFAULT (strftime('%s','now')),
     updated_at INTEGER DEFAULT (strftime('%s','now'))
 );
 
-CREATE INDEX idx_rating_category_category_1
-ON rating_category (category_1);
-CREATE INDEX idx_rating_category_category_2
-ON rating_category (category_2);
-
-/*
-
-select strftime('%Y/%m/%d %H:%M:%S', '1328191356', 'unixepoch', 'localtime');
-select datetime(1328405495, 'unixepoch', 'localtime');
-SELECT strftime('%s','now');
-
-*/
+CREATE UNIQUE INDEX idx_rating_category_category
+ON rating_category (category_1, category_2);
