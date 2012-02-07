@@ -73,7 +73,9 @@ function kakasi-katakana() {
     echo "$@" | nkfeuc | kakasi -i euc -JK | nkfutf 
 }
 function xmlformat() {
-    xml fo --encode utf-8 $@
+    tmp=$(mktemp)
+    xml fo --encode utf-8 $1 > $tmp
+    /bin/mv -f $tmp $1
 }
 function xmldelcomment() {
     xml ed -d '//comment()' $1
