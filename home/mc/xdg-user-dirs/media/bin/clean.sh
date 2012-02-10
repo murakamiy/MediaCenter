@@ -7,7 +7,7 @@ function has_free_space() {
     if [ -z "$used" ];then
         return 0
     fi
-    if [ $used -lt 60 ];then
+    if [ $used -lt 70 ];then
         return 0
     fi
     return 1
