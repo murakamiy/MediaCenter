@@ -62,7 +62,7 @@ from
     from programme
     where series_id = -1
     and category_id != -1
-    and (strftime('%s','now') - start) < 60 * 60 * 24 * 2
+    and (strftime('%s','now') - start) < 60 * 60 * 25
 ) as A
 inner join
 (
@@ -78,7 +78,7 @@ group by A.category_id, A.title
 """
 
 sql_6 = u"""
-select A.series_id, B.transport_stream_id, B.service_id, B.event_id
+select A.series_id, B.transport_stream_id, B.service_id, B.event_id, B.length
 from rating_series as A
 inner join programme as B on (A.category_id = B.category_id and A.title = B.title)
 where B.series_id = -1
@@ -93,6 +93,13 @@ where transport_stream_id = ?
 and service_id = ?
 and event_id = ?
 """
+
+sql_8 = u"""
+update rating_series set
+length = length + ?,
+updated_at = strftime('%s','now')
+where series_id = ?
+"""
 ####################################################################################################
 
 con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db")
@@ -102,10 +109,10 @@ con.execute(sql_1);
 con.commit()
 
 csr = con.cursor()
-param_play = []
+param_programme = []
 param_rating_category = []
 for row in csr.execute(sql_2):
-    param_play.append((
+    param_programme.append((
         row["category_id"],
         row["transport_stream_id"],
         row["service_id"],
@@ -114,7 +121,7 @@ for row in csr.execute(sql_2):
         row["length"],
         row["category_id"]))
 csr.close()
-for param in param_play:
+for param in param_programme:
     con.execute(sql_3, param)
 for param in param_rating_category:
     con.execute(sql_4, param)
@@ -124,14 +131,20 @@ con.commit()
 con.execute(sql_5);
 con.commit()
 csr = con.cursor()
-param_play = []
+param_programme = []
+param_rating_series = []
 for row in csr.execute(sql_6):
-    param_play.append((
+    param_programme.append((
         row["series_id"],
         row["transport_stream_id"],
         row["service_id"],
         row["event_id"]))
+    param_rating_series.append((
+        row["length"],
+        row["series_id"]))
 csr.close()
-for param in param_play:
+for param in param_programme:
     con.execute(sql_7, param)
+for param in param_rating_series:
+    con.execute(sql_8, param)
 con.commit()
