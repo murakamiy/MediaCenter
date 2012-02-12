@@ -10,58 +10,18 @@ import sqlite3
 
 ####################################################################################################
 sql = u"""
-update play set
-    play_time_total =
-    (
-        select
-            case
-                when length < play_time_total + ? then
-                    length
-                else
-                    play_time_total + ?
-            end
-        from play
-        where transport_stream_id = ?
-        and service_id = ?
-        and event_id = ?
-    ),
-    play_time_queue =
-    (
-        select
-            case
-                when length < play_time_total + ? then
-                    play_time_queue + (length - play_time_total)
-                else
-                    play_time_queue + ?
-            end
-        from play
-        where transport_stream_id = ?
-        and service_id = ?
-        and event_id = ?
-    ),
-    updated_at = strftime('%s','now')
-where transport_stream_id = ?
-and service_id = ? 
-and event_id = ?
+insert into play (transport_stream_id, service_id, event_id, play_time)
+values (?, ?, ?, ?)
 """
 ####################################################################################################
 def update(signum, frame):
     con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db")
     con.execute(sql,
             (
-                play_time,
-                play_time,
                 transport_stream_id,
                 service_id,
                 event_id,
-                play_time,
-                play_time,
-                transport_stream_id,
-                service_id,
-                event_id,
-                transport_stream_id,
-                service_id,
-                event_id,
+                play_time
             ))
     con.commit()
     con.close()

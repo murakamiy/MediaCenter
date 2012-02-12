@@ -9,7 +9,7 @@ import sqlite3
 ####################################################################################################
 sql = u"""
 insert into 
-    play (
+    programme (
         transport_stream_id,
         service_id,
         event_id,
