@@ -11,6 +11,7 @@ finders_list.append(finder.VarietyFinder())
 # finders_list.append(finder.EnglishFinder())
 finders_list.append(finder.CreditFinder())
 finders_list.append(finder.SportFinder())
+finders_list.append(finder.NewsFinder())
 
 
 cheif = finder.FindresCheif(finders_list)

@@ -89,6 +89,8 @@ class TitleFinder(Finder):
         u'ドラゴンボール',
         u'NARUTO',
         u'はじめの一歩',
+        u'ペルソナ4',
+        u'偽物語',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -131,6 +133,13 @@ class SportFinder(Finder):
     priority = 40
     def allow(self, pinfo):
         if pinfo.category_2 == 'サッカー' and int(pinfo.channel) > 100:
+            return True
+        return False
+
+class NewsFinder(Finder):
+    priority = 40
+    def allow(self, pinfo):
+        if pinfo.channel == '291' and pinfo.title == 'ニュースウオッチ9':
             return True
         return False
 
