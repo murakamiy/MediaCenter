@@ -7,7 +7,7 @@ function has_free_space() {
     if [ -z "$used" ];then
         return 0
     fi
-    if [ $used -lt 70 ];then
+    if [ $used -lt 80 ];then
         return 0
     fi
     return 1
@@ -19,7 +19,7 @@ while true;do
     find $MC_DIR_RESUME -type f -delete
     (
         cd $MC_DIR_MP4
-        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,50d')
+        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,300d')
     )
 
     has_free_space
