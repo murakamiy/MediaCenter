@@ -131,7 +131,8 @@ and (strftime('%s','now') - A.start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 *
 """
 
 sql_10 = u"""
-select series_id from rating_series
+select series_id
+from rating_series
 where category_id = ?
 and title = ?
 """
@@ -155,6 +156,15 @@ updated_at = strftime('%s','now')
 where transport_stream_id = ?
 and service_id = ?
 and event_id = ?
+"""
+
+sql_14 = u"""
+select
+series_id,
+title
+from rating_series
+where category_id = ?
+and title like ?
 """
 ####################################################################################################
 
@@ -235,16 +245,37 @@ for l in list_new:
     if 2 < len(l["title_identical"]) and len(l["title_sub"]) / 3 < len(l["title_identical"]):
         csr.execute(sql_10, (l["sql_row"]["category_id"], l["title_identical"]))
         r = csr.fetchone()
+
         if r == None:
-            csr.execute(sql_11, (l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]));
+            csr.execute(sql_14,
+                    (
+                        l["sql_row"]["category_id"],
+                        l["title_identical"][0:len(l["title_identical"]) - 1] + "%"
+                    ))
+            list_like = csr.fetchall()
+            for ll in list_like:
+                if abs(len(l["title_identical"]) - len(ll["title"])) == 1:
+                    print 'like', l["title_identical"], ll["title"], len(l["title_identical"]), len(ll["title"])
+                    r = ll
+                    break
+
+        if r == None:
+            csr.execute(sql_11, (l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]))
             series_id = csr.lastrowid
             print 'insert', l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]
         else:
             series_id = r["series_id"]
-            csr.execute(sql_12, (l["sql_row"]["length"], series_id));
+            csr.execute(sql_12, (l["sql_row"]["length"], series_id))
             print 'update', l["sql_row"]["length"], series_id
 
         csr.execute(sql_13, (series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]))
         print 'update2', series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]
 
 con.commit()
+
+
+
+
+
+
+con.close()
