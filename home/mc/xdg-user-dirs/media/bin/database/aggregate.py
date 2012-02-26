@@ -63,7 +63,7 @@ select C.category_id, C.title, C.sum from
         from programme
         where series_id = -1
         and category_id != -1
-        and (strftime('%s','now') - start) < 60 * 60 * 25
+        and (strftime('%s','now') - ? - start) < 60 * 60 * 25
     ) as A
     inner join
     (
@@ -74,7 +74,7 @@ select C.category_id, C.title, C.sum from
         from programme
         where series_id = -1
         and category_id != -1
-        and (strftime('%s','now') - start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
+        and (strftime('%s','now') - ? - start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
     ) as B on (A.category_id = B.category_id and A.title = B.title)
     group by A.category_id, A.title
 ) as C
@@ -111,7 +111,7 @@ length
 from programme
 where series_id = -1
 and category_id != -1
-and (strftime('%s','now') - start) < 60 * 60 * 25
+and (strftime('%s','now') - ? - start) < 60 * 60 * 25
 """
 
 sql_9 = u"""
@@ -127,7 +127,7 @@ left outer join rating_series as B on
 (A.series_id = B.series_id)
 where A.identical = 0
 and A.category_id != -1
-and (strftime('%s','now') - A.start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
+and (strftime('%s','now') - ? - A.start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
 """
 
 sql_10 = u"""
@@ -168,6 +168,10 @@ and title like ?
 """
 ####################################################################################################
 
+back_date = 0
+if 1 < len(sys.argv):
+    back_date = int(sys.argv[1]) * 60 * 60 * 24
+
 con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db")
 con.row_factory = sqlite3.Row
 
@@ -186,7 +190,7 @@ for param in param_programme:
     con.execute(sql_3, param)
 con.commit()
 
-con.execute(sql_5)
+con.execute(sql_5, (back_date, back_date))
 con.commit()
 csr = con.cursor()
 param_programme = []
@@ -202,11 +206,11 @@ for param in param_programme:
 con.commit()
 
 csr = con.cursor()
-csr.execute(sql_8)
+csr.execute(sql_8, (back_date,))
 sql_new = csr.fetchall()
 csr.close()
 csr = con.cursor()
-csr.execute(sql_9)
+csr.execute(sql_9, (back_date,))
 sql_old = csr.fetchall()
 csr.close()
 
@@ -245,7 +249,6 @@ for l in list_new:
     if 2 < len(l["title_identical"]) and len(l["title_sub"]) / 3 < len(l["title_identical"]):
         csr.execute(sql_10, (l["sql_row"]["category_id"], l["title_identical"]))
         r = csr.fetchone()
-
         if r == None:
             csr.execute(sql_14,
                     (
@@ -258,7 +261,6 @@ for l in list_new:
                     print 'like', l["title_identical"], ll["title"], len(l["title_identical"]), len(ll["title"])
                     r = ll
                     break
-
         if r == None:
             csr.execute(sql_11, (l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]))
             series_id = csr.lastrowid
@@ -267,7 +269,6 @@ for l in list_new:
             series_id = r["series_id"]
             csr.execute(sql_12, (l["sql_row"]["length"], series_id))
             print 'update', l["sql_row"]["length"], series_id
-
         csr.execute(sql_13, (series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]))
         print 'update2', series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]
 
