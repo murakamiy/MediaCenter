@@ -42,6 +42,7 @@ CREATE INDEX idx_play_aggregate ON play (aggregate);
 CREATE TABLE rating_series (
     series_id INTEGER PRIMARY KEY,
     category_id INTEGER,
+    channel TEXT,
     title TEXT,
     play_time INTEGER DEFAULT 0,
     length INTEGER DEFAULT 0,
@@ -50,7 +51,8 @@ CREATE TABLE rating_series (
     updated_at INTEGER DEFAULT (strftime('%s','now'))
 );
 
-CREATE UNIQUE INDEX idx_rating_series_category_id_title ON rating_series (category_id, title);
+CREATE UNIQUE INDEX idx_rating_series_category_id_channel_title
+ON rating_series (category_id, channel, title);
 
 CREATE TABLE rating_category (
     category_id INTEGER PRIMARY KEY,

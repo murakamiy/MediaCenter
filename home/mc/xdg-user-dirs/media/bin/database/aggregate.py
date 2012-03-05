@@ -55,6 +55,7 @@ transport_stream_id,
 service_id,
 event_id,
 category_id,
+channel,
 title,
 length
 from programme
@@ -69,6 +70,7 @@ transport_stream_id,
 service_id,
 event_id,
 category_id,
+channel,
 title,
 length
 from programme
@@ -80,12 +82,13 @@ sql_10 = u"""
 select series_id
 from rating_series
 where category_id = ?
+and channel = ?
 and title = ?
 """
 
 sql_11 = u"""
-insert into rating_series (category_id, title, length)
-values (?, ?, ?)
+insert into rating_series (category_id, channel, title, length)
+values (?, ?, ?, ?)
 """
 
 sql_12 = u"""
@@ -110,6 +113,7 @@ series_id,
 title
 from rating_series
 where category_id = ?
+and channel = ?
 and title like ?
 """
 ####################################################################################################
@@ -164,7 +168,9 @@ for l in sql_old:
 
 for new in list_new:
     for old in list_old:
-        if new["sql_row"]["category_id"] == old["sql_row"]["category_id"] and new["title_left"] == old["title_left"]:
+        if (new["sql_row"]["category_id"] == old["sql_row"]["category_id"] and
+            new["sql_row"]["channel"] == old["sql_row"]["channel"] and
+            new["title_left"] == old["title_left"]):
             if new["title_sub"] == old["title_sub"]:
                 new["title_identical"] = new["title_sub"]
             else:
@@ -178,31 +184,45 @@ for new in list_new:
 csr = con.cursor()
 for l in list_new:
     if 2 < len(l["title_identical"]) and len(l["title_sub"]) / 3 < len(l["title_identical"]):
-        csr.execute(sql_10, (l["sql_row"]["category_id"], l["title_identical"]))
+        csr.execute(sql_10, (l["sql_row"]["category_id"], l["sql_row"]["channel"], l["title_identical"]))
         r = csr.fetchone()
         if r == None:
             csr.execute(sql_14,
                     (
                         l["sql_row"]["category_id"],
+                        l["sql_row"]["channel"],
                         l["title_identical"][0:len(l["title_identical"]) - 1] + "%"
                     ))
             list_like = csr.fetchall()
             for ll in list_like:
-                if abs(len(l["title_identical"]) - len(ll["title"])) <= 2:
+                if abs(len(l["title_identical"]) - len(ll["title"])) == 1:
                     print 'like', l["title_identical"], ll["title"], len(l["title_identical"]), len(ll["title"])
                     r = ll
                     break
         if r == None:
-            csr.execute(sql_11, (l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]))
+            csr.execute(sql_11,
+                    (
+                        l["sql_row"]["category_id"],
+                        l["sql_row"]["channel"],
+                        l["title_identical"],
+                        l["sql_row"]["length"]
+                    ))
             series_id = csr.lastrowid
             print 'insert', l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]
         else:
             series_id = r["series_id"]
             csr.execute(sql_12, (l["sql_row"]["length"], series_id))
             print 'update', l["sql_row"]["length"], series_id
-        csr.execute(sql_13, (series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]))
+        csr.execute(sql_13,
+                (
+                    series_id,
+                    l["sql_row"]["transport_stream_id"],
+                    l["sql_row"]["service_id"],
+                    l["sql_row"]["event_id"]
+                ))
         print 'update2', series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]
 
+csr.close()
 con.commit()
 
 
