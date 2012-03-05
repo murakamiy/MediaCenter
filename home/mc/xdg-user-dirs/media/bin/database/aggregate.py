@@ -143,12 +143,9 @@ con.commit()
 csr = con.cursor()
 csr.execute(sql_8, (back_date,))
 sql_new = csr.fetchall()
-csr.close()
-csr = con.cursor()
 csr.execute(sql_9, (back_date,))
 sql_old = csr.fetchall()
 csr.close()
-
 pattern = re.compile(u" ")
 list_new = []
 list_old = []
@@ -165,7 +162,6 @@ for l in sql_old:
     m["title_sub"] = re.sub(pattern, '', unicodedata.normalize('NFKC', l["title"]))
     m["sql_row"] = l
     list_old.append(m)
-
 for new in list_new:
     for old in list_old:
         if (new["sql_row"]["category_id"] == old["sql_row"]["category_id"] and
@@ -180,7 +176,6 @@ for new in list_new:
                         if len(new["title_identical"]) < i - 2:
                             new["title_identical"] = new["title_sub"][0:i - 2]
                         break
-
 csr = con.cursor()
 for l in list_new:
     if 2 < len(l["title_identical"]) and len(l["title_sub"]) / 3 < len(l["title_identical"]):
@@ -196,7 +191,6 @@ for l in list_new:
             list_like = csr.fetchall()
             for ll in list_like:
                 if abs(len(l["title_identical"]) - len(ll["title"])) == 1:
-                    print 'like', l["title_identical"], ll["title"], len(l["title_identical"]), len(ll["title"])
                     r = ll
                     break
         if r == None:
@@ -208,11 +202,9 @@ for l in list_new:
                         l["sql_row"]["length"]
                     ))
             series_id = csr.lastrowid
-            print 'insert', l["sql_row"]["category_id"], l["title_identical"], l["sql_row"]["length"]
         else:
             series_id = r["series_id"]
             csr.execute(sql_12, (l["sql_row"]["length"], series_id))
-            print 'update', l["sql_row"]["length"], series_id
         csr.execute(sql_13,
                 (
                     series_id,
@@ -220,8 +212,6 @@ for l in list_new:
                     l["sql_row"]["service_id"],
                     l["sql_row"]["event_id"]
                 ))
-        print 'update2', series_id, l["sql_row"]["transport_stream_id"], l["sql_row"]["service_id"], l["sql_row"]["event_id"]
-
 csr.close()
 con.commit()
 
