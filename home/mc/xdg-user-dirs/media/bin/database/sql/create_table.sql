@@ -14,7 +14,6 @@ CREATE TABLE programme (
     priority INTEGER,
     foundby TEXT,
     length INTEGER,
-    identical INTEGER DEFAULT 0,
     created_at INTEGER DEFAULT (strftime('%s','now')),
     updated_at INTEGER DEFAULT (strftime('%s','now')),
     PRIMARY KEY (transport_stream_id, service_id, event_id)
@@ -24,7 +23,6 @@ CREATE INDEX idx_programme_series_id ON programme (series_id);
 CREATE INDEX idx_programme_category_id ON programme (category_id);
 CREATE INDEX idx_programme_title ON programme (title);
 CREATE INDEX idx_programme_start ON programme (start);
-CREATE INDEX idx_programme_identical ON programme (identical);
 
 
 CREATE TABLE play (

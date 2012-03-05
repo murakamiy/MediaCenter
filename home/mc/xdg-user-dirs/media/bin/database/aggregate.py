@@ -74,8 +74,7 @@ A.length
 from programme as A
 left outer join rating_series as B on
 (A.series_id = B.series_id)
-where A.identical = 0
-and A.category_id != -1
+where A.category_id != -1
 and (strftime('%s','now') - ? - A.start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
 """
 
