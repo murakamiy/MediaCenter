@@ -65,17 +65,15 @@ and (strftime('%s','now') - ? - start) < 60 * 60 * 25
 
 sql_9 = u"""
 select 
-A.transport_stream_id,
-A.service_id,
-A.event_id,
-A.category_id,
-A.title,
-A.length
-from programme as A
-left outer join rating_series as B on
-(A.series_id = B.series_id)
-where A.category_id != -1
-and (strftime('%s','now') - ? - A.start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
+transport_stream_id,
+service_id,
+event_id,
+category_id,
+title,
+length
+from programme
+where category_id != -1
+and (strftime('%s','now') - ? - start) between 60 * 60 * 24 * 7 and 60 * 60 * 24 * 8
 """
 
 sql_10 = u"""
