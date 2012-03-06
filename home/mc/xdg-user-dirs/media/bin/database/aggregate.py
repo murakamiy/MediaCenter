@@ -202,15 +202,15 @@ list_new = []
 list_old = []
 for l in sql_new:
     m = {}
-    m["title_left"] = unicodedata.normalize('NFKC', l["title"][:2])
     m["title_sub"] = re.sub(pattern, '', unicodedata.normalize('NFKC', l["title"]))
+    m["title_left"] = m["title_sub"][:2]
     m["title_identical"] = u""
     m["sql_row"] = l
     list_new.append(m)
 for l in sql_old:
     m = {}
-    m["title_left"] = unicodedata.normalize('NFKC', l["title"][:2])
     m["title_sub"] = re.sub(pattern, '', unicodedata.normalize('NFKC', l["title"]))
+    m["title_left"] = m["title_sub"][:2]
     m["sql_row"] = l
     list_old.append(m)
 for new in list_new:
