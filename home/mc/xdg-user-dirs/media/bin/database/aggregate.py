@@ -116,6 +116,57 @@ where category_id = ?
 and channel = ?
 and title like ?
 """
+
+sql_15 = u"""
+select
+sum(A.play_time) as sum,
+B.transport_stream_id,
+B.service_id,
+B.event_id,
+B.category_id,
+B.series_id
+from play as A
+inner join programme as B on
+(
+    A.transport_stream_id = B.transport_stream_id and
+    A.service_id = B.service_id and
+    A.event_id = B.event_id
+)
+inner join rating_category as C on (B.category_id = C.category_id)
+inner join rating_series as D on (B.series_id = D.series_id)
+where A.aggregate = 0
+group by 
+B.transport_stream_id,
+B.service_id,
+B.event_id,
+B.category_id,
+B.series_id
+"""
+
+sql_16 = u"""
+update rating_series set
+play_time = play_time + ?,
+rating = round(cast((play_time + ?) as real) / cast(length as real), 2),
+updated_at = strftime('%s','now')
+where series_id = ?
+"""
+
+sql_17 = u"""
+update rating_category set
+play_time = play_time + ?,
+rating = round(cast((play_time + ?) as real) / cast(length as real), 2),
+updated_at = strftime('%s','now')
+where category_id = ?
+"""
+
+sql_18 = u"""
+update play set
+aggregate = 1,
+updated_at = strftime('%s','now')
+where transport_stream_id = ?
+and service_id = ?
+and event_id = ?
+"""
 ####################################################################################################
 
 back_date = 0
@@ -215,9 +266,16 @@ for l in list_new:
 csr.close()
 con.commit()
 
-
-
-
-
+csr = con.cursor()
+csr.execute(sql_15)
+sql_play = csr.fetchall()
+csr.close()
+csr = con.cursor()
+for row in sql_play:
+    csr.execute(sql_16, (row["sum"], row["sum"], row["series_id"]))
+    csr.execute(sql_17, (row["sum"], row["sum"], row["category_id"]))
+    csr.execute(sql_18, (row["transport_stream_id"], row["service_id"], row["event_id"]))
+csr.close()
+con.commit()
 
 con.close()
