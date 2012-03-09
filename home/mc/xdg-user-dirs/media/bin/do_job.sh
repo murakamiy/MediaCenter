@@ -11,7 +11,6 @@ rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
-mp4_time=$(( ($end - $start) / 3 ))
 ((now = now - 120))
 
 bash $MC_BIN_ENCODE &
