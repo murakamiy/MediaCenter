@@ -28,7 +28,7 @@ if [ -n "$thumb_file" ];then
 
     if [ $dir = $MC_DIR_TS ];then
         trap safe_finish 1 2 3 15
-        python ${MC_DIR_DB}/play.py ${MC_DIR_JOB_FINISHED}/${base}.xml >> ${MC_DIR_DB}/log 2>&1 &
+        python ${MC_DIR_DB_RATING}/play.py ${MC_DIR_JOB_FINISHED}/${base}.xml >> ${MC_DIR_DB_RATING}/log 2>&1 &
         pid_play=$!
     fi
 
