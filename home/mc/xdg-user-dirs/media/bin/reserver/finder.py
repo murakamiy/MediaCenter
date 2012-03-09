@@ -139,7 +139,7 @@ class SportFinder(Finder):
 class NewsFinder(Finder):
     priority = 40
     def allow(self, pinfo):
-        if pinfo.channel == '291' and pinfo.title == 'ニュースウオッチ9':
+        if pinfo.title == 'ニュースウオッチ9':
             return True
         return False
 
