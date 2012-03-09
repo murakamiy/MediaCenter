@@ -6,7 +6,7 @@ diff -Naur src_old/drivers/media/dvb/dvb-core/dmxdev.h src/drivers/media/dvb/dvb
  
  	struct dvb_ringbuffer dvr_buffer;
 -#define DVR_BUFFER_SIZE (10*188*1024)
-+#define DVR_BUFFER_SIZE (200*188*1024)
++#define DVR_BUFFER_SIZE (100*188*1024)
  
  	struct mutex mutex;
  	spinlock_t lock;
