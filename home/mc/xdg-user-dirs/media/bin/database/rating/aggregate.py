@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from constant import *
 import sys
 import sqlite3
 import re
@@ -173,7 +174,7 @@ back_date = 0
 if 1 < len(sys.argv):
     back_date = int(sys.argv[1]) * 60 * 60 * 24
 
-con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db")
+con = sqlite3.connect(DB_FILE)
 con.row_factory = sqlite3.Row
 
 con.execute(sql_1)

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from constant import *
 import sys
 import signal
 from time import sleep
@@ -15,7 +16,7 @@ values (?, ?, ?, ?)
 """
 ####################################################################################################
 def update(signum, frame):
-    con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db")
+    con = sqlite3.connect(DB_FILE)
     con.execute(sql,
             (
                 transport_stream_id,

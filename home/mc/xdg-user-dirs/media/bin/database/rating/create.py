@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from constant import *
 import sys
 from xml.etree.cElementTree import ElementTree
 from xml.etree.cElementTree import Element
@@ -61,7 +62,7 @@ start = int(tree.find("epoch[@type='start']").text)
 stop = int(tree.find("epoch[@type='stop']").text)
 length = stop - start
 
-con = sqlite3.connect("/home/mc/xdg-user-dirs/media/bin/database/tv.db", isolation_level=None)
+con = sqlite3.connect(DB_FILE, isolation_level=None)
 con.execute(sql,
         (
             transport_stream_id,
