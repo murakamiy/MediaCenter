@@ -23,35 +23,52 @@ and A.title like ?
 """
 ####################################################################################################
 
-xml_file = sys.argv[1]
+class Provider:
+    def __init__(self):
+        self.con = sqlite3.connect(DB_FILE, isolation_level=None)
+        self.con.row_factory = sqlite3.Row
+    def __del__(self):
+        self.con.close()
+    def is_favorite_element(self, element):
+        (channel, category_1, category_2, title_left, title_norm) = self.get_element_text(element)
+        return self.is_favorite_db(channel, category_1, category_2, title_left, title_norm)
+    def is_favorite_xml(self, xml_file):
+        tree = ElementTree()
+        tree.parse(xml_file)
+        elem = tree.find("programme")
+        (channel, category_1, category_2, title_left, title_norm) = self.get_element_text(elem)
+        return self.is_favorite_db(channel, category_1, category_2, title_left, title_norm)
+    def get_element_text(self, element):
+        title = element.find('title').text
+        title_norm = re.sub(u" ", "", unicodedata.normalize('NFKC', title))
+        title_left = title_norm[:2]
+        channel = element.get('channel')
+        category_1 = ''
+        category_2 = ''
+        i = 0
+        for c in element.findall('category'):
+            if i == 0:
+                category_1 = c.text
+            elif i == 1:
+                category_2 = c.text
+            i += 1
+        return (channel, category_1, category_2, title_left, title_norm)
+    def is_favorite_db(self, channel, category_1, category_2, title_left, title_norm):
+        ret = False
+        csr = self.con.cursor()
+        for row in csr.execute(sql_1, (channel, category_1, category_2, title_left + u"%")):
+            if row["title"] == title_norm[:len(row["title"])]:
+                ret = True
+                break
+        csr.close()
+        return ret
 
-tree = ElementTree()
-tree.parse(xml_file)
-el = tree.find("programme")
-title = el.find('title').text
-title_norm = re.sub(u" ", "", unicodedata.normalize('NFKC', title))
-title_left = title_norm[:2]
-channel = el.get('channel')
-category_1 = ''
-category_2 = ''
-i = 0
-for c in el.findall('category'):
-    if i == 0:
-        category_1 = c.text
-    elif i == 1:
-        category_2 = c.text
-    i += 1
 
-con = sqlite3.connect(DB_FILE, isolation_level=None)
-con.row_factory = sqlite3.Row
-
-csr = con.cursor()
-ret = 1
-for row in csr.execute(sql_1, (channel, category_1, category_2, title_left + u"%")):
-    if row["title"] == title_norm[:len(row["title"])]:
+if __name__ == '__main__':
+    xml_file = sys.argv[1]
+    p = Provider()
+    if True == p.is_favorite_xml(xml_file):
         ret = 0
-        break
-csr.close()
-con.close()
-
-sys.exit(ret)
+    else:
+        ret = 1
+    sys.exit(ret)
