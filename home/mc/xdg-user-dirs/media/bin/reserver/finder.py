@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 import re
 import random
+import os
+from datetime import datetime
+from datetime import time
+
+CRON_TIME = os.environ["MC_CRON_TIME"]
+cron_arr = map(int, CRON_TIME.split(":"))
+cron_time = time(cron_arr[0], cron_arr[1], cron_arr[2])
+
 
 class FindresCheif:
     finders = []
@@ -38,6 +46,11 @@ class Finder:
         return re.compile(buf)
     def like(self, pinfo):
         if (pinfo.epoch_end - pinfo.epoch_start) > (60 * 60 * 3):
+            return False
+        if (
+                (cron_time.hour == pinfo.start.hour and pinfo.start.minute <= cron_time.minute + 30) or 
+                (cron_time.hour == pinfo.end.hour and cron_time.minute + 30 <= pinfo.end.minute)
+           ):
             return False
         return self.allow(pinfo)
     def allow(self, pinfo):
