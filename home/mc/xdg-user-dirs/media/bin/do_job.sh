@@ -10,6 +10,11 @@ category=$(print_category ${MC_DIR_RESERVED}/${job_file_xml})
 rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
+rec_time=$(($end - $start - 10))
+transport_stream_id=$(xmlsel -t -m //transport-stream-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
+service_id=$(xmlsel -t -m //service-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
+event_id=$(xmlsel -t -m //event-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
+channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
@@ -31,6 +36,9 @@ else
         mkfifo -m 644 $fifo_tail
         fifo_b25=${fifo_dir}/b25_$$
         mkfifo -m 644 $fifo_b25
+        fifo_extend=${fifo_dir}/extend_$$
+        mkfifo -m 644 $fifo_extend
+        echo > $fifo_extend &
 
         today=$(date +%d)
 
@@ -43,7 +51,34 @@ else
         tail --follow --retry --sleep-interval=0.1 ${MC_DIR_TS}/${job_file_ts} > $fifo_tail &
         pid_tail=$!
 
-        $rec
+        (
+            sleep 120
+            python ${MC_DIR_DB_RATING}/rating.py ${MC_DIR_RECORDING}/${job_file_xml}
+            if [ $? -eq 0 ];then
+
+                bs_cs=
+                echo $channel | grep -q ^BS_
+                if [ $? -eq 0 ];then
+                    bs_cs='-b'
+                fi
+                echo $channel | grep -q ^CS_
+                if [ $? -eq 0 ];then
+                    bs_cs='-c'
+                fi
+
+                mod_time=($(python $MC_BIN_EPGDUMP $bs_cs -p $transport_stream_id:$service_id:$event_id -i ${MC_DIR_TS}/${job_file_ts}))
+
+                if [ -n "${mod_time[1]}" ];then
+                    if [ "${mod_time[1]}" -gt $end ];then
+                        extend=$((${mod_time[1]} - $end)) 
+                        log "rec time extended: $extend $job_file_xml $title"
+                        echo $extend > $fifo_extend
+                    fi
+                fi
+            fi
+        ) &
+
+        rec -e $fifo_extend $channel $rec_time ${MC_DIR_TS}/${job_file_ts}
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
@@ -54,6 +89,7 @@ else
         kill -TERM $pid_tail
         /bin/rm -f $fifo_tail
         /bin/rm -f $fifo_b25
+        /bin/rm -f $fifo_extend
 
         b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.b25
 

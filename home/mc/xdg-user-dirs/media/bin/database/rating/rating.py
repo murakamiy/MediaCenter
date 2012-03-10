@@ -18,7 +18,7 @@ inner join rating_category as B on (A.category_id = B.category_id)
 where A.channel = ?
 and B.category_1 = ?
 and B.category_2 = ?
-and A.rating > 0.6
+and A.rating > 0.5
 and A.title like ?
 """
 ####################################################################################################

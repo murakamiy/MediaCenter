@@ -105,6 +105,7 @@ sleep $time
 if [ -p "$extend_fifo" ];then
     time=$(cat $extend_fifo)
     if [ -n "$time" ];then
+        echo "$0 rec time extended: $time"
         sleep $time
     fi
 fi
