@@ -7,9 +7,25 @@ function safe_finish() {
     /bin/rm -f $run_file
 }
 
+fuse=
+extend_fifo=
+while getopts 'e:f' opt;do
+    case $opt in
+        e)
+            extend_fifo=$OPTARG
+            ;;
+        f)
+            fuse=fuse_b25
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
 if [ $# -lt 3 ];then
 cat <<EOF
-USAGE: rec channel time output [fuse_b25]
+USAGE: rec [OPTION] channel time output
+       -e  specify extend rec time fifo
+       -f  use fuse_b25
 EOF
 exit 1
 fi
@@ -17,7 +33,6 @@ fi
 channel=$1
 time=$2
 output=$3
-fuse=$4
 
 if [ $channel -gt 100 ];then
     tuner=bs_cs
@@ -70,6 +85,8 @@ lockfile-remove $lock_file
 ####################################################################################################
 echo "$0: $run_file" 
 
+trap safe_finish 1 2 3 15
+
 tid=$aid
 if [ "$fuse" = "fuse_b25" ];then
     tid=$(($aid - 8))
@@ -84,6 +101,12 @@ LANG=C dd if=/dev/dvb/adapter${aid}/dvr0 of=$output \
     oflag=noatime &
 pid_dd=$!
 
-trap safe_finish 1 2 3 15
 sleep $time
+if [ -p "$extend_fifo" ];then
+    time=$(cat $extend_fifo)
+    if [ -n "$time" ];then
+        sleep $time
+    fi
+fi
+
 safe_finish
