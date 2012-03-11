@@ -9,6 +9,8 @@ from datetime import datetime
 import time
 from xml.etree.cElementTree import ElementTree
 from xml.etree.cElementTree import Element
+import unicodedata
+from rating import rating
 
 DIR_EPG = os.environ["MC_DIR_EPG"]
 DIR_TS = os.environ["MC_DIR_TS"]
@@ -39,6 +41,7 @@ class ProgramInfo:
             return False
         return (self.epoch_start - self.epoch_now) <= RESERVE_SPAN
     def set_program_info(self, el):
+        self.element = el
         self.end   = datetime.strptime(string.split(el.get('stop'))[0],  '%Y%m%d%H%M%S')
         self.epoch_end = int(time.mktime(self.end.timetuple()))
         self.title = self.get_text(el.find('title').text)
@@ -127,9 +130,18 @@ class ReserveMaker:
         rinfo_list.sort(cmp=timeline_sort, reverse=False)
         rinfo_list = self.apply_dislike(rinfo_list)
         rinfo_list = self.apply_favorite(rinfo_list)
+        rinfo_list = self.apply_rating(rinfo_list)
         rinfo_list = self.apply_priority(rinfo_list)
         rinfo_list = self.create_reserve(rinfo_list)
         self.do_reserve(rinfo_list)
+    def apply_rating(self, rinfo_list):
+        provider = rating.Provider()
+        self.log("rating: ")
+        for rinfo in rinfo_list:
+            rating_v = provider.get_rating_element(rinfo.pinfo.element)
+            rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
+            self.log(" %s %3d %2d %.2f %s" % (rinfo.pinfo.start, rinfo.pinfo.rectime / 60, int(rinfo.pinfo.channel), rinfo.pinfo.priority, rinfo.pinfo.title))
+        return rinfo_list
     def apply_dislike(self, rinfo_list):
         dislike_list = self.create_program_list(DIR_DISLIKE)
         self.log("dislike: ")
@@ -278,6 +290,10 @@ class ReserveMaker:
         at_element.text = at_command
         rec_element = Element("rec")
         rec_element.text = rec_command
+        rec_channel_element = Element("rec-channel")
+        rec_channel_element.text = pinfo.channel
+        rec_time_element = Element("rec-time")
+        rec_time_element.text = str(pinfo.rectime)
 
         command_element = Element("command")
         command_element.append(do_job_element)
@@ -292,5 +308,7 @@ class ReserveMaker:
         reserved_element.append(time_stop_element)
         reserved_element.append(epoch_start_element)
         reserved_element.append(epoch_stop_element)
+        reserved_element.append(rec_channel_element)
+        reserved_element.append(rec_time_element)
         reserved_element.append(command_element)
         return ReserveInfo(pinfo, reserved_element, "echo '%s' | %s" % (do_job_command, at_command))
