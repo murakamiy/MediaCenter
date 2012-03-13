@@ -10,7 +10,7 @@ A.title
 from rating_series as A
 inner join programme as B on (A.series_id = B.series_id)
 order by B.start desc
-limit 10
+limit 30
 ;
 
 .mode list

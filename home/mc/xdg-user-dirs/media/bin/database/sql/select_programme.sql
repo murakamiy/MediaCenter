@@ -7,7 +7,7 @@ foundby,
 title
 from programme
 order by start desc
-limit 10
+limit 30
 ;
 
 .mode list

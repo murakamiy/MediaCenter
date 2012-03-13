@@ -15,7 +15,7 @@ inner join programme as B on
     A.event_id = B.event_id
 )
 order by B.start desc
-limit 10
+limit 30
 ;
 
 .mode list
