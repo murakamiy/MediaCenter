@@ -10,7 +10,8 @@ category=$(print_category ${MC_DIR_RESERVED}/${job_file_xml})
 rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
-rec_time=$(($end - $start - 10))
+rec_channel=$(xmlsel -t -m //rec-channel -v . ${MC_DIR_RESERVED}/${job_file_xml})
+rec_time=$(xmlsel -t -m //rec-time -v . ${MC_DIR_RESERVED}/${job_file_xml})
 transport_stream_id=$(xmlsel -t -m //transport-stream-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 service_id=$(xmlsel -t -m //service-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 event_id=$(xmlsel -t -m //event-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
@@ -78,7 +79,7 @@ else
             fi
         ) &
 
-        rec -e $fifo_extend $channel $rec_time ${MC_DIR_TS}/${job_file_ts}
+        rec -e $fifo_extend $rec_channel $rec_time ${MC_DIR_TS}/${job_file_ts}
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
@@ -113,11 +114,11 @@ else
         category_dir="${MC_DIR_TITLE_TS}/${category}"
         mkdir -p "$category_dir"
         for i in $(seq -w 1 99);do
-            if [ ! -e "${category_dir}/${title}${i}.png" ];then
+            if [ ! -e "${category_dir}/${title}_${i}.png" ];then
                 break
             fi
         done
-        ln $thumb_file "${category_dir}/${title}${i}.png"
+        ln $thumb_file "${category_dir}/${title}_${i}.png"
 
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
