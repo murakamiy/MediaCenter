@@ -102,8 +102,9 @@ case $command in
         shift
         for f in $@;do
             base=$(basename $f | awk -F . '{ print $1 }')
+            ext=$(basename $f | awk -F . '{ print $2 }')
 
-            thumb_file=${MC_DIR_THUMB}/${base}.mp4
+            thumb_file=${MC_DIR_THUMB}/${base}.${ext}
             echo "ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
             ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
             if [ $? -eq 0 ];then
