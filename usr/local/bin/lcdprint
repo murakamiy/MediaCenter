@@ -2,8 +2,12 @@
 
 buffer=/tmp/lcdbuffer
 reset=
-while getopts 'rts:e:qw:' opt;do
+shutdown_message=false
+while getopts 'drts:e:qw:' opt;do
     case $opt in
+        d)
+            shutdown_message=true
+            ;;
         t)
             time=true
             ;;
@@ -32,6 +36,10 @@ if [ -n "$reset" ];then
     exit
 fi
 
+if [ "$shutdown_message" = "true" ];then
+    printf 'GOING TO HALT   !!!!!!!!!!!!!'  > /dev/lcd0
+    exit
+fi
 if [ -n "$quit" ];then
     if [ -n "$wakeup_time" ];then
         # 2011/05/02 21:23

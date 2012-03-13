@@ -59,6 +59,7 @@ if [ $wakeup_time -ne -1 ];then
         logcat
         screen_command=screen
     fi
+    sudo lcdprint -d
     echo "next wakeup time: $next_wakeup_time\n\nStop ShutDown ?"
     zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nStop ShutDown ?</span>"
     if [ $? -ne 0 ];then
