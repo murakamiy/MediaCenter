@@ -5,6 +5,8 @@ from time import localtime
 from time import mktime
 from time import strptime
 from time import strftime
+from dateutil import rrule
+from datetime import datetime
 
 NO_RESERVED_JOB = 0
 NO_SHUTDOWN = -1
@@ -23,12 +25,11 @@ log = open(LOG_FILE, "a")
 next_job_epoch = int(sys.argv[1])
 current_epoch = int(mktime(localtime()))
 
-cron_job_date = localtime(current_epoch + (60 * 60 * 11))
-cron_job_list = list(cron_job_date)
-cron_job_time = map(int, CRON_TIME.split(":"))
-for i in range(0, 3):
-    cron_job_list[i + 3] = cron_job_time[i]
-cron_job_epoch = int(mktime(tuple(cron_job_list)))
+cron = map(int, CRON_TIME.split(":"))
+now = datetime.now()
+rule = rrule.rrule(rrule.DAILY,
+        dtstart=datetime(now.year, now.month, now.day, cron[0], cron[1], cron[2]))
+cron_job_epoch = int(mktime(rule.after(now).timetuple()))
 
 if next_job_epoch == NO_RESERVED_JOB:
     wakeup = ensure_wakeup(current_epoch, cron_job_epoch)
