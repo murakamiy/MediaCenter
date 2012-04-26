@@ -17,10 +17,7 @@ count=0
 while true;do
     find ~/.local/share/Trash -type f -delete
     find $MC_DIR_RESUME -type f -delete
-    (
-        cd $MC_DIR_MP4
-        rm -f $(ls -t $MC_DIR_MP4 | sed -e '1,300d')
-    )
+    find $MC_DIR_MP4 -ctime +28 -delete
 
     has_free_space
     if [ $? -eq 0 ];then
