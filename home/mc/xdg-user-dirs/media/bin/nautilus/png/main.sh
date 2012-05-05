@@ -10,6 +10,7 @@ png_file="$1"
 inode=$(stat --format='%i' $png_file)
 thumb_file=$(basename $(find $MC_DIR_THUMB -inum $inode))
 base=$(echo $thumb_file | awk -F . '{ print $1 }')
+xml_file=${base}.xml
 
 if [ -n "$thumb_file" ];then
     title_dir=$(dirname $png_file)
@@ -28,11 +29,11 @@ if [ -n "$thumb_file" ];then
 
     if [ $dir = $MC_DIR_TS ];then
         trap safe_finish 1 2 3 15
-        python ${MC_DIR_DB_RATING}/play.py ${MC_DIR_JOB_FINISHED}/${base}.xml >> ${MC_DIR_DB_RATING}/log 2>&1 &
+        python ${MC_DIR_DB_RATING}/play.py ${MC_DIR_JOB_FINISHED}/${xml_file} >> ${MC_DIR_DB_RATING}/log 2>&1 &
         pid_play=$!
     fi
 
-    $(dirname $0)/action.sh $thumb_file $video_file "$png_file" $MC_DIR_RESUME
+    $(dirname $0)/action.sh $thumb_file $video_file "$png_file" $MC_DIR_RESUME $xml_file
 
     safe_finish
 else
