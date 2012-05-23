@@ -13,11 +13,18 @@ base=$(echo $thumb_file | awk -F . '{ print $1 }')
 xml_file=${base}.xml
 
 if [ -n "$thumb_file" ];then
-    title_dir=$(dirname $png_file)
-    if [ "$title_dir" = $MC_DIR_TITLE_ENCODE ];then
-        dir=$MC_DIR_ENCODE
-    else
+
+    echo $png_file | grep -q $MC_DIR_TITLE_TS
+    if [ $? -eq 0 ];then
         dir=$MC_DIR_TS
+    else
+        echo $png_file | grep -q $MC_DIR_TITLE_ENCODE
+        if [ $? -eq 0 ];then
+            dir=$MC_DIR_ENCODE
+        else
+            zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong\n\n $dir/$thumb_file</span>"
+            exit
+        fi
     fi
 
     num=$(find $dir -type f -name $thumb_file | wc -l)
