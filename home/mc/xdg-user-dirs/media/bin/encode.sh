@@ -11,7 +11,7 @@ function do_encode_ffmpeg() {
     -vsync 1 \
     -vcodec libx264 -fpre ${MC_DIR_BIN}/libx264-normal.ffpreset \
     -acodec copy \
-    -s 960x540 -threads 2 \
+    -threads 2 \
     -r 30000/1001 \
     $output
 
@@ -26,7 +26,6 @@ function do_encode_mencoder() {
     mencoder $input -quiet \
     -of lavf -lavfopts format=mp4 \
     -ovc x264 -x264encopts crf=25.0:threads=2 \
-    -vf scale=960:540 \
     -oac faac -faacopts quality=1000 \
     -o $output
 
