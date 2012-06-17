@@ -42,7 +42,7 @@ class Provider:
         (channel, category_1, category_2, title_left, title_norm) = self.get_element_text(elem)
         return self.is_favorite_db(channel, category_1, category_2, title_left, title_norm)
     def get_element_text(self, element):
-        title = element.find('title').text
+        title = u" " + element.find('title').text
         title_norm = re.sub(u" ", "", unicodedata.normalize('NFKC', title))
         title_left = title_norm[:2]
         channel = element.get('channel')
