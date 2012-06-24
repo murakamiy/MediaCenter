@@ -1,0 +1,11 @@
+
+[Desktop Entry]
+Type=Application
+Exec=/usr/local/bin/init-job
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[ja_JP]=init-job
+Name=init-job
+Comment[ja_JP]=
+Comment=

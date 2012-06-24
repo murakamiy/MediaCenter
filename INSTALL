@@ -1,5 +1,16 @@
 /etc/modprobe.d/blacklist.conf earth_pt1 追加
 
+watchdog
+/etc/modprobe.d/watchdog.conf
+    options softdog soft_margin=600
+/etc/rc.local
+    modprobe softdog 
+    echo 60 > /proc/sys/kernel/panic
+    echo 1 > /proc/sys/kernel/panic_on_oops
+crontab -e (root)
+    * * * * * echo > /dev/watchdog
+
+
 pt1 dkmsに追加、ビルド、インストール
 
 ログイン画面の設定
