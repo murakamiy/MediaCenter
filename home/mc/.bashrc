@@ -4,6 +4,7 @@
 PS1="[\u \W]\\$ "
 # LANG=ja_JP.eucJP
 # LANG=C
+LANG=ja_JP.SJIS
 LANG=ja_JP.utf8
 PAGER='less -MQXcgi -x4'
 EDITOR='vim'
@@ -37,7 +38,8 @@ alias less='less -MQSXcgi -x4'
 alias bc='bc -q'
 alias psa='ps -eo comm,rsz,vsz,%cpu,pid,user,args'
 alias psm='ps -ao comm,rsz,vsz,%cpu,pid,user,args'
-
+alias getclip='xclip -o'
+alias putclip='xclip -i'
 alias vimemo='vi ~/work/memo'
 
 alias xml='xmlstarlet'
@@ -127,5 +129,5 @@ function selactor() {
         -v 'normalize-space(../title)' -o '  ' -v '../@start' -n $2
 }
 function smbaterm() {
-    smbclient '//ATERM-CE6499/hts54806-1/'
+    smbclient -A ~/.smbauth '//ATERM-CE6499/hts54806-1/'
 }

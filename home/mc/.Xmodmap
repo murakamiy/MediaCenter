@@ -1,0 +1,11 @@
+clear lock
+clear control
+
+keycode 102 = Control_L
+keycode 100 = Control_R
+keycode  66 = Escape
+
+add control = Control_L
+add control = Control_R
+add mod1 = Alt_R
+add mod1 = Alt_L
