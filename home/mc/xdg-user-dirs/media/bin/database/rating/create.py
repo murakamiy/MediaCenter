@@ -56,7 +56,7 @@ for c in el.findall('category'):
     elif i == 1:
         category_2 = c.text
     i += 1
-priority = int(tree.find("priority").text)
+priority = float(tree.find("priority").text)
 foundby = tree.find("foundby").text
 start = int(tree.find("epoch[@type='start']").text)
 stop = int(tree.find("epoch[@type='stop']").text)

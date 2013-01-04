@@ -2,7 +2,7 @@
 
 # cat: /dev/dvb/adapter3/dvr0: Value too large for defined data type
 
-src_dir=linux-source-3.0.0
+src_dir=linux-source-3.5.0
 
 /bin/cp $(ls /boot/config* | grep generic | sort | tail -n 1) $src_dir/.config
 

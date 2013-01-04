@@ -29,7 +29,6 @@ else
     if [ $now -lt $start ];then
         log "start: $job_file_xml"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
-        sudo lcdprint -s $start -e $end
 
         fifo_dir=/tmp/dvb-pt2/fifo
         mkdir -p $fifo_dir
@@ -43,8 +42,24 @@ else
 
         today=$(date +%d)
 
-        echo "ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 ${MC_DIR_MP4}/${today}_${title}.mp4"
-        ffmpeg -y -i $fifo_b25 -f mp4 -vsync 1 -vcodec libx264 -acodec libfaac -s 360x240 -fpre /home/mc/work/encode/libx264-normal.ffpreset -vpre ipod320 "${MC_DIR_MP4}/${today}_${title}.mp4" > /dev/null 2>&1 &
+        echo avconv -y -i $fifo_b25 -f mp4 \
+            -s 960x540 \
+            -loglevel quiet \
+            -vsync 1 \
+            -vcodec libx264 -acodec libvo_aacenc \
+            -profile:v baseline -crf 30 -level 30 \
+            -maxrate:v 10000k -r:a 44100 -b:a 64k \
+            "${MC_DIR_MP4}/${today}_${title}.mp4"
+
+        avconv -y -i $fifo_b25 -f mp4 \
+            -s 960x540 \
+            -loglevel quiet \
+            -vsync 1 \
+            -vcodec libx264 -acodec libvo_aacenc \
+            -profile:v baseline -crf 30 -level 30 \
+            -maxrate:v 10000k -r:a 44100 -b:a 64k \
+            "${MC_DIR_MP4}/${today}_${title}.mp4" > /dev/null 2>&1 &
+
         pid_ffmpeg=$!
         b25 -v 0 $fifo_tail $fifo_b25 &
         pid_b25=$!
@@ -119,6 +134,12 @@ else
             fi
         done
         ln $thumb_file "${category_dir}/${title}_${i}.png"
+
+        (
+            cd $MC_DIR_MP4
+            echo smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
+        )
 
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 

@@ -5,11 +5,11 @@ function is_job_running() {
     running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml')
     ps auxc | grep -q mplayer
     mplayer=$?
-    ps auxc | grep -q rhythmbox
-    rhythmbox=$?
+    ps auxc | grep -q vlc
+    vlc=$?
     ps auxc | grep ^mc | grep -q sshd
     ssh=$?
-    if [ -n "$running" -o "$mplayer" -eq 0 -o "$rhythmbox" -eq 0 -o "$ssh" -eq 0 ];then
+    if [ -n "$running" -o "$mplayer" -eq 0 -o "$vlc" -eq 0 -o "$ssh" -eq 0 ];then
         log "running jobs: $running"
         ret=0
     else
@@ -53,21 +53,10 @@ wakeup_time=$(python $MC_BIN_WAKEUP_TIME $next_job_time)
 if [ $wakeup_time -ne -1 ];then
     next_wakeup_time=$(awk -v epoc=$wakeup_time 'BEGIN { print strftime("%Y/%m/%d %H:%M:%S", epoc) }')
     log
-    screen_command=
-    env | grep -q '^TERM='
-    if [ $? -eq 0 ];then
-        logcat
-        screen_command=screen
-    fi
-    sudo lcdprint -d
-    echo "next wakeup time: $next_wakeup_time\n\nStop ShutDown ?"
-    zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nStop ShutDown ?</span>"
-    if [ $? -ne 0 ];then
-        gnome-session-quit --logout --no-prompt
-        killall -s HUP lcdclock
-        sleep 20
-        sudo lcdprint -q -w $wakeup_time
-        $screen_command sudo wakeuptool -w -t $wakeup_time
+    echo "next wakeup time: $next_wakeup_time\n\nShutDown ?"
+    zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
+    if [ $? -ne 1 ];then
+        sudo wakeuptool -w -t $wakeup_time
     fi
 else
     log

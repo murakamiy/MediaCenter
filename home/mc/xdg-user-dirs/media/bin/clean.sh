@@ -17,6 +17,10 @@ count=0
 while true;do
     find ~/.local/share/Trash -type f -delete
     find $MC_DIR_RESUME -type f -delete
+    for f in $(find $MC_DIR_MP4 -ctime +28);do
+        b=$(basename $f)
+        smbclient -A ~/.smbauth -D contents -c "del $b" $MC_SMB_SERVER
+    done
     find $MC_DIR_MP4 -ctime +28 -delete
 
     has_free_space
