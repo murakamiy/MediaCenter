@@ -1,7 +1,7 @@
 概要:アースソフト PT2を利用して作成した地デジ録画システム
 
 環境:
-    OS                     :Ubuntu 11.04 64bit
+    OS                     :Ubuntu 12.10 64bit
     ハードウェア:
         マザーボード       :ASUS F2A85-M AMD A85X FCHチップセット microATX
         CPU                :AMD A8-Series A8-5500 AD5500OKHJBOX 3.2GHz x 4 Radeon HD 7560D
