@@ -119,7 +119,7 @@ mediubuntuレポジトリの追加
 
 crontabの編集
     PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-    0 13 * * * bash /home/mc/xdg-user-dirs/media/bin/mkjob.sh
+    5 13 * * * bash /home/mc/xdg-user-dirs/media/bin/mkjob.sh
 
 nautilus pngファイルの設定
     /home/mc/xdg-user-dirs/media/bin/nautilus/png/main.sh
