@@ -1,8 +1,6 @@
 #!/bin/bash
 
 LANG=C vlc \
---control lirc --lirc-file ~/.lircrc \
---no-overlay \
 --fullscreen \
 $@
 

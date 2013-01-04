@@ -1,13 +1,12 @@
 #!/bin/bash
 
 function set_wakeup_time() {
-    wakeup=$1
-    kexec -l /boot/vmlinuz-$(uname -r) --initrd=/boot/initrd.img-$(uname -r)-alarm --append="root=/dev/sdb1 ro hpet=disable break=bottom wakeup=${wakeup}"
+    echo 0 > /sys/class/rtc/rtc0/wakealarm
+    echo -n $1 > /sys/class/rtc/rtc0/wakealarm
 }
 
 function do_wakeup() {
-    sync;sync
-    telinit 0
+    shutdown -h now
 }
 
 function do_shutdown() {
@@ -27,23 +26,16 @@ for rd in $(ls /boot/initrd.img* | grep -v alarm);do
     mv init init.0
     awk '/maybe_break[[:space:]]+bottom/ { exit } { print $0 }' init.0 > init
 
-    if [ $break_bottom = "true" ];then
-        echo 'maybe_break bottom' >> init
-    fi
-
 cat << 'EOF'>> init
-#echo "wakeup-orig=$wakeup"
-#wakeup=$(busybox grep -Eo 'wakeup=[0-9]+' /proc/cmdline | busybox sed -e 's/wakeup=//')
+
 umount $rootmnt
-busybox mkswap /dev/sdb3
-busybox swapon /dev/sdb3                 || echo -n disk > /sys/power/state
-[ -n "$wakeup" -a "$wakeup" -gt 0 ]      || echo -n disk > /sys/power/state
+busybox mkswap /dev/sdc3                 || echo -n disk > /sys/power/state
+busybox swapon /dev/sdc3                 || echo -n disk > /sys/power/state
+[ -n "$wakeup_time" -a "$wakeup_time" -gt 0 ]      || echo -n disk > /sys/power/state
 
 echo 0 > /sys/class/rtc/rtc0/wakealarm
-echo -n $wakeup > /sys/class/rtc/rtc0/wakealarm
-#echo "wakeup-parsed=$wakeup"
-#busybox head -n 6 /proc/driver/rtc
-#sleep 10
+echo -n $wakeup_time > /sys/class/rtc/rtc0/wakealarm
+
 echo -n disk > /sys/power/state
 EOF
     chmod 755 init
@@ -61,11 +53,9 @@ function print_help() {
 
 cat <<EOF
 USAGE: $(basename $0) OPTIONS
-       -b               make initramfs break (debug mode)
        -h               print help
        -l               print next wakeup time
        -m               make initramfs
-       -r               print rc0.d directory
        -s               shutdown and will not be wake
        -t WAKEUP_TIME   set wakeup time(seconds since the epoch time)
        -w               shutdown and will be wake
@@ -73,34 +63,14 @@ EOF
 exit
 }
 
-function print_rc0d() {
-cat <<EOF
-K18kexec-load@       K50pcscd@                S35networking@
-K19lirc@             K74bluetooth@            S40umountfs@
-K19samba@            K99laptop-mode@          S48cryptdisks@
-K19setserial@        README                   S59cryptdisks-early@
-K20kerneloops@       S10unattended-upgrades@  S60umountroot@
-K20multipath-tools@  S15wpa-ifupdown@         S85kexec@
-K30etc-setserial@    S20sendsigs@             S90reboot@
-K31atieventsd@       S30urandom@
-K50alsa-utils@       S31umountnfs.sh@
-EOF
-exit
-}
-
-
 if [ $# -eq 0 ];then
     print_help
 fi
 
-break_bottom=false
 will_be_wakeup=false
 wakeup_time=
-while getopts 'bhlmrst:w' opt;do
+while getopts 'hlmst:w' opt;do
     case $opt in
-        b)
-            break_bottom=true
-            ;;
         h)
             print_help
             ;;
@@ -115,9 +85,6 @@ while getopts 'bhlmrst:w' opt;do
         s)
             do_shutdown
             exit
-            ;;
-        r)
-            print_rc0d
             ;;
         t)
             wakeup_time=$OPTARG
