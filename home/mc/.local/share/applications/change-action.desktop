@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=shutdowntool
+Name=ChangeAction
 Comment=Browse and rotate images
-TryExec=/home/mc/xdg-user-dirs/media/bin/safe_shutdown.sh
-Exec=/home/mc/xdg-user-dirs/media/bin/safe_shutdown.sh %U
-Icon=system-shutdown-panel
+TryExec=/home/mc/xdg-user-dirs/media/bin/change-action.sh
+Exec=/home/mc/xdg-user-dirs/media/bin/change-action.sh %U
+Icon=ubuntuone-client-offline
 StartupNotify=true
 Terminal=false
 Type=Application
