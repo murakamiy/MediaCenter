@@ -75,7 +75,7 @@ class AnimeFinder(Finder):
         u'DOG　DAYS',
     ]
     def allow(self, pinfo):
-        if pinfo.category_1 == 'アニメ／特撮' and pinfo.start.hour < 6:
+        if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and pinfo.start.hour < 6:
             if not re.search(self.deny_pattern, pinfo.title):
                 return True
         return False
@@ -104,6 +104,7 @@ class TitleFinder(Finder):
         u'はじめの一歩',
         u'ペルソナ4',
         u'偽物語',
+        u'青の祓魔師',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -133,6 +134,8 @@ class CreditFinder(Finder):
         u'レディー・ガガ',
         u'LADY GAGA',
         u'LADY　GAGA',
+        u'石原さとみ',
+        u'阿部寛',
     ]
     deny_list = [
         u'BSプレマップ',
