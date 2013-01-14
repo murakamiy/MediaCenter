@@ -16,6 +16,7 @@ transport_stream_id=$(xmlsel -t -m //transport-stream-id -v . ${MC_DIR_RESERVED}
 service_id=$(xmlsel -t -m //service-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 event_id=$(xmlsel -t -m //event-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
+broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
@@ -126,7 +127,7 @@ else
         else
             cp $MC_FILE_THUMB $thumb_file
         fi
-        category_dir="${MC_DIR_TITLE_TS}/${category}"
+        category_dir="${MC_DIR_TITLE_TS}/${broadcasting}/${category}"
         mkdir -p "$category_dir"
         for i in $(seq -w 1 99);do
             if [ ! -e "${category_dir}/${title}_${i}.png" ];then

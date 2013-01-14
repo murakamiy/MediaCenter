@@ -15,6 +15,7 @@ USAGE: $(basename $0) command
                 show_ts
                 show_video
                 show_encode
+                show_rec
                 show_info
                 show_xml
                 show_fail
@@ -56,6 +57,26 @@ case $command in
         ;;
     show_ts)
         for f in $MC_DIR_JOB_FINISHED/*;do
+            title=$(print_title $f)
+            start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
+            end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
+            ((time = (end - start) / 60))
+            ts_file=${MC_DIR_TS}/$(basename $f .xml).ts 
+            echo "$ts_file $time $title"
+        done
+        ;;
+    show_rec)
+        echo MC_DIR_RECORDING
+        for f in $(find $MC_DIR_RECORDING -type f);do
+            title=$(print_title $f)
+            start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
+            end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
+            ((time = (end - start) / 60))
+            ts_file=${MC_DIR_TS}/$(basename $f .xml).ts 
+            echo "$ts_file $time $title"
+        done
+        echo RECORD_FINISHED
+        for f in $(find $MC_DIR_RECORD_FINISHED -type f);do
             title=$(print_title $f)
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
@@ -129,6 +150,7 @@ case $command in
             job_file_ts=${job_file_base}.ts
             title=$(print_title ${MC_DIR_JOB_FINISHED}/${job_file_xml})
             category=$(print_category ${MC_DIR_JOB_FINISHED}/${job_file_xml})
+            broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_JOB_FINISHED}/${job_file_xml})
 
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
             echo "ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
@@ -139,6 +161,7 @@ case $command in
                 cp $MC_FILE_THUMB $thumb_file
             fi
             category_dir="${MC_DIR_TITLE_TS}/${category}"
+            category_dir="${MC_DIR_TITLE_TS}/${broadcasting}/${category}"
             mkdir -p "$category_dir"
             for i in $(seq -w 1 99);do
                 if [ ! -e "${category_dir}/${title}${i}.png" ];then

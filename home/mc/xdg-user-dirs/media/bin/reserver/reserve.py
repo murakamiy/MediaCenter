@@ -62,6 +62,13 @@ class ProgramInfo:
         self.file_base = self.start.strftime("%Y%m%d-%H%M-") + self.channel
         self.file_ts = os.path.join(DIR_TS, self.file_base + ".ts")
         self.file_reserved = os.path.join(DIR_RESERVED, self.file_base + ".xml")
+        ch = self.get_text(self.element.get('channel'))
+        if re.search('^BS_', ch):
+            self.broadcasting = 'BS'
+        elif re.search('^CS_', ch):
+            self.broadcasting = 'CS'
+        else:
+            self.broadcasting = 'Digital'
     def get_text(self, text):
         return text.encode('utf-8') if text != None else ""
 
@@ -280,6 +287,8 @@ class ReserveMaker:
         time_stop_element = Element("time", attr)
         time_stop_element.text = pinfo.time_end
 
+        broadcasting_element = Element("broadcasting")
+        broadcasting_element.text = pinfo.broadcasting
         found_by_element = Element("foundby")
         found_by_element.text = pinfo.found_by
         priority_element = Element("priority")
@@ -304,6 +313,7 @@ class ReserveMaker:
         reserved_element.append(el)
         reserved_element.append(priority_element)
         reserved_element.append(found_by_element)
+        reserved_element.append(broadcasting_element)
         reserved_element.append(time_start_element)
         reserved_element.append(time_stop_element)
         reserved_element.append(epoch_start_element)
