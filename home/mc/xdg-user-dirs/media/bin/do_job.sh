@@ -44,7 +44,7 @@ else
         today=$(date +%d)
 
         echo avconv -y -i $fifo_b25 -f mp4 \
-            -s 960x540 \
+            -s 640x360 \
             -loglevel quiet \
             -vsync 1 \
             -vcodec libx264 -acodec libvo_aacenc \
@@ -53,13 +53,13 @@ else
             "${MC_DIR_MP4}/${today}_${title}.mp4"
 
         avconv -y -i $fifo_b25 -f mp4 \
-            -s 960x540 \
+            -s 640x360 \
             -loglevel quiet \
             -vsync 1 \
             -vcodec libx264 -acodec libvo_aacenc \
             -profile:v baseline -crf 30 -level 30 \
             -maxrate:v 10000k -r:a 44100 -b:a 64k \
-            "${MC_DIR_MP4}/${today}_${title}.mp4" > /dev/null 2>&1 &
+            "${MC_DIR_MP4}/${today}_${title}.mp4" &
 
         pid_ffmpeg=$!
         b25 -v 0 $fifo_tail $fifo_b25 &
