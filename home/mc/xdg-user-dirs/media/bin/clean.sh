@@ -21,7 +21,7 @@ while true;do
         b=$(basename $f)
         smbclient -A ~/.smbauth -D contents -c "del $b" $MC_SMB_SERVER
     done
-    find $MC_DIR_MP4 -ctime +28 -delete
+    find $MC_DIR_MP4 -ctime +14 -delete
 
     has_free_space
     if [ $? -eq 0 ];then
