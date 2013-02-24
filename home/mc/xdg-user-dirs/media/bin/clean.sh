@@ -7,7 +7,7 @@ function has_free_space() {
     if [ -z "$used" ];then
         return 0
     fi
-    if [ $used -lt 80 ];then
+    if [ $used -lt 70 ];then
         return 0
     fi
     return 1
@@ -17,7 +17,7 @@ count=0
 while true;do
     find ~/.local/share/Trash -type f -delete
     find $MC_DIR_RESUME -type f -delete
-    for f in $(find $MC_DIR_MP4 -ctime +28);do
+    for f in $(find $MC_DIR_MP4 -ctime +14);do
         b=$(basename $f)
         smbclient -A ~/.smbauth -D contents -c "del $b" $MC_SMB_SERVER
     done
