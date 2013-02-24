@@ -98,9 +98,7 @@ class TitleFinder(Finder):
     priority = 100
     allow_list = [
         u'鋼の錬金術師',
-        u'刀語',
-        u'ドラゴンボール',
-        u'NARUTO',
+        u'ジョジョ',
         u'はじめの一歩',
         u'ペルソナ4',
         u'偽物語',

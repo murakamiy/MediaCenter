@@ -23,3 +23,4 @@ r.reserve('[0-9]*.xml')
 r.reserve('bs.xml')
 
 # cs
+r.reserve('cs_[0-9]*.xml')
