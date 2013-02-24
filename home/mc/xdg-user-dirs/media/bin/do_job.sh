@@ -108,7 +108,14 @@ else
         /bin/rm -f $fifo_b25
         /bin/rm -f $fifo_extend
 
+        lockfile-create /tmp/b25
+        lockfile-touch /tmp/b25 &
+        pid_lock=$!
+
         b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.b25
+
+        kill -TERM $pid_lock
+        lockfile-remove /tmp/b25
 
         ts_orig=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts})
         ts_b25=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts}.b25)
