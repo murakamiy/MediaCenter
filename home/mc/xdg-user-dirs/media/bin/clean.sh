@@ -17,11 +17,18 @@ count=0
 while true;do
     find ~/.local/share/Trash -type f -delete
     find $MC_DIR_RESUME -type f -delete
-    for f in $(find $MC_DIR_MP4 -ctime +14);do
-        b=$(basename $f)
-        smbclient -A ~/.smbauth -D contents -c "del $b" $MC_SMB_SERVER
+    find $MC_DIR_MP4 -ctime +28 -delete
+    for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
+        egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
+        awk -F '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' '
+        {
+            "date +%Y%m%d%H%M%S -d \""$2"\"" | getline time
+            printf("%d\t%s\n", time, $1)
+        }' | sort -k 1 -n -r | sed -n -e '301,$p' | awk '{ print $2 }');do
+
+        smbclient -A ~/.smbauth -D contents -c "del $f" $MC_SMB_SERVER
+
     done
-    find $MC_DIR_MP4 -ctime +14 -delete
 
     has_free_space
     if [ $? -eq 0 ];then
