@@ -61,7 +61,7 @@ case $command in
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
-            ts_file=${MC_DIR_TS}/$(basename $f .xml).ts 
+            ts_file=$(ls -sh ${MC_DIR_TS}/$(basename $f .xml).ts)
             echo "$ts_file $time $title"
         done
         ;;
@@ -72,7 +72,7 @@ case $command in
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
-            ts_file=${MC_DIR_TS}/$(basename $f .xml).ts 
+            ts_file=$(ls -sh ${MC_DIR_TS}/$(basename $f .xml).ts)
             echo "$ts_file $time $title"
         done
         echo RECORD_FINISHED
