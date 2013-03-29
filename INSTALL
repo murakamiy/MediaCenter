@@ -97,7 +97,7 @@ mediubuntuレポジトリの追加
     /etc/fstab
 
     visudo
-    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /etc/init.d/mediatomb,/usr/local/bin/wakeuptool,/usr/local/bin/lcdprint
+    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool
 
     groupadd media
     vigr

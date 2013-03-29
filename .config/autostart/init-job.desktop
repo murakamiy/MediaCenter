@@ -1,7 +1,7 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/usr/local/bin/init-job
+Exec=/home/mc/xdg-user-dirs/media/ubin/init-job
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

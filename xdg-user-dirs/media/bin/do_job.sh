@@ -7,7 +7,6 @@ job_file_ts=${job_file_base}.ts
 
 title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
 category=$(print_category ${MC_DIR_RESERVED}/${job_file_xml})
-rec=$(xmlsel -t -m '//command' -m "rec" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 rec_channel=$(xmlsel -t -m //rec-channel -v . ${MC_DIR_RESERVED}/${job_file_xml})
@@ -95,7 +94,7 @@ else
             fi
         ) &
 
-        rec -e $fifo_extend $rec_channel $rec_time ${MC_DIR_TS}/${job_file_ts}
+        $MC_BIN_REC -e $fifo_extend $rec_channel $rec_time ${MC_DIR_TS}/${job_file_ts}
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 

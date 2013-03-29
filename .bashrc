@@ -4,6 +4,7 @@
 PS1="[\u \W]\\$ "
 # LANG=ja_JP.eucJP
 # LANG=C
+PATH=$PATH:~/xdg-user-dirs/media/ubin
 LANG=ja_JP.SJIS
 LANG=ja_JP.utf8
 PAGER='less -MQXcgi -x4'
@@ -12,7 +13,7 @@ HISTSIZE=2000
 HISTFILESIZE=2000
 HISTCONTROL=ignoredups
 HISTIGNORE=ls:ll:la:cd:bg:fg
-export PS1 PAGER EDITOR LANG HISTSIZE HISTFILESIZE HISTCONTROL HISTIGNORE
+export PATH PS1 PAGER EDITOR LANG HISTSIZE HISTFILESIZE HISTCONTROL HISTIGNORE
 source /etc/bash_completion
 #####################################################################################################
 # Alias

@@ -56,7 +56,7 @@ if [ $wakeup_time -ne -1 ];then
     echo "next wakeup time: $next_wakeup_time\n\nShutDown ?"
     zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
     if [ $? -ne 1 ];then
-        sudo wakeuptool -w -t $wakeup_time
+        sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi
 else
     log
