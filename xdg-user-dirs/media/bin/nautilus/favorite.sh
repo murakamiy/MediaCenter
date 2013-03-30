@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home/mc/xdg-user-dirs/media/bin/00.conf
+source $(dirname $0)/../00.conf
 
 xml=${MC_DIR_JOB_FINISHED}/${5}
 title=$(xmlsel -t -m '//title' -v '.' $xml)

@@ -40,6 +40,3 @@ while getopts 'abmvdfe' opt;do
             ;;
     esac
 done
-
-# nautilus/png/
-# action.sh@  dislike.sh*  favorite.sh*  main.sh*  mplayer.sh*  vlc.sh*

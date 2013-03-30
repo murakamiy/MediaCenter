@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home/mc/xdg-user-dirs/media/bin/00.conf
+source $(dirname $0)/../00.conf
 
 function safe_finish() {
     kill -TERM $pid_play

@@ -1,4 +1,5 @@
 #!/bin/bash
+source $(dirname $0)/../00.conf
 
 resume=${4}/$(basename ${2})
 seek=
@@ -12,4 +13,4 @@ if [ -f $resume ];then
     fi
 fi
 
-mymplayer -r $resume $seek -a $2
+$MC_BIN_MYMPLAYER -t -r $resume $seek $2

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=PNGHandler
 Type=Application
-Exec=/home/mc/xdg-user-dirs/media/bin/nautilus/png/main.sh %U
+Exec=/home/mc/xdg-user-dirs/media/bin/nautilus/main.sh %U
 Icon=eog
 Terminal=false

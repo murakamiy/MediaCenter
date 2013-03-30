@@ -122,7 +122,7 @@ crontabの編集
     5 13 * * * bash /home/mc/xdg-user-dirs/media/bin/mkjob.sh
 
 nautilus pngファイルの設定
-    /home/mc/xdg-user-dirs/media/bin/nautilus/png/main.sh
+    /home/mc/xdg-user-dirs/media/bin/nautilus/main.sh
 
 gconf-editor
     /apps/nautilus/preferences/show_desktop 無効
