@@ -1,20 +1,108 @@
-/etc/modprobe.d/blacklist.conf earth_pt1 追加
+ファイアーウオールの設定
+    ufw allow from 192.168.0.0/24
+    ufw enable
 
-watchdog
-/etc/modprobe.d/watchdog.conf
-    options softdog soft_margin=600
-/etc/rc.local
-    modprobe softdog 
-    echo 60 > /proc/sys/kernel/panic
-    echo 1 > /proc/sys/kernel/panic_on_oops
-crontab -e (root)
-    * * * * * echo > /dev/watchdog
+packageのアップデート
+apt-get update; apt-get dist-upgrade
 
+mediubuntuレポジトリの追加
 
-pt1 dkmsに追加、ビルド、インストール
+packageのremove
+libreoffice-base-core
+libreoffice-calc
+libreoffice-common
+libreoffice-core
+libreoffice-draw
+libreoffice-emailmerge
+libreoffice-gnome
+libreoffice-gtk
+libreoffice-help-en-us
+libreoffice-impress
+libreoffice-math
+libreoffice-ogltrans
+libreoffice-pdfimport
+libreoffice-presentation-minimizer
+libreoffice-presenter-console
+libreoffice-style-human
+libreoffice-style-tango
+libreoffice-writer
 
-ログイン画面の設定
-    cp /usr/share/applications/gnome-appearance-properties.desktop /usr/share/gdm/autostart/LoginWindow
+packageのinstall
+libavcodec-extra-53
+libavdevice-extra-53
+libavfilter-extra-2
+libavformat-extra-53
+libavutil-extra-51
+libdvdcss2
+libpostproc-extra-52
+libswscale-extra-2
+non-free-codecs
+w64codecs
+
+apport-hooks-medibuntu
+aptitude
+aptitude-common
+autoconf
+automake
+autotools-dev
+build-essential
+cabextract
+dpkg-dev
+exim4
+exim4-base
+exim4-config
+exim4-daemon-light
+fakeroot
+g++
+g++-4.7
+gawk
+gdisk
+git
+git-man
+gstreamer0.10-plugins-bad-multiverse
+heirloom-mailx
+htop
+imagemagick
+imagemagick-common
+iotop
+javascript-common
+kernel-package
+m4
+mdadm
+mplayer2
+mysql-common
+ncurses-term
+netpbm
+nkf
+non-free-codecs
+openssh-server
+pcsc-tools
+pcscd
+po-debconf
+python-dateutil
+python-pyscard
+python-pysqlite2
+screen
+smplayer
+smplayer-themes
+smplayer-translations
+sqlite3
+ssh-import-id
+ttf-mscorefonts-installer
+ubuntu-restricted-extras
+unrar
+vim
+vim-runtime
+vlc
+vlc-data
+vlc-nox
+vlc-plugin-notify
+vlc-plugin-pulse
+vobcopy
+w64codecs
+wwwconfig-common
+xbase-clients
+xmlstarlet
 
 pcscツールインストール
     dpkg -i libccid_1.3.11-1_amd64.deb libpcsc-perl_1.4.8-1_amd64.deb libpcsclite1_1.5.5-3ubuntu2.1_amd64.deb pcsc-tools_1.4.16-1_amd64.deb pcscd_1.5.5-3ubuntu2.1_amd64.deb libpcsclite-dev_1.5.5-3ubuntu2.1_amd64.deb
@@ -26,17 +114,6 @@ pcscツールインストール
     echo "pcsc-tools hold" | dpkg --set-selections
     echo "pcscd hold" | dpkg --set-selections
 
-
-ログインno_effect 2D
-ATI FGLRX ドライバーのインストール
-解像度 1280x720
-リフレッシュレート 60Hz
-ピクセル形式 YCbCr4:4:4
-イメージオプション スクリーンにグラフィックプロセッサを使用
-グラフィックプロセッサスケーリング アスペクト比の保持
-ティアフリー ティアフリーデスクトップを無効
-3D 詳細設定 垂直リフレッシュを待機 アプリケーションで指定しない限りオフ
-
 raid 設定
 mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 4096 /dev/sda /dev/sdd 
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
@@ -44,65 +121,39 @@ mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 mdadm --misc --stop /dev/md0 
 cat /proc/mdstat 
 
+パーティション作成
+# gdisk /dev/md0
+
+フォーマット
+# mkfs.ext4 -b 4096 /dev/md0p1 
+
 ハードディスクスリープ設定
 hdparm -S 240 /dev/sda
 hdparm -S 240 /dev/sdd 
 hdparm -S 240 /dev/sdb 
 hdparm -S 60 /dev/sdc
 
-パーティション
-# gdisk /dev/md0
-GPT fdisk (gdisk) version 0.6.14
-
-Partition table scan:
-  MBR: protective
-  BSD: not present
-  APM: not present
-  GPT: present
-
-Found valid GPT with protective MBR; using GPT.
-
-Command (? for help): p
-Disk /dev/md0: 9767550976 sectors, 4.5 TiB
-Logical sector size: 512 bytes
-Disk identifier (GUID): 96827572-D1B3-4455-88F5-77D1D9083062
-Partition table holds up to 128 entries
-First usable sector is 34, last usable sector is 9767550942
-Partitions will be aligned on 8-sector boundaries
-Total free space is 12 sectors (6.0 KiB)
-
-Number  Start (sector)    End (sector)  Size       Code  Name
-   1              40      9767550936   4.5 TiB     0700  Linux/Windows data
-
-フォーマット
-# mkfs.ext4 -b 4096 /dev/md0p1 
-
-自動起動するアプリに追加
-    myirexec
-    lcdprint
-    mymediatomb
-
-起動用のラムディスク作成
-    wakeuptool -m
-
-mediubuntuレポジトリの追加
-    sudo -E wget --output-document=/etc/apt/sources.list.d/medibuntu.list http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list && sudo apt-get --quiet update && sudo apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring && sudo apt-get --quiet update
-    sudo apt-get install app-install-data-medibuntu apport-hooks-medibuntu
-
-ファイアーウオールの設定
-    ufw allow from 192.168.0.0/24
-    ufw enable
+watchdogの設定
+/etc/modprobe.d/watchdog.conf
+    options softdog soft_margin=600
+/etc/rc.local
+    modprobe softdog 
+    echo 60 > /proc/sys/kernel/panic
+    echo 1 > /proc/sys/kernel/panic_on_oops
+crontab -e (root)
+    * * * * * echo > /dev/watchdog
 
 /etcファイル編集
     /etc/fstab
-
-    visudo
-    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /etc/init.d/mediatomb,/usr/local/bin/wakeuptool,/usr/local/bin/lcdprint
+    /dev/md0p1   /home/mc/xdg-user-dirs/media/video           ext4    defaults,commit=10,relatime                    0 2
 
     groupadd media
     vigr
     vigr -s
     media:x:1001:mc
+
+    visudo
+    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /etc/init.d/mediatomb,/usr/local/bin/wakeuptool,/usr/local/bin/lcdprint
 
     BCASカード
     /etc/rc.local
@@ -112,10 +163,19 @@ mediubuntuレポジトリの追加
     /etc/init/hwclock-save.conf
     #exec hwclock --rtc=/dev/rtc0 --systohc $tz --noadjfile $badyear
 
-    wakeuptool -w -t $(awk 'BEGIN { print systime() + 180 }')
+    /etc/default/apport
+    enabled=0
 
-    rm -rf rc0.d/ 
-    cp -a rc6.d/ rc0.d
+    /etc/default/grub
+    # GRUB_HIDDEN_TIMEOUT=0
+    GRUB_TIMEOUT=5
+    GRUB_CMDLINE_LINUX_DEFAULT=""
+    GRUB_TERMINAL=console
+    GRUB_GFXMODE=640x480
+
+起動時の設定アップデート
+update-initramfs -u
+update-grub2 
 
 crontabの編集
     PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
@@ -123,44 +183,15 @@ crontabの編集
 
 nautilus pngファイルの設定
     /home/mc/xdg-user-dirs/media/bin/nautilus/png/main.sh
+    nautilus 起動 -> PNGファイル選択 -> 右クリック -> プロパティ -> 開き方 -> PNGHandler -> デフォルトに設定する
 
-gconf-editor
-    /apps/nautilus/preferences/show_desktop 無効
+wakeuptool のテスト
+wakeup_time=$(awk 'BEGIN { print systime() + 120 }')
+date
+sleep 20
+sudo wakeuptool -w -t $wakeup_time
 
-アプリのインストール
-autoconf automake autotools-dev
-htop iotop kexec-tools
-gawk
-ffmpeg 
-nkf 
-lirc
-lirc-x
-openssh-server
-rhythmbox
-smplayer
-vlc
-screen
-git
-xbase-clients
-xdotool
-xmacro
-xmlstarlet
-python-pyscard
-pcsc-tools pcscd
-libfuse-dev
-libpcsclite-dev
-mdadm
-gdisk
-vim
-screen
-dconf-tools
-ethtool
-imagemagick
-mediatomb
-vobcopy
-gpac
-linux-source-3.0.0
-kernel-package
-earch mplayer
-sqlite3
-python2.7-pysqlite2
+sshd の設定
+/etc/ssh/sshd_config
+PasswordAuthentication no
+stop ssh; start ssh;
