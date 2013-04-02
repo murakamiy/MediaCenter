@@ -6,8 +6,11 @@ xdg-user-dirs/picture
 xdg-user-dirs/document
 xdg-user-dirs/download
 xdg-user-dirs/Dropbox
-xdg-user-dirs/media/job
+xdg-user-dirs/media/job/log
+xdg-user-dirs/media/job/epg
+xdg-user-dirs/media/job/state
 xdg-user-dirs/media/video
 xdg-user-dirs/media/bin/epgdump_py
 xdg-user-dirs/media/bin/database/rating/log
 xdg-user-dirs/media/bin/database/tv.db
+xdg-user-dirs/media/bin/nautilus/action.sh
