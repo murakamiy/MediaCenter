@@ -1,0 +1,198 @@
+#!/bin/bash
+
+function usage() {
+cat << EOF
+USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
+        $(basename $0) -p USB_ROOT_ID
+        -h print help
+        -l output USB_ROOT_ID to specified file
+        -p power on
+        -z power off
+EOF
+exit 1
+}
+function do_unmount_partition() {
+
+    device_name=$1
+    for partition in $(find /dev -maxdepth 1 -not -name $device_name -name "$device_name*");do
+        mount | awk '{ print $1 }' | grep -q $partition
+        if [ $? -eq 0 ];then
+            echo umount $partition
+            umount $partition
+        fi
+    done
+}
+function unmount_partition() {
+
+    device_file=$1
+    device_file_base=$(basename $device_file)
+    array_name=$(grep ' active ' /proc/mdstat | \
+        awk -v dev=$device_file_base '{ for (i = 5; i <= NF; i++) if (match($i, dev)) printf("%s", $1) }')
+
+    if [ "$array_name" = "" ];then
+        do_unmount_partition $device_file_base
+    else
+        do_unmount_partition $array_name
+        echo mdadm --stop /dev/$array_name
+        mdadm --stop /dev/$array_name
+    fi
+}
+function do_stop() {
+
+    device_file=$1
+    if [ -L $device_file ];then
+        device_file=$(find $device_file -printf '%h/%l')
+    fi
+
+    unmount_partition $device_file
+
+    usb_hub_path=$(udevadm info --query=path --name=$device_file | sed -r -e 's@(/[^/]+){6}$@@')
+    if [ ! -e /sys/${usb_hub_path}/power/autosuspend ];then
+        echo "ERROR : does not exists /sys/${usb_hub_path}/power/autosuspend"
+        return 1
+    fi
+    if [ ! -e /sys/${usb_hub_path}/power/level ];then
+        echo "ERROR : does not exists /sys/${usb_hub_path}/power/level"
+        return 1
+    fi
+
+    usb_hub_id=$(udevadm info --query=path --name=$device_file | awk -F '/' '{ print $7 }')
+    echo $usb_hub_id | egrep -q '[0-9.-]+'
+    if [ $? -ne 0 ];then
+        echo "ERROR : could not get usb_hub_id : $usb_hub_id"
+        return 1
+    fi
+
+cat << EOF
+echo 0           > /sys/${usb_hub_path}/power/autosuspend
+echo auto        > /sys/${usb_hub_path}/power/level
+echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
+EOF
+
+    echo 0           > /sys/${usb_hub_path}/power/autosuspend
+    echo auto        > /sys/${usb_hub_path}/power/level
+    echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
+
+    return 0
+}
+
+################################################################################
+################################################################################
+
+control=
+output_file=
+while getopts 'hl:pz' opt;do
+    case $opt in
+        h)
+            usage
+            ;;
+        l)
+            output_file=$OPTARG
+            ;;
+        p)
+            control=on
+            ;;
+        z)
+            control=off
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+if [ "$control" = "" ];then
+    usage
+fi
+
+if [ $# -lt 1 ];then
+    usage
+fi
+
+if [ "$control" = "on" ];then
+
+    usb_root=$1
+    if [ "$usb_root" = "" ];then
+        usage
+    fi
+
+    echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
+    echo $usb_root > /sys/bus/usb/drivers/usb/bind
+
+elif [ "$control" = "off" ];then
+
+    device_list=$@
+    for device in $device_list;do
+        if [ ! -e $device ];then
+            echo "ERROR : DEVICE_FILE does not exist $device"
+            exit 1
+        fi
+        udevadm info --query=path --name=$device
+        if [ $? -ne 0 ];then
+            exit 1
+        fi
+    done
+
+    usb_root=$(udevadm info --query=path --name=$(echo $device_list | awk '{ print $1 }') | awk -F / '{ print $5 }')
+    if [ "$usb_root" = "" ];then
+        echo "ERROR : could not found root device"
+        exit 1
+    fi
+
+    if [ "$output_file" != "" ];then
+        if [ ! -e $output_file -o -f $output_file ];then
+            echo $usb_root > $output_file
+        else
+            echo "WARNING : could not output USB_ROOT_ID to $output_file"
+        fi
+    fi
+
+    echo "sync;sync"
+    sync;sync
+
+    for device in $device_list;do
+        do_stop $device
+        if [ $? -ne 0 ];then
+            exit 1
+        fi
+    done
+
+    echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
+    echo $usb_root > /sys/bus/usb/drivers/usb/unbind
+
+else
+    usage
+fi
+
+# [root sh]# bash disk-power-control
+# USAGE : disk-power-control [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
+#         disk-power-control -p USB_ROOT_ID
+#         -h print help
+#         -l output USB_ROOT_ID to specified file
+#         -p power on
+#         -z power off
+# [root sh]# bash disk-power-control -l usb_id -z /dev/usbhd*
+# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/4-1.1:1.0/host18/target18:0:0/18:0:0:0/block/sdc
+# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/4-1.2:1.0/host19/target19:0:0/19:0:0:0/block/sdd
+# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/4-1.3:1.0/host20/target20:0:0/20:0:0:0/block/sde
+# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/4-1.4:1.0/host21/target21:0:0/21:0:0:0/block/sdf
+# sync;sync
+# umount /dev/md0p1
+# mdadm --stop /dev/md0
+# mdadm: stopped /dev/md0
+# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/power/autosuspend
+# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/power/level
+# echo 4-1.1 > /sys/bus/usb/drivers/usb/unbind
+# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/power/autosuspend
+# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/power/level
+# echo 4-1.2 > /sys/bus/usb/drivers/usb/unbind
+# umount /dev/sde3
+# umount /dev/sde2
+# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/power/autosuspend
+# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/power/level
+# echo 4-1.3 > /sys/bus/usb/drivers/usb/unbind
+# umount /dev/sdf1
+# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/power/autosuspend
+# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/power/level
+# echo 4-1.4 > /sys/bus/usb/drivers/usb/unbind
+# echo usb4 > /sys/bus/usb/drivers/usb/unbind
+# [root sh]# bash disk-power-control -p $(cat usb_id)
+# echo usb4 > /sys/bus/usb/drivers/usb/bind
