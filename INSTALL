@@ -42,6 +42,7 @@ w64codecs
 apport-hooks-medibuntu
 aptitude
 aptitude-common
+astyle
 autoconf
 automake
 autotools-dev
