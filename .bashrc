@@ -4,7 +4,7 @@
 PS1="[\u \W]\\$ "
 # LANG=ja_JP.eucJP
 # LANG=C
-PATH=$PATH:~/xdg-user-dirs/media/ubin
+PATH=$PATH:/home/mc/xdg-user-dirs/media/ubin
 LANG=ja_JP.SJIS
 LANG=ja_JP.utf8
 PAGER='less -MQXcgi -x4'

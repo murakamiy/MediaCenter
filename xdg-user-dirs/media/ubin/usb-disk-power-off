@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sleep 30
+
+sudo /home/mc/xdg-user-dirs/media/ubin/disk-power-control \
+    -l /home/mc/xdg-user-dirs/media/job/state/usb_disk_id \
+    -z /dev/usbhd*
