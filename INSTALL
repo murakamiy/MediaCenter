@@ -69,6 +69,8 @@ imagemagick-common
 iotop
 javascript-common
 kernel-package
+libpcsclite-dev
+linux-headers-generic
 m4
 mdadm
 mplayer2
@@ -157,12 +159,11 @@ xmlstarlet
 
 USB ディスク自動マウント無効化
 $ gsettings set org.gnome.desktop.media-handling automount false
-$ gsettings get org.gnome.desktop.media-handling automount false
+$ gsettings get org.gnome.desktop.media-handling automount
 
 USB Hard Disk デバイス名の設定
     /etc/udev/rules.d/98-usb-hard-disk.rules
-    # "CENTURY USB Hard Disk 1"
-    # KERNEL=="sd*", SUBSYSTEM=="block", ATTR{removable}=="1", KERNELS=="[0-9]-[0-9].[0-9]", SUBSYSTEMS=="usb", DRIVERS=="usb", ATTRS{serial}=="D15Ixxxx", SYMLINK+="usbhda%n"
+    # "CENTURY USB Hard Disk "
 
     KERNEL=="sd*", SUBSYSTEM=="block", ATTR{removable}=="0", KERNELS=="4-1.1:1.0", SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhda%n"
     KERNEL=="sd*", SUBSYSTEM=="block", ATTR{removable}=="0", KERNELS=="4-1.2:1.0", SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhdb%n"
@@ -231,7 +232,7 @@ crontab -e (root)
     media:x:1001:mc
 
     visudo
-    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /etc/init.d/mediatomb,/usr/local/bin/wakeuptool,/usr/local/bin/lcdprint
+    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control
 
     BCASカード
     /etc/rc.local
@@ -267,7 +268,7 @@ wakeuptool のテスト
 wakeup_time=$(awk 'BEGIN { print systime() + 120 }')
 date
 sleep 20
-sudo wakeuptool -w -t $wakeup_time
+sudo /home/mc/xdg-user-dirs/media/ubin/wakeuptool -w -t $wakeup_time
 
 sshd の設定
 /etc/ssh/sshd_config
