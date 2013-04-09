@@ -1,37 +1,11 @@
 #!/bin/bash
 prog_name=$(basename $0)
 
-function usage() {
-cat << EOF
-USAGE : $prog_name [-x|-h]
-        -h print help message
-        -x power off by no sleep time
-EOF
-exit 1
-}
-
-do_sleep=true
-while getopts 'hx' opt;do
-    case $opt in
-        h)
-            usage
-            ;;
-        x)
-            do_sleep=false
-            ;;
-    esac
-done
-shift $(($OPTIND -1))
-
 power_control=/home/mc/xdg-user-dirs/media/ubin/disk-power-control
 usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk_id
 
 count=$(find /dev -name 'usbhd*' | wc -l)
 if [ $prog_name = "usb-disk-power-off" ];then
-
-    if [ "$do_sleep" = "true" ];then
-        sleep 30
-    fi
 
     if [ $count -ne 0 ];then
         sudo $power_control -l $usb_disk_id -z /dev/usbhd*
