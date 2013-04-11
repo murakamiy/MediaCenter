@@ -4,11 +4,12 @@ prog_name=$(basename $0)
 power_control=/home/mc/xdg-user-dirs/media/ubin/disk-power-control
 usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk_id
 
-count=$(find /dev -name 'usbhd*' | wc -l)
+count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
 if [ $prog_name = "usb-disk-power-off" ];then
 
     if [ $count -ne 0 ];then
-        sudo $power_control -l $usb_disk_id -z /dev/usbhd*
+        device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
+        sudo $power_control -l $usb_disk_id -z $device_list
     else
         echo "USB disk power status is all ready off"
         exit 1

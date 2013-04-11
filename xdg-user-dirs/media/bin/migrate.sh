@@ -36,5 +36,11 @@ for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 done
 
 for ts in $(find $MC_DIR_TS -type f);do
+    log "move to hard disk : $ts"
     /bin/mv $ts $MC_DIR_TS_HD
+done &
+
+for en in $(find $MC_DIR_ENCODE -type f);do
+    log "move to hard disk : $en"
+    /bin/mv $en $MC_DIR_ENCODE_HD
 done

@@ -1,0 +1,6 @@
+# "CENTURY USB Hard Disk"
+
+KERNEL=="sd*", SUBSYSTEM=="block", KERNELS=="4-1.1:1.0", SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhda%n"
+KERNEL=="sd*", SUBSYSTEM=="block", KERNELS=="4-1.2:1.0", SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhdb%n"
+KERNEL=="sd*", SUBSYSTEM=="block", KERNELS=="4-1.3:1.0", SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhdc%n"
+KERNEL=="sd*", SUBSYSTEM=="block", KERNELS=="4-1.4:1.0", SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhdd%n"

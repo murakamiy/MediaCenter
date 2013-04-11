@@ -116,6 +116,8 @@ if [ "$control" = "on" ];then
 
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
     echo $usb_root > /sys/bus/usb/drivers/usb/bind
+    echo "initctl emit mounted-bind-video MC_USB_DISK_MIGRATE_POWER_OFF=do_not_execute"
+    initctl emit mounted-bind-video MC_USB_DISK_MIGRATE_POWER_OFF=do_not_execute
 
 elif [ "$control" = "off" ];then
 
