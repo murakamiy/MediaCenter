@@ -38,7 +38,7 @@ done
 for ts in $(find $MC_DIR_TS -type f);do
     log "move to hard disk : $ts"
     /bin/mv $ts $MC_DIR_TS_HD
-done &
+done
 
 for en in $(find $MC_DIR_ENCODE -type f);do
     log "move to hard disk : $en"
