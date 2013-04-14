@@ -21,6 +21,7 @@ libreoffice-presenter-console
 libreoffice-style-human
 libreoffice-style-tango
 libreoffice-writer
+thunderbird
 
 packageのアップデート
 apt-get update; apt-get dist-upgrade
@@ -94,6 +95,7 @@ smplayer-themes
 smplayer-translations
 sqlite3
 ssh-import-id
+trash-cli
 ttf-mscorefonts-installer
 ubuntu-restricted-extras
 unrar
