@@ -16,11 +16,11 @@ if [ -n "$thumb_file" ];then
 
     echo $png_file | grep -q $MC_DIR_TITLE_TS
     if [ $? -eq 0 ];then
-        dir=$MC_DIR_TS
+        dir=$MC_DIR_TS_HD
     else
         echo $png_file | grep -q $MC_DIR_TITLE_ENCODE
         if [ $? -eq 0 ];then
-            dir=$MC_DIR_ENCODE
+            dir=$MC_DIR_ENCODE_HD
         else
             zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong\n\n $dir/$thumb_file</span>"
             exit

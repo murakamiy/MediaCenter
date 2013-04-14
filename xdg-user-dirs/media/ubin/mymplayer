@@ -70,29 +70,9 @@ if [ -z "$media" -a ! -f "$1" ];then
     print_help 
 fi
 
-input=$(realpath $1)
+input=$1
 
-if [ $ts_file = "true" ];then
-    tsprog_id=$(ffmpeg -i $input 2>&1 | egrep '(Program|Stream)' | awk '
-    {
-        if ( $1 == "Program") {
-            id = $2
-        }
-        if (match($0, "mpeg2video")) {
-            print id
-            exit
-        }
-    }')
-    if [ -n "$tsprog_id" ];then
-        tsprog=" -tsprog $tsprog_id "
-    fi
-fi
-
-
-(
-
-cd /home/mc/xdg-user-dirs/pictures/mplayer
-eval mplayer $media $quiet $seek $delay $volume \
+mplayer $media $quiet $seek $delay $volume \
 -volstep 10 \
 -fs -geometry 960x540+0+50 -monitoraspect 16:9 \
 -cache 500000 -cache-min 50 -cache-seek-min 10 \
@@ -101,7 +81,6 @@ eval mplayer $media $quiet $seek $delay $volume \
 $tsprog $aid $sid $audio $message_level \
 $input $output
 
-)
 
 # -dr -vf pp=fast/ffmpegdeint,screenshot \
 # -vo gl:swapinterval=1 \
