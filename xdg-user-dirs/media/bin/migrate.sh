@@ -14,6 +14,8 @@ function has_free_space() {
     return 1
 }
 
+log "start"
+
 for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
     has_free_space
@@ -44,3 +46,5 @@ for en in $(find $MC_DIR_ENCODE -type f);do
     log "move to hard disk : $en"
     /bin/mv $en $MC_DIR_ENCODE_HD
 done
+
+log "end"
