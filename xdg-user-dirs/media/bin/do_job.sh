@@ -30,27 +30,17 @@ else
         log "start: $job_file_xml"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
+
+
+
+
+
         fifo_dir=/tmp/dvb-pt2/fifo
         mkdir -p $fifo_dir
-        fifo_tail=${fifo_dir}/tail_$$
-        mkfifo -m 644 $fifo_tail
         fifo_b25=${fifo_dir}/b25_$$
         mkfifo -m 644 $fifo_b25
-        fifo_extend=${fifo_dir}/extend_$$
-        mkfifo -m 644 $fifo_extend
-        echo > $fifo_extend &
 
         today=$(date +%d)
-
-        echo avconv -y -i $fifo_b25 -f mp4 \
-            -s 640x360 \
-            -loglevel quiet \
-            -vsync 1 \
-            -vcodec libx264 -acodec libvo_aacenc \
-            -profile:v baseline -crf 30 -level 30 \
-            -maxrate:v 10000k -r:a 44100 -b:a 64k \
-            "${MC_DIR_MP4}/${today}_${title}.mp4"
-
         avconv -y -i $fifo_b25 -f mp4 \
             -s 640x360 \
             -loglevel quiet \
@@ -59,71 +49,22 @@ else
             -profile:v baseline -crf 30 -level 30 \
             -maxrate:v 10000k -r:a 44100 -b:a 64k \
             "${MC_DIR_MP4}/${today}_${title}.mp4" &
+        pid_avconv=$!
 
-        pid_ffmpeg=$!
-        b25 -v 0 $fifo_tail $fifo_b25 &
-        pid_b25=$!
         touch ${MC_DIR_TS}/${job_file_ts}
-        tail --follow --retry --sleep-interval=0.1 ${MC_DIR_TS}/${job_file_ts} > $fifo_tail &
+        tail --follow --retry --sleep-interval=0.1 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
         pid_tail=$!
 
-        (
-            sleep 120
-            python ${MC_DIR_DB_RATING}/rating.py ${MC_DIR_RECORDING}/${job_file_xml}
-            if [ $? -eq 0 ];then
 
-                bs_cs=
-                echo $channel | grep -q ^BS_
-                if [ $? -eq 0 ];then
-                    bs_cs='-b'
-                fi
-                echo $channel | grep -q ^CS_
-                if [ $? -eq 0 ];then
-                    bs_cs='-c'
-                fi
-
-                mod_time=($(python $MC_BIN_EPGDUMP $bs_cs -p $transport_stream_id:$service_id:$event_id -i ${MC_DIR_TS}/${job_file_ts}))
-
-                if [ -n "${mod_time[1]}" ];then
-                    if [ "${mod_time[1]}" -gt $end ];then
-                        extend=$((${mod_time[1]} - $end)) 
-                        log "rec time extended: $extend $job_file_xml $title"
-                        echo $extend > $fifo_extend
-                    fi
-                fi
-            fi
-        ) &
-
-        $MC_BIN_REC -e $fifo_extend $rec_channel $rec_time ${MC_DIR_TS}/${job_file_ts}
+        $MC_BIN_REC --b25 --strip $rec_channel $rec_time ${MC_DIR_TS}/${job_file_ts}
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         sync
         sleep 20
-        kill -TERM $pid_ffmpeg
-        kill -TERM $pid_b25
+        kill -TERM $pid_avconv
         kill -TERM $pid_tail
-        /bin/rm -f $fifo_tail
         /bin/rm -f $fifo_b25
-        /bin/rm -f $fifo_extend
-
-        lockfile-create /tmp/b25
-        lockfile-touch /tmp/b25 &
-        pid_lock=$!
-
-        b25 -v 0 ${MC_DIR_TS}/${job_file_ts} ${MC_DIR_TS}/${job_file_ts}.b25
-
-        kill -TERM $pid_lock
-        lockfile-remove /tmp/b25
-
-        ts_orig=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts})
-        ts_b25=$(stat --format=%s ${MC_DIR_TS}/${job_file_ts}.b25)
-        ts_valid=$(( $ts_orig / 188 * 188 ))
-        if [ $ts_b25 -eq $ts_valid ];then
-            /bin/mv -f ${MC_DIR_TS}/${job_file_ts}.b25 ${MC_DIR_TS}/${job_file_ts}
-        else
-            /bin/rm -f ${MC_DIR_TS}/${job_file_ts}.b25
-        fi
 
         thumb_file=${MC_DIR_THUMB}/${job_file_ts}
         echo "ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"

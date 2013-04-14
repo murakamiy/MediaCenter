@@ -55,6 +55,7 @@ exim4-base
 exim4-config
 exim4-daemon-light
 fakeroot
+ffmpeg 
 g++
 g++-4.7
 gawk
@@ -69,6 +70,7 @@ imagemagick-common
 iotop
 javascript-common
 kernel-package
+libav-tools 
 libpcsclite-dev
 linux-headers-generic
 m4
