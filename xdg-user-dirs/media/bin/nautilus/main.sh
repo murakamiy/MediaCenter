@@ -23,14 +23,14 @@ if [ -n "$thumb_file" ];then
         if [ $? -eq 0 ];then
             dir=$MC_DIR_ENCODE_HD
         else
-            zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong\n\n $dir/$thumb_file</span>"
+            zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong 1\n\n $dir/$thumb_file</span>"
             exit
         fi
     fi
 
     num=$(find $dir -type f -name $thumb_file | wc -l)
     if [ $num -ne 1 ];then
-        zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong\n\n $dir/$thumb_file</span>"
+        zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong 2\n\n $dir/$thumb_file</span>"
         exit
     fi
     video_file=$(find $dir -type f -name $thumb_file)
