@@ -41,7 +41,7 @@ if [ -n "$thumb_file" ];then
         pid_play=$!
     fi
 
-    $(dirname $0)/action.sh $thumb_file $video_file "$png_file" $MC_DIR_RESUME $xml_file
+    $(dirname $0)/action.sh $thumb_file $video_file "$png_file" $xml_file
 
     safe_finish
 else

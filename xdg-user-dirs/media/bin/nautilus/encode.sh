@@ -1,7 +1,7 @@
 #!/bin/bash
 source $(dirname $0)/../00.conf
 
-xml=${MC_DIR_JOB_FINISHED}/${5}
+xml=${MC_DIR_JOB_FINISHED}/${4}
 title=$(xmlsel -t -m '//title' -v '.' $xml)
 
 killall zenity
