@@ -4,6 +4,7 @@ source $(dirname $0)/../00.conf
 function safe_finish() {
     kill -TERM $pid_play
     killall mymplayer
+    killall myvlc
 }
 
 png_file="$1"
