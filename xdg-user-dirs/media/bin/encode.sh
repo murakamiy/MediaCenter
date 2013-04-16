@@ -3,20 +3,19 @@ source $(dirname $0)/00.conf
 
 function do_encode_ffmpeg() {
     local base=$1
-    local input=${MC_DIR_TS}/${base}.ts
+    local input=${MC_DIR_TS_HD}/${base}.ts
     local output=${MC_DIR_ENCODE}/${base}.mp4
 
-    ffmpeg -y -i $input \
-    -f mp4 \
-    -vsync 1 \
-    -vcodec libx264 -fpre ${MC_DIR_BIN}/libx264-normal.ffpreset \
-    -acodec copy \
-    -threads 1 \
-    -r 30000/1001 \
-    $output
-
-#     -acodec libfaac -ab 256k \
-#     -acodec libmp3lame -ac 2 -ar 48000 -ab 256k \
+    avconv -y -i $input \
+        -loglevel quiet \
+        -threads 1 \
+        -f mp4 \
+        -s 1280x720 \
+        -vsync 1 \
+        -r 30000/1001 \
+        -vcodec libx264 -acodec copy \
+        -profile:v main -crf 25 -level 31 \
+        $output
 }
 function is_encoding_job_running() {
     local running=$(find $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f')
