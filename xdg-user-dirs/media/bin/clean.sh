@@ -2,7 +2,6 @@
 source $(dirname $0)/00.conf
 
 trash-empty
-find $MC_DIR_RESUME -type f -delete
 find $MC_DIR_MP4 -ctime +28 -delete
 for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
     egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |

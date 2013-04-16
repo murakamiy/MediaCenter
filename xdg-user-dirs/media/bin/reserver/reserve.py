@@ -15,11 +15,6 @@ from rating import rating
 DIR_EPG = os.environ["MC_DIR_EPG"]
 DIR_TS = os.environ["MC_DIR_TS"]
 DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
-DIR_RECORDING = os.environ["MC_DIR_RECORDING"]
-DIR_FINISHED = os.environ["MC_DIR_RECORD_FINISHED"]
-DIR_FAILED = os.environ["MC_DIR_FAILED"]
-DIR_DISLIKE = os.environ["MC_DIR_DISLIKE"]
-DIR_FAVORITE = os.environ["MC_DIR_FAVORITE"]
 DIR_REMOVED = os.environ["MC_DIR_REMOVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
@@ -135,8 +130,6 @@ class ReserveMaker:
                     continue
                 rinfo_list.extend(self.find(tree))
         rinfo_list.sort(cmp=timeline_sort, reverse=False)
-        rinfo_list = self.apply_dislike(rinfo_list)
-        rinfo_list = self.apply_favorite(rinfo_list)
         rinfo_list = self.apply_rating(rinfo_list)
         rinfo_list = self.apply_priority(rinfo_list)
         rinfo_list = self.create_reserve(rinfo_list)
@@ -149,39 +142,6 @@ class ReserveMaker:
             rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
             self.log(" %s %3d %2d %.2f %s" % (rinfo.pinfo.start, rinfo.pinfo.rectime / 60, int(rinfo.pinfo.channel), rinfo.pinfo.priority, rinfo.pinfo.title))
         return rinfo_list
-    def apply_dislike(self, rinfo_list):
-        dislike_list = self.create_program_list(DIR_DISLIKE)
-        self.log("dislike: ")
-        for f in dislike_list:
-            self.log(" %s" % f.title)
-        return self.modify_priority(rinfo_list, dislike_list, -10)
-    def apply_favorite(self, rinfo_list):
-        favorite_list = self.create_program_list(DIR_FAVORITE)
-        self.log("favorite: ")
-        for f in favorite_list:
-            self.log(" %s" % f.title)
-        return self.modify_priority(rinfo_list, favorite_list, 15)
-    def modify_priority(self, rinfo_list, modify_list, modifier):
-        for rinfo in rinfo_list:
-            for pinfo in modify_list:
-                if rinfo.pinfo.channel == pinfo.channel and rinfo.pinfo.category_1 == pinfo.category_1 and re.search(pinfo.title_pattern, rinfo.pinfo.title):
-                    rinfo.pinfo.priority += modifier
-                    self.log(" %s %3d %2d %d %s" % (rinfo.pinfo.start, rinfo.pinfo.rectime / 60, int(rinfo.pinfo.channel), rinfo.pinfo.priority, rinfo.pinfo.title))
-        return rinfo_list
-    def create_program_list(self, dir):
-        plist = []
-        for xml_file in glob(dir + '/*.xml'):
-            tree = self.parse_xml(xml_file)
-            el = tree.find("programme")
-            pinfo = ProgramInfo(el, self.now)
-            pinfo.set_program_info(el)
-            title = pinfo.title.decode('utf-8')
-            for pattern in self.title_sub_list:
-                title = re.sub(pattern, '', title)
-            pinfo.title = title.encode('utf-8')
-            pinfo.title_pattern = re.compile(re.escape(pinfo.title))
-            plist.append(pinfo)
-        return plist
     def apply_priority(self, rinfo_list):
         timer_list = self.create_timer(rinfo_list)
         job_list = []
