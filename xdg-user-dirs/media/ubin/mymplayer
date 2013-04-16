@@ -8,27 +8,20 @@ USAGE: mymplayer [OPTION]... [FILE]
        -d DELAY       set delay time
        -h             print help message
        -m             play dvd media
-       -r RESUME_FILE set log file for resume
-       -s SEEK        set seek time
-       -t             play mpeg2 ts file
        -u AID         set audio id
        -v VOLUME      set volume
 EOF
 exit
 }
 
-output=
-quiet=
 delay=
 volume=
 audio="-ao pulse"
 media=
 sid=
 aid=
-message_level=
 tsprog=
-ts_file=false
-while getopts 'ab:d:hmr:s:tu:v:' opt;do
+while getopts 'ab:d:hmu:v:' opt;do
     case $opt in
         h)
             print_help
@@ -48,17 +41,6 @@ while getopts 'ab:d:hmr:s:tu:v:' opt;do
         d)
             delay=" -delay $OPTARG "
             ;;
-        r)
-            output=" > $OPTARG"
-            quiet=" -quiet "
-            message_level=" -msglevel all=4 "
-            ;;
-        s)
-            seek=" -ss $OPTARG "
-            ;;
-        t)
-            ts_file=true
-            ;;
         v)
             volume=" -volume $OPTARG "
             ;;
@@ -72,15 +54,11 @@ fi
 
 input=$1
 
-mplayer $media $quiet $seek $delay $volume \
+mplayer $media $delay $volume \
 -volstep 10 \
 -fs -geometry 960x540+0+50 -monitoraspect 16:9 \
 -cache 500000 -cache-min 50 -cache-seek-min 10 \
 -dr -vf pp=ac/linblenddeint \
 -vo gl:swapinterval=1 \
-$tsprog $aid $sid $audio $message_level \
-$input $output
-
-
-# -dr -vf pp=fast/ffmpegdeint,screenshot \
-# -vo gl:swapinterval=1 \
+$aid $sid $audio \
+$input
