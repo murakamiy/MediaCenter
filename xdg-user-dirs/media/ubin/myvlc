@@ -1,6 +1,14 @@
 #!/bin/bash
 
 LANG=C vlc \
+--deinterlace 1 --deinterlace-mode blend \
+--global-key-jump+long='Page Up' \
+--global-key-jump+medium=Up \
+--global-key-jump+short=Right \
+--global-key-jump-long='Page Down' \
+--global-key-jump-medium=Down \
+--global-key-jump-short=Left \
+--vout xcb_glx \
 --fullscreen \
 $@
 
