@@ -44,6 +44,7 @@ else
         avconv -y -i $fifo_b25 -f mp4 \
             -s 640x360 \
             -loglevel quiet \
+            -threads 1 \
             -vsync 1 \
             -vcodec libx264 -acodec libvo_aacenc \
             -profile:v baseline -crf 30 -level 30 \
@@ -84,9 +85,11 @@ else
         ln $thumb_file "${category_dir}/${title}_${i}.png"
 
         (
-            cd $MC_DIR_MP4
-            echo smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
-            smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
+            if [ -s "${today}_${title}.mp4" ];then
+                cd $MC_DIR_MP4
+                echo smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
+                smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
+            fi
         )
 
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1

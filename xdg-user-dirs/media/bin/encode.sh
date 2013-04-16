@@ -11,26 +11,12 @@ function do_encode_ffmpeg() {
     -vsync 1 \
     -vcodec libx264 -fpre ${MC_DIR_BIN}/libx264-normal.ffpreset \
     -acodec copy \
-    -threads 2 \
+    -threads 1 \
     -r 30000/1001 \
     $output
 
 #     -acodec libfaac -ab 256k \
 #     -acodec libmp3lame -ac 2 -ar 48000 -ab 256k \
-}
-function do_encode_mencoder() {
-    local base=$1
-    local input=${MC_DIR_TS}/${base}.ts
-    local output=${MC_DIR_ENCODE}/${base}.mp4
-
-    mencoder $input -quiet \
-    -of lavf -lavfopts format=mp4 \
-    -ovc x264 -x264encopts crf=25.0:threads=2 \
-    -oac faac -faacopts quality=1000 \
-    -o $output
-
-#     -oac mp3lame -lameopts preset=extreme \
-#     -oac faac -faacopts br=256 \
 }
 function is_encoding_job_running() {
     local running=$(find $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f')
@@ -56,7 +42,6 @@ if [ -n "$xml" ];then
     mv $xml $MC_DIR_ENCODING
 
     do_encode_ffmpeg $base
-#     do_encode_mencoder $base
 
     if [ $? -eq 0 ];then
         time_end=$(awk 'BEGIN { print systime() }')
