@@ -1,10 +1,16 @@
 #!/bin/bash
 prog_name=$(basename $0)
 
+lock_file=/tmp/usb_disk_power_lock_file
 power_control=/home/mc/xdg-user-dirs/media/ubin/disk-power-control
 usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk_id
 
 count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
+
+lockfile-create $lock_file
+lockfile-touch $lock_file &
+pid_lock=$!
+
 if [ $prog_name = "usb-disk-power-off" ];then
 
     if [ $count -ne 0 ];then
@@ -24,3 +30,6 @@ elif [ $prog_name = "usb-disk-power-on" ];then
         exit 1
     fi
 fi
+
+kill -TERM $pid_lock
+lockfile-remove $lock_file
