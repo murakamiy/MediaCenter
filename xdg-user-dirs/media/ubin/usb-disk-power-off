@@ -7,28 +7,27 @@ usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk_id
 
 count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
 
+if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
+    echo "USB disk power status is all ready off"
+    exit 1
+elif [ $prog_name = "usb-disk-power-on" -a $count -ne 0 ];then
+    echo "USB disk power status is all ready on"
+    exit 1
+fi
+
 lockfile-create $lock_file
 lockfile-touch $lock_file &
 pid_lock=$!
 
 if [ $prog_name = "usb-disk-power-off" ];then
 
-    if [ $count -ne 0 ];then
-        device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
-        sudo $power_control -l $usb_disk_id -z $device_list
-    else
-        echo "USB disk power status is all ready off"
-        exit 1
-    fi
+    device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
+    sudo $power_control -l $usb_disk_id -z $device_list
 
 elif [ $prog_name = "usb-disk-power-on" ];then
 
-    if [ $count -eq 0 ];then
-        sudo $power_control -p $(cat $usb_disk_id)
-    else
-        echo "USB disk power status is all ready on"
-        exit 1
-    fi
+    sudo $power_control -p $(cat $usb_disk_id)
+
 fi
 
 kill -TERM $pid_lock
