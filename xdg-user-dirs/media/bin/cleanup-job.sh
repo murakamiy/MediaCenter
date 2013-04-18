@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home/mc/xdg-user-dirs/media/bin/00.conf
+source $(dirname $0)/00.conf
 
 mkjob=false
 if [ -f ${MC_DIR_RECORDING}/mkjob.xml ];then

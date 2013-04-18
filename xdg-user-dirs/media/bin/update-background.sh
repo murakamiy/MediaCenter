@@ -1,8 +1,5 @@
 #!/bin/bash
-
-function xmlsel() {
-    xmlstarlet sel --encode utf-8 $@ | xmlstarlet unesc
-}
+source $(dirname $0)/00.conf
 
 # centered  : 中央
 # scaled    : サイズ調整
@@ -16,8 +13,8 @@ STYLE=scaled
 PRIMARY_COLOR=#2c001e # Ubuntu 11.04のデフォルト値
 SECONDARY_COLOR=#2c001e
 
-job_dir=/home/mc/xdg-user-dirs/media/job/state/02_recording
-root_dir=/home/mc/xdg-user-dirs/media/job/state/background/
+job_dir=$MC_DIR_RECORDING
+root_dir=$MC_DIR_BACKGROUND
 run_dir=${root_dir}/run
 input_dir=${root_dir}/in
 work_dir=${root_dir}/work

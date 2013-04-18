@@ -1,11 +1,11 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/home/mc/xdg-user-dirs/media/ubin/init-job
+Exec=/home/mc/xdg-user-dirs/media/bin/cleanup-job.sh
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
-Name[ja_JP]=init-job
-Name=init-job
+Name[ja_JP]=cleanup-job
+Name=cleanup-job
 Comment[ja_JP]=
 Comment=

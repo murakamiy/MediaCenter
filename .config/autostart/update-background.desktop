@@ -1,11 +1,11 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/home/mc/xdg-user-dirs/media/ubin/update-img
+Exec=/home/mc/xdg-user-dirs/media/bin/update-background.sh
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
-Name[ja_JP]=update-img
-Name=update-img
+Name[ja_JP]=update-background
+Name=update-background
 Comment[ja_JP]=
 Comment=
