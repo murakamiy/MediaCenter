@@ -7,7 +7,7 @@ cat<<EOF
 USAGE: ch [OPTION] [CHANNEL]
        -b  print bs channels 
        -c  print cs channels
-       -d  print degital channels
+       -d  print digital channels
        -h  print help message
 EOF
 exit
@@ -23,7 +23,7 @@ while getopts 'bcdh' opt;do
             file=${channel_dir}/cs
             ;;
         d)
-            file=${channel_dir}/degital
+            file=${channel_dir}/digital
             ;;
         h)
             print_help

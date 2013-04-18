@@ -7,7 +7,7 @@ log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
 log 'starting create ts file'
-for c in $(awk '{ print $1 }' $MC_FILE_CHANNEL_DEGITAL);do
+for c in $(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL);do
     $MC_BIN_REC $c 60 ${MC_DIR_EPG}/${c}.ts
 done
 
