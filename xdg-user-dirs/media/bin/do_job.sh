@@ -35,7 +35,7 @@ else
 
 
 
-        fifo_dir=/tmp/dvb-pt2/fifo
+        fifo_dir=/tmp/pt3/fifo
         mkdir -p $fifo_dir
         fifo_b25=${fifo_dir}/b25_$$
         mkfifo -m 644 $fifo_b25
