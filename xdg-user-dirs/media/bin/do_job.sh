@@ -56,8 +56,16 @@ else
         tail --follow --retry --sleep-interval=0.1 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
         pid_tail=$!
 
+        if [ "$broadcasting" = "BS" ];then
+            channel_file=$MC_FILE_CHANNEL_BS
+        elif [ "$broadcasting" = "CS" ];then
+            channel_file=$MC_FILE_CHANNEL_CS
+        elif [ "$broadcasting" = "Digital" ];then
+            channel_file=$MC_FILE_CHANNEL_DIGITAL
+        fi
+        ch_array=($(awk -F '\t' -v channel=$rec_channel '{ if ($1 == channel) printf("%s %s", $2, $4) }' $channel_file))
 
-        $MC_BIN_REC --b25 --strip $rec_channel $rec_time ${MC_DIR_TS}/${job_file_ts}
+        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time ${MC_DIR_TS}/${job_file_ts}
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 

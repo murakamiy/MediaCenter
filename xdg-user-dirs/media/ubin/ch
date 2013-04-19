@@ -36,9 +36,5 @@ if [ "$file" = "none" ];then
     print_help
 fi
 
-grep_command=
-if [ $# -gt 0 ];then
-   grep_command=" | grep ^$1"
-fi
-
-eval sort -k 1 -n $file $grep_command
+awk '{ printf("%s\t%s\t%s\t%s\n", $4, $2, $1, $3) }' $file |
+column -t -s '	'
