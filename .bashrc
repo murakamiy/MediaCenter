@@ -52,6 +52,7 @@ alias nkfjis='nkf -j -Lw -d --overwrite'
 alias nkfsjis='nkf -s -Lw -d --overwrite'
 
 alias cdbin='cd /home/mc/xdg-user-dirs/media/bin'
+alias cdubin='cd /home/mc/xdg-user-dirs/media/ubin'
 alias cdjob='cd /home/mc/xdg-user-dirs/media/job'
 alias cdvideo='cd /home/mc/xdg-user-dirs/media/video'
 #####################################################################################################
