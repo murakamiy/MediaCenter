@@ -7,11 +7,13 @@ cat << EOF
 USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
         $(basename $0) -r USB_ROOT_ID
         $(basename $0) -p USB_ROOT_ID
+        $(basename $0) -k
         -h print help
         -l output USB_ROOT_ID to specified file
         -p usb hub power on
         -z usb hub power off
         -r usb root power off
+        -k lock usb disk status to power on
 EOF
 exit 1
 }
@@ -20,7 +22,7 @@ function do_unmount_partition() {
     device_name=$1
     for partition in $(find /dev -maxdepth 1 -not -name $device_name -name "$device_name*");do
 
-        cmd=$(awk -v pt=$partition '{ if ($1 == pt) printf("umount %s;\n", $2) }' /proc/mounts | tac)
+        cmd=$(awk -v pt=$partition '{ if ($1 == pt) printf("fuser -k %s; umount %s;\n", $2, $2) }' /proc/mounts | tac)
         echo $cmd
         eval $cmd
 
@@ -85,10 +87,13 @@ EOF
 
 control=
 output_file=
-while getopts 'hl:prz' opt;do
+while getopts 'hkl:prz' opt;do
     case $opt in
         h)
             usage
+            ;;
+        k)
+            control=lock
             ;;
         l)
             output_file=$OPTARG
@@ -108,6 +113,10 @@ shift $(($OPTIND -1))
 
 if [ "$control" = "" ];then
     usage
+fi
+if [ "$control" = "lock" ];then
+    touch $usb_disk_power_on
+    exit 0
 fi
 
 if [ $# -lt 1 ];then
