@@ -1,5 +1,7 @@
 #!/bin/bash
 
+usb_disk_power_on=/home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on
+
 function usage() {
 cat << EOF
 USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
@@ -119,11 +121,14 @@ if [ "$control" = "on" ];then
         usage
     fi
 
+    touch $usb_disk_power_on
+
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
     echo $usb_root > /sys/bus/usb/drivers/usb/bind
-    sleep 10
-    echo "initctl emit mounted-bind-video MC_USB_DISK_MIGRATE_POWER_OFF=do_not_execute"
-    initctl emit mounted-bind-video MC_USB_DISK_MIGRATE_POWER_OFF=do_not_execute
+    echo "initctl emit mounted-bind-video"
+    initctl emit mounted-bind-video
+
+    /bin/rm -f $usb_disk_power_on
 
 elif [ "$control" = "off_hub" ];then
 

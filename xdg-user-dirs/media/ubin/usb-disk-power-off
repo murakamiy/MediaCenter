@@ -3,7 +3,7 @@ prog_name=$(basename $0)
 
 lock_file=/tmp/usb_disk_power_lock_file
 power_control=/home/mc/xdg-user-dirs/media/ubin/disk-power-control
-usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk_id
+usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk/id
 
 count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
 
