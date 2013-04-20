@@ -227,7 +227,7 @@ class ReserveMaker:
         return new_list
     def do_create_reserve(self, pinfo, el):
         rec_command = "rec %s %d %s" % (pinfo.channel, pinfo.rectime, pinfo.file_ts)
-        do_job_command = "bash %s %s" % (BIN_DO_JOB, pinfo.file_base)
+        do_job_command = "exec bash %s %s" % (BIN_DO_JOB, pinfo.file_base)
         at_command = "at -t %s > /dev/null 2>&1" % (pinfo.start.strftime("%Y%m%d%H%M"))
 
         attr = {"type" : "start"}
