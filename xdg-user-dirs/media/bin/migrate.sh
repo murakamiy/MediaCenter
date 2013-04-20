@@ -14,37 +14,44 @@ function has_free_space() {
     return 1
 }
 
-log "start"
+sleep 10
+if [ "$1" = "array" ];then
 
-for ts in $(find $MC_DIR_TS_HD -type f | sort);do
+    log "start ts_hd"
+    for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
-    has_free_space
-    if [ $? -eq 0 ];then
-        break
-    fi
+        has_free_space
+        if [ $? -eq 0 ];then
+            break
+        fi
 
-    xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
-    png_thumb=${MC_DIR_THUMB}/$(basename $ts)
-    png_title=
+        xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
+        png_thumb=${MC_DIR_THUMB}/$(basename $ts)
+        png_title=
 
-    if [ -f "$png_thumb" ];then
-        inode=$(stat --format='%i' $png_thumb)
-        png_title=$(find $MC_DIR_TITLE_TS -inum $inode)
-    fi
+        if [ -f "$png_thumb" ];then
+            inode=$(stat --format='%i' $png_thumb)
+            png_title=$(find $MC_DIR_TITLE_TS -inum $inode)
+        fi
 
-    log "delete : $ts $png_title $png_thumb $xml"
-    /bin/rm $ts "$png_title" $png_thumb $xml
+        log "delete : $ts $png_title $png_thumb $xml"
+        /bin/rm $ts "$png_title" $png_thumb $xml
 
-done
+    done
 
-for ts in $(find $MC_DIR_TS -type f);do
-    log "move to hard disk : $ts"
-    /bin/mv $ts $MC_DIR_TS_HD
-done
+    for ts in $(find $MC_DIR_TS -type f);do
+        log "move to hard disk : $ts"
+        /bin/mv $ts $MC_DIR_TS_HD
+    done
+    log "end ts_hd"
 
-for en in $(find $MC_DIR_ENCODE -type f);do
-    log "move to hard disk : $en"
-    /bin/mv $en $MC_DIR_ENCODE_HD
-done
+elif [ "$1" = "encode" ];then
 
-log "end"
+    log "start encode"
+    for en in $(find $MC_DIR_ENCODE -type f);do
+        log "move to hard disk : $en"
+        /bin/mv $en $MC_DIR_ENCODE_HD
+    done
+    log "end encode"
+
+fi

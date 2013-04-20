@@ -3,11 +3,13 @@
 function usage() {
 cat << EOF
 USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
+        $(basename $0) -r USB_ROOT_ID
         $(basename $0) -p USB_ROOT_ID
         -h print help
         -l output USB_ROOT_ID to specified file
-        -p power on
-        -z power off
+        -p usb hub power on
+        -z usb hub power off
+        -r usb root power off
 EOF
 exit 1
 }
@@ -81,7 +83,7 @@ EOF
 
 control=
 output_file=
-while getopts 'hl:pz' opt;do
+while getopts 'hl:prz' opt;do
     case $opt in
         h)
             usage
@@ -92,8 +94,11 @@ while getopts 'hl:pz' opt;do
         p)
             control=on
             ;;
+        r)
+            control=off_root
+            ;;
         z)
-            control=off
+            control=off_hub
             ;;
     esac
 done
@@ -116,10 +121,11 @@ if [ "$control" = "on" ];then
 
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
     echo $usb_root > /sys/bus/usb/drivers/usb/bind
+    sleep 10
     echo "initctl emit mounted-bind-video MC_USB_DISK_MIGRATE_POWER_OFF=do_not_execute"
     initctl emit mounted-bind-video MC_USB_DISK_MIGRATE_POWER_OFF=do_not_execute
 
-elif [ "$control" = "off" ];then
+elif [ "$control" = "off_hub" ];then
 
     device_list=$@
     for device in $device_list;do
@@ -157,44 +163,16 @@ elif [ "$control" = "off" ];then
         fi
     done
 
+elif [ "$control" = "off_root" ];then
+
+    usb_root=$1
+    if [ "$usb_root" = "" ];then
+        usage
+    fi
+
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
     echo $usb_root > /sys/bus/usb/drivers/usb/unbind
 
 else
     usage
 fi
-
-# [root sh]# bash disk-power-control
-# USAGE : disk-power-control [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
-#         disk-power-control -p USB_ROOT_ID
-#         -h print help
-#         -l output USB_ROOT_ID to specified file
-#         -p power on
-#         -z power off
-# [root sh]# bash disk-power-control -l usb_id -z /dev/usbhd*
-# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/4-1.1:1.0/host18/target18:0:0/18:0:0:0/block/sdc
-# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/4-1.2:1.0/host19/target19:0:0/19:0:0:0/block/sdd
-# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/4-1.3:1.0/host20/target20:0:0/20:0:0:0/block/sde
-# /devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/4-1.4:1.0/host21/target21:0:0/21:0:0:0/block/sdf
-# sync;sync
-# umount /dev/md0p1
-# mdadm --stop /dev/md0
-# mdadm: stopped /dev/md0
-# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/power/autosuspend
-# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/power/level
-# echo 4-1.1 > /sys/bus/usb/drivers/usb/unbind
-# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/power/autosuspend
-# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/power/level
-# echo 4-1.2 > /sys/bus/usb/drivers/usb/unbind
-# umount /dev/sde3
-# umount /dev/sde2
-# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/power/autosuspend
-# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/power/level
-# echo 4-1.3 > /sys/bus/usb/drivers/usb/unbind
-# umount /dev/sdf1
-# echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/power/autosuspend
-# echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/power/level
-# echo 4-1.4 > /sys/bus/usb/drivers/usb/unbind
-# echo usb4 > /sys/bus/usb/drivers/usb/unbind
-# [root sh]# bash disk-power-control -p $(cat usb_id)
-# echo usb4 > /sys/bus/usb/drivers/usb/bind
