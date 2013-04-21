@@ -214,9 +214,6 @@ crontab -e (root)
     * * * * * echo > /dev/watchdog
 
 /etcファイル編集
-    /etc/rc.local
-    mount --bind /mnt/ssd/video /home/mc/xdg-user-dirs/media/video
-
     groupadd media
     vigr
     vigr -s
