@@ -1,26 +1,26 @@
-概要:アースソフト PT2を利用して作成した地デジ録画システム
+地上デジタル放送自動録画システム
 
-環境:
-    OS                     :Ubuntu 12.10 64bit
-    ハードウェア:
-        マザーボード       :ASUS F2A85-M AMD A85X FCHチップセット microATX
-        CPU                :AMD A8-Series A8-5500 AD5500OKHJBOX 3.2GHz x 4 Radeon HD 7560D
-        メモリ             :Kingston KVR1333D3N9/2G DDR3 PC3-10600 2GB x 2
-        ブルーレイドライブ :PIONEER BD-RW BDR-206
-        ハードディスク     :Hitachi 3.5inch HDS721050CLA362 500GB x 2
-                           :WesternDigital Caviar Green 5400rpm 2.5TB WD25EZRX x 2 RAID 0
-        PCケース           :SILVERSTONE SST-LC10B-E-USB3.0
-        カードリーダー     :NTTME SCR3310-NTTCom
-        チューナー         :アースソフト PT2
-        電源               :サイズ 80PLUSシルバー電源 超力2プライグイン 650W SPCR2-650P
-        Bluetooth          :iBUFFALO BSHSBD08BK Bluetooth 4.0+EDR/LE
-        ファン             :アイネックス OMEGA TYPHOON 80mm 究極静音タイプ CFZ-80L x 2
-                           :アイネックス OMEGA TYPHOON 92mm 究極静音タイプ CFZ-90L x 2
-        リモコン           :Victor RM-A1500
+OS : Ubuntu 12.10 64bit
 
-システム詳細:
+ハードウェア:
+マザーボード         : ASUSTek Intel Socket 1155 DDR3メモリ対応 mini-ITXマザーボード P8H77-I
+CPU                  : Intel CPU Core I3-3225 3.3GHz 3MBキャッシュ LGA1155 BX80637I33225
+メモリ               : CFD DDR3 PC3-12800 CL9 4GB ヒートシンク付 W3U1600HQ-4G/N x 2
+SSD                  : Samsung SSD840 ベーシックキット250GB MZ-7TD250B/IT x 2 RAID 0
+PCケース             : Fractal Design MiniITX DTX用キューブPCケース Black Node 304 CS3966 FD-CA-NODE-304-BL
+カードリーダー       : NTTME SCR3310-NTTCom
+チューナー           : アースソフト PT3 Rev.A
+電源                 : FILCO ACアダプター for デスクトップPC 180W PLS180
+Bluetooth            : iBUFFALO BSHSBD08BK Bluetooth 4.0+EDR/LE
+ファン               : CoolerMaster社製 CPUファン RR-TX3E-28PK-J1 (Hyper TX3 EVO)
+
+ハードディスクケース : センチュリー 裸族のカプセルホテル CRCH35U3IS
+ハードディスク       : Hitachi 3.5inch HDS721050CLA362 500GB x 2
+                     : WesternDigital Caviar Green 5400rpm 2.5TB WD25EZRX x 2 RAID 0
+
+システム概要:
     1. 録画
-        1. 毎日13:00にEPG(電子番組表)を取得する。
+        1. 毎日13:05にEPG(電子番組表)を取得する。
         2. キーワード指定した番組を録画予約する。
         3. PCシャットダウン。
         4. BIOSのRTC alarmを利用して、5分前にPC起動。
@@ -28,6 +28,5 @@
         6. PCシャットダウン。
 
     2. ユーザーインターフェイス
-        1. lircを利用して、nautilusを起動する。
-        2. nautilus上で、録画した番組を選択する。
-        3. mplayerで録画した番組を再生する。
+        1. nautilus上で、録画した番組を選択する。
+        2. mplayerで録画した番組を再生する。

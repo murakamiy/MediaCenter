@@ -1,11 +1,6 @@
 ファイアーウオールの設定
-    ufw allow from 192.168.0.0/24
+    ufw allow from 192.168.0.0/24 to 192.168.0.0/24 port 22 
     ufw enable
-
-packageのアップデート
-apt-get update; apt-get dist-upgrade
-
-mediubuntuレポジトリの追加
 
 packageのremove
 libreoffice-base-core
@@ -26,6 +21,12 @@ libreoffice-presenter-console
 libreoffice-style-human
 libreoffice-style-tango
 libreoffice-writer
+thunderbird
+
+packageのアップデート
+apt-get update; apt-get dist-upgrade
+
+mediubuntuレポジトリの追加
 
 packageのinstall
 libavcodec-extra-53
@@ -42,17 +43,20 @@ w64codecs
 apport-hooks-medibuntu
 aptitude
 aptitude-common
+astyle
 autoconf
 automake
 autotools-dev
 build-essential
 cabextract
+dkms
 dpkg-dev
 exim4
 exim4-base
 exim4-config
 exim4-daemon-light
 fakeroot
+ffmpeg 
 g++
 g++-4.7
 gawk
@@ -67,6 +71,9 @@ imagemagick-common
 iotop
 javascript-common
 kernel-package
+libav-tools 
+libpcsclite-dev
+linux-headers-generic
 m4
 mdadm
 mplayer2
@@ -88,6 +95,7 @@ smplayer-themes
 smplayer-translations
 sqlite3
 ssh-import-id
+trash-cli
 ttf-mscorefonts-installer
 ubuntu-restricted-extras
 unrar
@@ -104,22 +112,84 @@ wwwconfig-common
 xbase-clients
 xmlstarlet
 
-pcscツールインストール
-    dpkg -i libccid_1.3.11-1_amd64.deb libpcsc-perl_1.4.8-1_amd64.deb libpcsclite1_1.5.5-3ubuntu2.1_amd64.deb pcsc-tools_1.4.16-1_amd64.deb pcscd_1.5.5-3ubuntu2.1_amd64.deb libpcsclite-dev_1.5.5-3ubuntu2.1_amd64.deb
+カードリーダーの設定
+--- /etc/libccid_Info.plist.0	2013-04-07 03:13:14.229812866 +0900
++++ /etc/libccid_Info.plist	2013-04-07 03:15:19.517817017 +0900
+@@ -325,6 +325,7 @@
+ 		<string>0x08C3</string>
+ 		<string>0x08C3</string>
+ 		<string>0x15E1</string>
++		<string>0x04e6</string>
+ 	</array>
+ 
+ 	<key>ifdProductID</key>
+@@ -550,6 +551,7 @@
+ 		<string>0x0401</string>
+ 		<string>0x0402</string>
+ 		<string>0x2007</string>
++		<string>0x511a</string>
+ 	</array>
+ 
+ 	<key>ifdFriendlyName</key>
+@@ -775,6 +777,7 @@
+ 		<string>Precise Biometrics Precise 250 MC</string>
+ 		<string>Precise Biometrics Precise 200 MC</string>
+ 		<string>RSA RSA SecurID (R) Authenticator</string>
++		<string>SCM Microsystems, Inc.</string>
+ 	</array>
+ 
+ 	<key>Copyright</key>
 
-    echo "libccid hold" | dpkg --set-selections
-    echo "libpcsc-perl hold" | dpkg --set-selections
-    echo "libpcsclite1 hold" | dpkg --set-selections
-    echo "libpcsclite-dev hold" | dpkg --set-selections
-    echo "pcsc-tools hold" | dpkg --set-selections
-    echo "pcscd hold" | dpkg --set-selections
+--- /etc/init.d/pcscd.0	2013-04-07 03:29:43.197838525 +0900
++++ /etc/init.d/pcscd	2013-04-07 03:03:12.872529338 +0900
+@@ -43,11 +43,11 @@
+ 
+ # Do not start at boot using systemd but start using on-demand
+ # http://ludovicrousseau.blogspot.com/2011/11/pcscd-auto-start-using-systemd.html
+-if [ $1 = "start" -a -d /sys/fs/cgroup/systemd ]
+-then
+-	# Do not start from this script
+-	exit 0
+-fi
++# if [ $1 = "start" -a -d /sys/fs/cgroup/systemd ]
++# then
++# 	# Do not start from this script
++# 	exit 0
++# fi
+ 
+ # Define LSB log_* functions.
+ # Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
 
-raid 設定
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 4096 /dev/sda /dev/sdd 
+
+USB ディスク自動マウント無効化
+$ gsettings set org.gnome.desktop.media-handling automount false
+$ gsettings get org.gnome.desktop.media-handling automount
+
+raid array 作成
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 4096 /dev/sda /dev/sdb
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 
-mdadm --misc --stop /dev/md0 
+raid 停止
 cat /proc/mdstat 
+mdadm --stop /dev/md3
+cat /proc/mdstat 
+
+raid 開始 個別
+mdadm --examine /dev/sdc
+     Array UUID : [UUID]
+mdadm /dev/md3 --assemble -u [UUID]
+cat /proc/mdstat 
+
+raid 開始 /etc/mdadm.conf 全て
+mdadm --assemble --scan
+cat /proc/mdstat 
+
+raid array 削除
+umount /dev/md0p1
+mdadm --detail /dev/md0
+mdadm --stop /dev/md0
+mdadm --zero-superblock /dev/sda2
+mdadm --zero-superblock /dev/sdb2
 
 パーティション作成
 # gdisk /dev/md0
@@ -144,8 +214,8 @@ crontab -e (root)
     * * * * * echo > /dev/watchdog
 
 /etcファイル編集
-    /etc/fstab
-    /dev/md0p1   /home/mc/xdg-user-dirs/media/video           ext4    defaults,commit=10,relatime                    0 2
+    /etc/rc.local
+    mount --bind /mnt/ssd/video /home/mc/xdg-user-dirs/media/video
 
     groupadd media
     vigr
@@ -153,7 +223,7 @@ crontab -e (root)
     media:x:1001:mc
 
     visudo
-    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /etc/init.d/mediatomb,/usr/local/bin/wakeuptool,/usr/local/bin/lcdprint
+    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control
 
     BCASカード
     /etc/rc.local
@@ -189,7 +259,7 @@ wakeuptool のテスト
 wakeup_time=$(awk 'BEGIN { print systime() + 120 }')
 date
 sleep 20
-sudo wakeuptool -w -t $wakeup_time
+sudo /home/mc/xdg-user-dirs/media/ubin/wakeuptool -w -t $wakeup_time
 
 sshd の設定
 /etc/ssh/sshd_config

@@ -1,0 +1,199 @@
+#!/bin/bash
+
+usb_disk_power_on=/home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on
+
+function usage() {
+cat << EOF
+USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
+        $(basename $0) -r USB_ROOT_ID
+        $(basename $0) -p USB_ROOT_ID
+        $(basename $0) [-k|-u]
+        -h print help
+        -l output USB_ROOT_ID to specified file
+        -p usb hub power on
+        -z usb hub power off
+        -r usb root power off
+        -k change usb disk status to power on
+        -u change usb disk status to power off
+EOF
+exit 1
+}
+function do_unmount_partition() {
+
+    device_name=$1
+    for partition in $(find /dev -maxdepth 1 -not -name $device_name -name "$device_name*");do
+
+        cmd=$(awk -v pt=$partition '{ if ($1 == pt) printf("fuser -k %s; umount %s;\n", $2, $2) }' /proc/mounts | tac)
+        echo $cmd
+        eval $cmd
+
+    done
+}
+function unmount_partition() {
+
+    device_file=$1
+    device_file_base=$(basename $device_file)
+    array_name=$(grep ' active ' /proc/mdstat | \
+        awk -v dev=$device_file_base '{ for (i = 5; i <= NF; i++) if (match($i, dev)) printf("%s", $1) }')
+
+    if [ "$array_name" = "" ];then
+        do_unmount_partition $device_file_base
+    else
+        do_unmount_partition $array_name
+        echo mdadm --stop /dev/$array_name
+        mdadm --stop /dev/$array_name
+    fi
+}
+function do_stop() {
+
+    device_file=$1
+    if [ -L $device_file ];then
+        device_file=$(find $device_file -printf '%h/%l')
+    fi
+
+    unmount_partition $device_file
+
+    usb_hub_path=$(udevadm info --query=path --name=$device_file | sed -r -e 's@(/[^/]+){6}$@@')
+    if [ ! -e /sys/${usb_hub_path}/power/autosuspend ];then
+        echo "ERROR : does not exists /sys/${usb_hub_path}/power/autosuspend"
+        return 1
+    fi
+    if [ ! -e /sys/${usb_hub_path}/power/level ];then
+        echo "ERROR : does not exists /sys/${usb_hub_path}/power/level"
+        return 1
+    fi
+
+    usb_hub_id=$(udevadm info --query=path --name=$device_file | awk -F '/' '{ print $7 }')
+    echo $usb_hub_id | egrep -q '[0-9.-]+'
+    if [ $? -ne 0 ];then
+        echo "ERROR : could not get usb_hub_id : $usb_hub_id"
+        return 1
+    fi
+
+cat << EOF
+echo 0           > /sys/${usb_hub_path}/power/autosuspend
+echo auto        > /sys/${usb_hub_path}/power/level
+echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
+EOF
+
+    echo 0           > /sys/${usb_hub_path}/power/autosuspend
+    echo auto        > /sys/${usb_hub_path}/power/level
+    echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
+
+    return 0
+}
+
+################################################################################
+################################################################################
+
+control=
+output_file=
+while getopts 'hkl:pruz' opt;do
+    case $opt in
+        h)
+            usage
+            ;;
+        k)
+            control=lock
+            ;;
+        l)
+            output_file=$OPTARG
+            ;;
+        p)
+            control=on
+            ;;
+        r)
+            control=off_root
+            ;;
+        z)
+            control=off_hub
+            ;;
+        u)
+            control=unlock
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+if [ "$control" = "" ];then
+    usage
+fi
+if [ "$control" = "lock" ];then
+    touch $usb_disk_power_on
+    exit 0
+elif [ "$control" = "unlock" ];then
+    /bin/rm -f $usb_disk_power_on
+    exit 0
+fi
+
+if [ $# -lt 1 ];then
+    usage
+fi
+
+if [ "$control" = "on" ];then
+
+    usb_root=$1
+    if [ "$usb_root" = "" ];then
+        usage
+    fi
+
+    touch $usb_disk_power_on
+
+    echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
+    echo $usb_root > /sys/bus/usb/drivers/usb/bind
+    echo "initctl emit mounted-bind-video"
+    initctl emit mounted-bind-video
+
+    /bin/rm -f $usb_disk_power_on
+
+elif [ "$control" = "off_hub" ];then
+
+    device_list=$@
+    for device in $device_list;do
+        if [ ! -e $device ];then
+            echo "ERROR : DEVICE_FILE does not exist $device"
+            exit 1
+        fi
+        udevadm info --query=path --name=$device
+        if [ $? -ne 0 ];then
+            exit 1
+        fi
+    done
+
+    usb_root=$(udevadm info --query=path --name=$(echo $device_list | awk '{ print $1 }') | awk -F / '{ print $5 }')
+    if [ "$usb_root" = "" ];then
+        echo "ERROR : could not found root device"
+        exit 1
+    fi
+
+    if [ "$output_file" != "" ];then
+        if [ ! -e $output_file -o -f $output_file ];then
+            echo $usb_root > $output_file
+        else
+            echo "WARNING : could not output USB_ROOT_ID to $output_file"
+        fi
+    fi
+
+    echo "sync;sync"
+    sync;sync
+
+    for device in $device_list;do
+        do_stop $device
+        if [ $? -ne 0 ];then
+            exit 1
+        fi
+    done
+
+elif [ "$control" = "off_root" ];then
+
+    usb_root=$1
+    if [ "$usb_root" = "" ];then
+        usage
+    fi
+
+    echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
+    echo $usb_root > /sys/bus/usb/drivers/usb/unbind
+
+else
+    usage
+fi

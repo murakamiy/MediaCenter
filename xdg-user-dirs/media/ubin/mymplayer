@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function print_help() {
+cat<<EOF
+USAGE: mymplayer [OPTION]... [FILE]
+       -a             output audio stream to spdif dts,ac3
+       -b SID         set subtitle id
+       -d DELAY       set delay time
+       -h             print help message
+       -m             play dvd media
+       -u AID         set audio id
+       -v VOLUME      set volume
+EOF
+exit
+}
+
+delay=
+volume=
+audio="-ao pulse"
+media=
+sid=
+aid=
+tsprog=
+while getopts 'ab:d:hmu:v:' opt;do
+    case $opt in
+        h)
+            print_help
+            ;;
+        b)
+            sid="-sid $OPTARG"
+            ;;
+        u)
+            aid="-aid $OPTARG"
+            ;;
+        m)
+            media=dvd:////dev/sr0
+            ;;
+        a)
+            audio="-ao alsa:device=spdif -ac hwac3,hwdts,mp3,faad,ffflac,ffwmav2"
+            ;;
+        d)
+            delay=" -delay $OPTARG "
+            ;;
+        v)
+            volume=" -volume $OPTARG "
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+if [ -z "$media" -a ! -f "$1" ];then
+    print_help 
+fi
+
+input=$1
+
+mplayer $media $delay $volume \
+-volstep 10 \
+-fs -geometry 960x540+0+50 -monitoraspect 16:9 \
+-cache 500000 -cache-min 50 -cache-seek-min 10 \
+-dr -vf pp=ac/linblenddeint \
+-vo gl:swapinterval=1 \
+$aid $sid $audio \
+$input

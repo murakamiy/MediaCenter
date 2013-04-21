@@ -1,0 +1,42 @@
+#!/bin/bash
+prog_name=$(basename $0)
+
+lock_file=/tmp/usb_disk_power_lock_file
+power_control=/home/mc/xdg-user-dirs/media/ubin/disk-power-control
+usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk/id
+
+count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
+
+if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
+    echo "USB disk power status is all ready off"
+    exit 1
+elif [ $prog_name = "usb-disk-power-on" -a $count -ne 0 ];then
+    echo "USB disk power status is all ready on"
+    exit 1
+elif [ $prog_name = "usb-disk-power-off-root" -a $count -ne 0 ];then
+    echo "USB hub power status is still on"
+    exit 1
+fi
+
+lockfile-create $lock_file
+lockfile-touch $lock_file &
+pid_lock=$!
+
+if [ $prog_name = "usb-disk-power-off" ];then
+
+    if [ $# -eq 0 ];then
+        device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
+    else
+        device_list=$@
+    fi
+    sudo $power_control -l $usb_disk_id -z $device_list
+    sudo $power_control -r $(cat $usb_disk_id)
+
+elif [ $prog_name = "usb-disk-power-on" ];then
+
+    sudo $power_control -p $(cat $usb_disk_id)
+
+fi
+
+kill -TERM $pid_lock
+lockfile-remove $lock_file

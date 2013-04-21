@@ -1,1 +1,0 @@
-/home/mc/xdg-user-dirs/media/bin/nautilus/png/vlc.sh
