@@ -7,13 +7,14 @@ cat << EOF
 USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
         $(basename $0) -r USB_ROOT_ID
         $(basename $0) -p USB_ROOT_ID
-        $(basename $0) -k
+        $(basename $0) [-k|-u]
         -h print help
         -l output USB_ROOT_ID to specified file
         -p usb hub power on
         -z usb hub power off
         -r usb root power off
-        -k lock usb disk status to power on
+        -k change usb disk status to power on
+        -u change usb disk status to power off
 EOF
 exit 1
 }
@@ -87,7 +88,7 @@ EOF
 
 control=
 output_file=
-while getopts 'hkl:prz' opt;do
+while getopts 'hkl:pruz' opt;do
     case $opt in
         h)
             usage
@@ -107,6 +108,9 @@ while getopts 'hkl:prz' opt;do
         z)
             control=off_hub
             ;;
+        u)
+            control=unlock
+            ;;
     esac
 done
 shift $(($OPTIND -1))
@@ -116,6 +120,9 @@ if [ "$control" = "" ];then
 fi
 if [ "$control" = "lock" ];then
     touch $usb_disk_power_on
+    exit 0
+elif [ "$control" = "unlock" ];then
+    /bin/rm -f $usb_disk_power_on
     exit 0
 fi
 

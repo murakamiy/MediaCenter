@@ -30,14 +30,11 @@ if [ $prog_name = "usb-disk-power-off" ];then
         device_list=$@
     fi
     sudo $power_control -l $usb_disk_id -z $device_list
+    sudo $power_control -r $(cat $usb_disk_id)
 
 elif [ $prog_name = "usb-disk-power-on" ];then
 
     sudo $power_control -p $(cat $usb_disk_id)
-
-elif [ $prog_name = "usb-disk-power-off-root" ];then
-
-    sudo $power_control -r $(cat $usb_disk_id)
 
 fi
 
