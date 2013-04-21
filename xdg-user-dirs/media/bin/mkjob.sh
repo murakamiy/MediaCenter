@@ -7,25 +7,21 @@ log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
 log 'starting create ts file'
-$MC_BIN_REC BS15_0 60 ${MC_DIR_EPG}/bs_cs_0.ts
 for c in $(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL);do
     $MC_BIN_REC $c 60 ${MC_DIR_EPG}/${c}.ts
 done
-cs_channel_array=(2 4)
-for c in ${cs_channel_array[@]};do
-    $MC_BIN_REC CS${c} 60 ${MC_DIR_EPG}/bs_cs_${c}.ts
-done
+$MC_BIN_REC BS15_0 60 ${MC_DIR_EPG}/bs_cs_0.ts
+$MC_BIN_REC CS2    60 ${MC_DIR_EPG}/bs_cs_2.ts
+$MC_BIN_REC CS4    60 ${MC_DIR_EPG}/bs_cs_4.ts
 
 log 'starting epgdump_py'
 for ts in ${MC_DIR_EPG}/[0-9]*.ts;do
     channel=$(basename $ts .ts)
     python $MC_BIN_EPGDUMP -e -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
 done
-python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_EPG}/bs.ts -o ${MC_DIR_EPG}/bs.xml
-for ts in ${MC_DIR_EPG}/cs_[0-9]*.ts;do
-    channel=$(basename $ts .ts)
-    python $MC_BIN_EPGDUMP -e -d -s -i $ts -o ${MC_DIR_EPG}/${channel}.xml
-done
+python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_EPG}/bs_cs_0.ts -o ${MC_DIR_EPG}/bs_cs_0.xml
+python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_EPG}/bs_cs_2.ts -o ${MC_DIR_EPG}/bs_cs_2.xml
+python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_EPG}/bs_cs_4.ts -o ${MC_DIR_EPG}/bs_cs_4.xml
 
 log 'starting find program'
 python $MC_BIN_RESERVER '[0-9]*.xml' 'bs_cs_[0-9]*.xml'
