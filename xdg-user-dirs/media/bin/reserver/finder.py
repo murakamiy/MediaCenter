@@ -276,5 +276,3 @@ class TestChannelFinder(Finder):
 # found_by     = found_by.__class__.__name__
 # rectime      = self.epoch_end - self.epoch_start - 10
 # channel      = self.get_text(el.get('channel'))
-# channel      = re.sub('^BS_', '',  self.channel)
-# channel      = re.sub('^CS_', '7', self.channel)

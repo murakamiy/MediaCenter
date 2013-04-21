@@ -30,11 +30,6 @@ else
         log "start: $job_file_xml"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
-
-
-
-
-
         fifo_dir=/tmp/pt3/fifo
         mkdir -p $fifo_dir
         fifo_b25=${fifo_dir}/b25_$$
@@ -93,8 +88,8 @@ else
         ln $thumb_file "${category_dir}/${title}_${i}.png"
 
         (
+            cd $MC_DIR_MP4
             if [ -s "${today}_${title}.mp4" ];then
-                cd $MC_DIR_MP4
                 echo smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
                 smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
             fi
