@@ -1,7 +1,14 @@
 #!/bin/bash
 
 LANG=C vlc \
---deinterlace 1 --deinterlace-mode blend \
+--overlay \
+--vout=xcb_glx \
+--deinterlace=1 \
+--video-filter=deinterlace \
+--deinterlace-mode=blend \
+--video-on-top \
+--fullscreen \
+--audio-filter=headphone_channel_mixer \
 --global-key-jump+long='Page Up' \
 --global-key-jump+medium=Up \
 --global-key-jump+short=Right \
@@ -11,16 +18,4 @@ LANG=C vlc \
 --global-key-quit=q \
 --global-key-vol-up=u \
 --global-key-vol-down=d \
---vout xcb_glx \
---fullscreen \
 $@
-
-
-
-# LANG=C vlc \
-# --no-qt-privacy-ask --ignore-config \
-# --extraintf rc --control lirc --lirc-file ~/.lircrc \
-# --overlay --ffmpeg-dr --fullscreen \
-# --video-filter deinterlace --deinterlace-mode blend \
-# --snapshot-path /home/mc/xdg-user-dirs/picture \
-# $@ > /home/mc/vlog 2>&1
