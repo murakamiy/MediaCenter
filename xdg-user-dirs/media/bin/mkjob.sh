@@ -3,6 +3,26 @@ source $(dirname $0)/00.conf
 
 touch ${MC_DIR_RECORDING}/mkjob.xml
 
+$MC_BIN_USB_POWER_ON
+bash /home/mc/xdg-user-dirs/media/bin/migrate.sh array &
+pid_mig_array=$!
+bash /home/mc/xdg-user-dirs/media/bin/migrate.sh encode &
+pid_mig_encode=$!
+
+log 'starting clean'
+bash $MC_BIN_CLEAN
+(
+    cd $MC_DIR_MP4
+    for f in *.mp4;do
+        fuser "$f"
+        if [ $? -ne 0 -a -s "$f" ];then
+            smbclient -A ~/.smbauth -D contents -c "put $f" $MC_SMB_SERVER
+            /bin/rm $f
+        fi
+    done
+) &
+pid_smb=$!
+
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
@@ -33,8 +53,9 @@ for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
     /bin/mv $temp_file $f
 done
 
-log 'starting clean'
-bash $MC_BIN_CLEAN
+wait $pid_mig_encode
+wait $pid_mig_array
+wait $pid_smb
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 log 'starting safe shutdown'

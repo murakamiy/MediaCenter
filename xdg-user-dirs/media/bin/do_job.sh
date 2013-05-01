@@ -87,14 +87,6 @@ else
         done
         ln $thumb_file "${category_dir}/${title}_${i}.png"
 
-        (
-            cd $MC_DIR_MP4
-            if [ -s "${today}_${title}.mp4" ];then
-                echo smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
-                smbclient -A ~/.smbauth -D contents -c "put ${today}_${title}.mp4" $MC_SMB_SERVER
-            fi
-        )
-
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED

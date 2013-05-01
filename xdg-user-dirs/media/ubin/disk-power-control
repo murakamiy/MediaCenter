@@ -144,6 +144,7 @@ if [ "$control" = "on" ];then
     echo "initctl emit mounted-bind-video"
     initctl emit mounted-bind-video
 
+    sleep 5
     /bin/rm -f $usb_disk_power_on
 
 elif [ "$control" = "off_hub" ];then
