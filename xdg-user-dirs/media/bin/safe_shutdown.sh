@@ -43,7 +43,7 @@ done
 is_job_running 
 if [ $? -eq 0 ];then
     echo job is running
-    zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>job is running</span>"
+    zenity --warning --no-wrap --timeout=5 --display=:0.0 --text="<span font_desc='40'>job is running</span>"
     exit
 fi
 

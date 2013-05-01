@@ -77,7 +77,8 @@ class AnimeFinder(Finder):
     def allow(self, pinfo):
         if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and pinfo.start.hour < 6:
             if not re.search(self.deny_pattern, pinfo.title):
-                return True
+                if pinfo.channel != 'CS_331':
+                    return True
         return False
 
 class BaseBallFinder(Finder):
@@ -98,7 +99,7 @@ class TitleFinder(Finder):
     priority = 100
     allow_list = [
         u'鋼の錬金術師',
-        u'ジョジョ',
+        u'ジョジョの奇妙な冒険',
         u'はじめの一歩',
         u'ペルソナ4',
         u'偽物語',
@@ -217,7 +218,7 @@ class EnglishFinder(Finder):
 
 class RandomGenerator:
     def getRandomChannel():
-        return random.choice(('14','15','16','17','18'))
+        return random.choice(('BS_200','BS_193','CS_227','CS_240'))
     def getRandomHour():
         return random.choice((20,21))
     getRandomChannel = staticmethod(getRandomChannel)
