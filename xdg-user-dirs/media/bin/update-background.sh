@@ -40,7 +40,7 @@ while [ true ];do
     fi
 
     i=1
-    meta_work=$(for f in $(find $job_dir -type f -name '*.xml');do
+    meta_work=$(for f in $(find $job_dir -type f -name '*.xml' -not -size 0);do
         epoch=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
 cat << EOF
 $epoch	$f
