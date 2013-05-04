@@ -89,6 +89,7 @@ po-debconf
 python-dateutil
 python-pyscard
 python-pysqlite2
+qtsixa
 screen
 smplayer
 smplayer-themes
@@ -111,6 +112,7 @@ w64codecs
 wwwconfig-common
 xbase-clients
 xmlstarlet
+xserver-xorg-input-joystick
 
 カードリーダーの設定
 --- /etc/libccid_Info.plist.0	2013-04-07 03:13:14.229812866 +0900
