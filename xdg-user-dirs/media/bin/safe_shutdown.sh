@@ -24,6 +24,11 @@ while getopts 't:' opt;do
     esac
 done
 
+
+$MC_BIN_DISK_POWER_CONTROL -u
+$MC_BIN_USB_POWER_OFF
+
+
 running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml')
 if [ -n "$running" ];then
     log "running jobs: $running"
@@ -41,9 +46,6 @@ if [ $wakeup_time -ne -1 ];then
     echo "next wakeup time: $next_wakeup_time\n\nShutDown ?"
     zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
     if [ $? -ne 1 ];then
-        $MC_BIN_DISK_POWER_CONTROL -u
-        $MC_BIN_USB_POWER_OFF
-        sleep 10
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi
 else
