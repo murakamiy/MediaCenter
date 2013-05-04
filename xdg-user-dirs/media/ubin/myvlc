@@ -15,7 +15,7 @@ LANG=C vlc \
 --global-key-jump-long='Page Down' \
 --global-key-jump-medium=Down \
 --global-key-jump-short=Left \
---global-key-quit=q \
---global-key-vol-up=u \
---global-key-vol-down=d \
+--global-key-quit=Esc \
+--global-key-vol-up=0 \
+--global-key-vol-down=9 \
 $@
