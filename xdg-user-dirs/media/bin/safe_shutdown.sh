@@ -24,18 +24,24 @@ while getopts 't:' opt;do
     esac
 done
 
+running=$(find $MC_DIR_PLAY -type f -name '*.xml' -printf '%f ')
+if [ -n "$running" ];then
+    log "playing movie: $running"
+    echo playing movie
+    zenity --warning --no-wrap --timeout=3 --display=:0.0 --text="<span font_desc='40'>playing movie</span>"
+    exit
+fi
 
-$MC_BIN_DISK_POWER_CONTROL -u
-$MC_BIN_USB_POWER_OFF
-
-
-running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml')
+running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     log "running jobs: $running"
     echo job is running
     zenity --warning --no-wrap --timeout=3 --display=:0.0 --text="<span font_desc='40'>job is running $running</span>"
     exit
 fi
+
+$MC_BIN_DISK_POWER_CONTROL -u
+$MC_BIN_USB_POWER_OFF
 
 next_job_time=$(get_next_job_time)
 wakeup_time=$(python $MC_BIN_WAKEUP_TIME $next_job_time)
