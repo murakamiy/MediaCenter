@@ -90,6 +90,8 @@ else
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
+        log "end: $job_file_xml"
+
         bash $MC_BIN_SAFE_SHUTDOWN
     else
         log "failed: $job_file_xml"
