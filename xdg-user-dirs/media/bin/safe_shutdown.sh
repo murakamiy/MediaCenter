@@ -50,8 +50,16 @@ if [ $wakeup_time -ne -1 ];then
     next_wakeup_time=$(awk -v epoc=$wakeup_time 'BEGIN { print strftime("%Y/%m/%d %H:%M:%S", epoc) }')
     log
     echo "next wakeup time: $next_wakeup_time\n\nShutDown ?"
-    zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
-    if [ $? -ne 1 ];then
+
+    xdpyinfo -display :0.0 > /dev/null
+    if [ $? -eq 0 ];then
+        zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
+        if [ $? -ne 1 ];then
+            log "execute wakeuptool X Server running"
+            sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
+        fi
+    else
+        log "execute wakeuptool X Server does not running"
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi
 else
