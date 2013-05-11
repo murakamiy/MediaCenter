@@ -112,7 +112,6 @@ w64codecs
 wwwconfig-common
 xbase-clients
 xmlstarlet
-xserver-xorg-input-joystick
 
 カードリーダーの設定
 --- /etc/libccid_Info.plist.0	2013-04-07 03:13:14.229812866 +0900
@@ -193,6 +192,45 @@ mdadm --stop /dev/md0
 mdadm --zero-superblock /dev/sda2
 mdadm --zero-superblock /dev/sdb2
 
+mdadmデーモンの自動起動無効
+diff -ru src_old/etc/default/mdadm src/etc/default/mdadm
+--- src_old/etc/default/mdadm	2013-05-05 13:53:35.548543546 +0900
++++ src/etc/default/mdadm	2013-05-05 13:53:03.520543732 +0900
+@@ -9,11 +9,11 @@
+ # AUTOCHECK:
+ #   should mdadm run periodic redundancy checks over your arrays? See
+ #   /etc/cron.d/mdadm.
+-AUTOCHECK=true
++AUTOCHECK=false
+ 
+ # START_DAEMON:
+ #   should mdadm start the MD monitoring daemon during boot?
+-START_DAEMON=true
++START_DAEMON=false
+ 
+ # DAEMON_OPTIONS:
+ #   additional options to pass to the daemon.
+
+
+インテルグラフィクスドライバ
+インテルのサイトからインストーラをダウンロードして、
+インストール
+intel-linux-graphics-installer_1.0_amd64.deb
+
+
+XOrgが起動しないことがある場合の対応
+diff -ru src_old/etc/init/lightdm.conf src/etc/init/lightdm.conf
+--- src_old/etc/init/lightdm.conf	2013-05-12 07:40:16.427263750 +0900
++++ src/etc/init/lightdm.conf	2013-05-12 07:39:55.751263470 +0900
+@@ -44,6 +44,7 @@
+ 	fi
+     fi
+ 
++    sleep 5
+     exec lightdm
+ end script
+ 
+
 パーティション作成
 # gdisk /dev/md0
 
@@ -204,16 +242,6 @@ hdparm -S 240 /dev/sda
 hdparm -S 240 /dev/sdd 
 hdparm -S 240 /dev/sdb 
 hdparm -S 60 /dev/sdc
-
-watchdogの設定
-/etc/modprobe.d/watchdog.conf
-    options softdog soft_margin=600
-/etc/rc.local
-    modprobe softdog 
-    echo 60 > /proc/sys/kernel/panic
-    echo 1 > /proc/sys/kernel/panic_on_oops
-crontab -e (root)
-    * * * * * echo > /dev/watchdog
 
 /etcファイル編集
     groupadd media
