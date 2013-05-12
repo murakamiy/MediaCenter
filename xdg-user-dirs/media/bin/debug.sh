@@ -10,9 +10,9 @@ USAGE: $(basename $0) command
                 atrm
                 mk_title_encode [FILE]...
                 mk_title_ts [FILE]...
-                show_ts
-                show_rec
-                show_reserve
+                ts
+                rec
+                reserve
 EOF
 exit
 fi
@@ -21,7 +21,7 @@ case $command in
     atrm)
         for i in $(atq | awk '{ print $1 }');do atrm $i; done
         ;;
-    show_ts)
+    ts)
         for f in $MC_DIR_JOB_FINISHED/*;do
             title=$(print_title $f)
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
@@ -31,7 +31,7 @@ case $command in
             echo "$ts_file $time $title"
         done
         ;;
-    show_rec)
+    rec)
         echo MC_DIR_RECORDING
         for f in $(find $MC_DIR_RECORDING -type f);do
             title=$(print_title $f)
@@ -104,7 +104,7 @@ case $command in
 
         done
         ;;
-    show_reserve)
+    reserve)
         for f in $MC_DIR_RESERVED/*;do
             title=$(print_title $f)
             time=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
