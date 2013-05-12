@@ -1,0 +1,3 @@
+# "Sony PLAYSTATION3 Controller"
+
+ACTION=="add", KERNELS=="input*", SUBSYSTEMS=="input", ATTRS{name}=="Sony PLAYSTATION(R)3 Controller", RUN+="/home/mc/xdg-user-dirs/media/bin/play-station-controller.sh"

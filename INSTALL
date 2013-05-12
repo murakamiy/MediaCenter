@@ -292,3 +292,6 @@ sshd の設定
 /etc/ssh/sshd_config
 PasswordAuthentication no
 stop ssh; start ssh;
+
+USBデバイス情報取得
+udevadm info --query=path --name=/dev/input/js0 --attribute-walk
