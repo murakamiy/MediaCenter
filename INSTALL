@@ -76,6 +76,7 @@ libpcsclite-dev
 linux-headers-generic
 m4
 mdadm
+mp4v2-utils
 mplayer2
 mysql-common
 ncurses-term

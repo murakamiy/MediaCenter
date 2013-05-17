@@ -66,9 +66,15 @@ case $command in
                 cp $MC_FILE_THUMB $thumb_file
             fi
             title=$base
+            tag=
+            if [ "$ext" = "mp4" ];then
+                tag=$(mp4info $f | grep Comments: | awk -F ': ' '{ print $2 }')
+            fi
             if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
                 title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
                 title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
+            elif [ -n "$tag" ];then
+                title=$tag
             fi
             ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
             touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
