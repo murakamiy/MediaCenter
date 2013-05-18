@@ -23,6 +23,10 @@ bash $MC_BIN_CLEAN
 ) &
 pid_smb=$!
 
+wait $pid_mig_encode
+wait $pid_smb
+wait $pid_mig_array
+
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
@@ -52,10 +56,6 @@ for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
     xmlstarlet format --encode utf-8 $f > $temp_file
     /bin/mv $temp_file $f
 done
-
-wait $pid_mig_encode
-wait $pid_mig_array
-wait $pid_smb
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 log 'starting safe shutdown'
