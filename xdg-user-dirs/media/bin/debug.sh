@@ -12,7 +12,7 @@ USAGE: $(basename $0) command
                 mk_title_ts [FILE]...
                 ts
                 rec
-                reserve
+                rsv
 EOF
 exit
 fi
@@ -110,7 +110,7 @@ case $command in
 
         done
         ;;
-    reserve)
+    rsv)
         for f in $MC_DIR_RESERVED/*;do
             title=$(print_title $f)
             time=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
