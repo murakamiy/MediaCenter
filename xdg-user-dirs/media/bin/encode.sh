@@ -13,7 +13,7 @@ function do_encode_ffmpeg() {
         -s 1280x720 \
         -vsync 1 \
         -r 30000/1001 \
-        -vcodec libx264 -acodec copy \
+        -vcodec libx264 -acodec libvo_aacenc \
         -profile:v main -crf 25 -level 31 \
         $output
 }
@@ -40,6 +40,7 @@ if [ -n "$xml" ];then
 
     mv $xml $MC_DIR_ENCODING
 
+    $MC_BIN_USB_POWER_ON
     do_encode_ffmpeg $base
 
     if [ $? -eq 0 ];then
