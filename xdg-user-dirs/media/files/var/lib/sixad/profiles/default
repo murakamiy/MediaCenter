@@ -63,21 +63,35 @@ timeout_mins 30
 out_of_reach_disconnects 0
 
 # Input - "Gnome", by "falkTX"
+# left mouse button
 key_select 273
 key_l3 0
 key_r3 0
+# space
 key_start 57
+# up
 key_up 103
+# right
 key_right 106
+# down
 key_down 108
+# left
 key_left 105
+# 9
 key_l2 10
+# 0
 key_r2 11
+# page down
 key_l1 109
+# page up
 key_r1 104
+# escape
 key_tri 1
+# enter
 key_cir 28
+# right mouse button
 key_squ 272
+# delete
 key_cro 111
 key_ps 0
 axis_left_type 3

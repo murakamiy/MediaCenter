@@ -11,4 +11,9 @@ if [ ! -e $log_file ];then
             >> $log_file 2>&1
 
     date +"%Y/%m/%d %H:%M:%S.%N END" >> $log_file
+
+    sleep 60
+    /bin/rm -f $log_file
+else
+    date +"%Y/%m/%d %H:%M:%S.%N paring is all ready finished" >> $log_file
 fi
