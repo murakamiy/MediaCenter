@@ -1,6 +1,9 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
+temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
+log "start: $temp"
+
 touch ${MC_DIR_RECORDING}/mkjob.xml
 
 $MC_BIN_USB_POWER_ON
@@ -58,5 +61,8 @@ for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
 done
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
-log 'starting safe shutdown'
+
+temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
+log "end: $temp"
+
 bash $MC_BIN_SAFE_SHUTDOWN

@@ -19,7 +19,7 @@ broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_fil
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
-bash $MC_BIN_ENCODE &
+bash $MC_BIN_ENCODE $channel &
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
 if [ $running -ge 4 ];then
     log "failed: $job_file_xml"
@@ -27,7 +27,8 @@ if [ $running -ge 4 ];then
     mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_FAILED
 else
     if [ $now -lt $start ];then
-        log "start: $job_file_xml"
+        temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
+        log "start: $job_file_xml $temp"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
         fifo_dir=/tmp/pt3/fifo
@@ -90,7 +91,8 @@ else
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
-        log "end: $job_file_xml"
+        temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
+        log "end: $job_file_xml $temp"
 
         bash $MC_BIN_SAFE_SHUTDOWN
     else
