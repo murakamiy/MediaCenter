@@ -74,6 +74,7 @@ kernel-package
 libav-tools 
 libpcsclite-dev
 linux-headers-generic
+lm-sensors
 m4
 mdadm
 mp4v2-utils
