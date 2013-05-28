@@ -37,7 +37,7 @@ if [ $? -eq 0 ];then
     exit
 fi
 
-xml=$(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | head -n 1)
+xml=$(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort | head -n 1)
 if [ -n "$xml" ];then
     time_start=$(awk 'BEGIN { print systime() }')
     base=$(basename $xml .xml)
