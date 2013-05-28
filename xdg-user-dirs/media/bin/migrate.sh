@@ -33,13 +33,16 @@ if [ "$1" = "array" ];then
             find $MC_DIR_TITLE_TS -inum $inode -delete
         fi
 
-        log "delete : $ts $png_thumb $xml"
+        file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS_HD/@@")
+        log "delete : $file_info $png_thumb $xml"
         /bin/rm -f $ts $png_thumb $xml
 
     done
 
     for ts in $(find $MC_DIR_TS -type f);do
-        log "move to hard disk : $ts"
+        file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS/@@")
+        log "move to hard disk : $file_info"
+
         sync
         /bin/mv $ts $MC_DIR_TS_HD
     done
