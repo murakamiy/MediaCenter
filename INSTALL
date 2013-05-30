@@ -64,6 +64,8 @@ gdisk
 git
 git-man
 gstreamer0.10-plugins-bad-multiverse
+handbrake-cli
+handbrake-gtk
 heirloom-mailx
 htop
 imagemagick
@@ -77,6 +79,7 @@ linux-headers-generic
 lm-sensors
 m4
 mdadm
+mkvtoolnix
 mp4v2-utils
 mplayer2
 mysql-common
@@ -169,7 +172,7 @@ $ gsettings set org.gnome.desktop.media-handling automount false
 $ gsettings get org.gnome.desktop.media-handling automount
 
 raid array 作成
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 4096 /dev/sda /dev/sdb
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 512 /dev/sda /dev/sdb
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 
 raid 停止
@@ -193,6 +196,50 @@ mdadm --detail /dev/md0
 mdadm --stop /dev/md0
 mdadm --zero-superblock /dev/sda2
 mdadm --zero-superblock /dev/sdb2
+
+ハードディスクスリープ設定
+hdparm -S 240 /dev/sda
+hdparm -S 240 /dev/sdd 
+hdparm -S 240 /dev/sdb 
+hdparm -S 60 /dev/sdc
+
+
+# Hard Disk Array
+umount /dev/md0p1
+mdadm --stop /dev/md0
+mdadm --zero-superblock /dev/sdc
+mdadm --zero-superblock /dev/sdd
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 512 /dev/sdc /dev/sdd
+gdisk /dev/md0
+
+# SSD Array
+umount /dev/md1p1
+mdadm --stop /dev/md1
+mdadm --zero-superblock /dev/sda2
+mdadm --zero-superblock /dev/sdb2
+mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda2 /dev/sdb2
+fdisk /dev/md1
+
+update-initramfs -u
+reboot
+
+# Hard Disk Array
+mkfs.ext4 \
+-cc \
+-m 1 \
+-b 4096 \
+-E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
+-O extent,large_file,sparse_super \
+/dev/md0p1
+
+# SSD Array
+mkfs.ext4 \
+-m 1 \
+-b 4096 \
+-E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
+-O extent,large_file,sparse_super \
+/dev/md1p1
+
 
 mdadmデーモンの自動起動無効
 diff -ru src_old/etc/default/mdadm src/etc/default/mdadm
@@ -232,18 +279,6 @@ diff -ru src_old/etc/init/lightdm.conf src/etc/init/lightdm.conf
      exec lightdm
  end script
  
-
-パーティション作成
-# gdisk /dev/md0
-
-フォーマット
-# mkfs.ext4 -b 4096 /dev/md0p1 
-
-ハードディスクスリープ設定
-hdparm -S 240 /dev/sda
-hdparm -S 240 /dev/sdd 
-hdparm -S 240 /dev/sdb 
-hdparm -S 60 /dev/sdc
 
 /etcファイル編集
     groupadd media
