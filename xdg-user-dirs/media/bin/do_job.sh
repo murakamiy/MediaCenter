@@ -66,9 +66,8 @@ else
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         sync
-        sleep 20
-        kill -TERM $pid_avconv
         kill -TERM $pid_tail
+        wait $pid_avconv
         /bin/rm -f $fifo_b25
 
         thumb_file=${MC_DIR_THUMB}/${job_file_ts}
