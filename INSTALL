@@ -240,6 +240,14 @@ mkfs.ext4 \
 -O extent,large_file,sparse_super \
 /dev/md1p1
 
+# Hard Disk Single
+mkfs.ext4 \
+-m 1 \
+-b 4096 \
+-E lazy_itable_init=0,lazy_journal_init=0 \
+-O extent,large_file,sparse_super \
+/dev/sdf1
+
 
 mdadmデーモンの自動起動無効
 diff -ru src_old/etc/default/mdadm src/etc/default/mdadm
