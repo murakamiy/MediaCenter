@@ -5,25 +5,14 @@ temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print 
 log "start: $temp"
 
 touch ${MC_DIR_RECORDING}/mkjob.xml
+trash-empty
 
 $MC_BIN_USB_POWER_ON
-bash /home/mc/xdg-user-dirs/media/bin/migrate.sh array &
+bash $MC_BIN_MIGRATE array &
 pid_mig_array=$!
-bash /home/mc/xdg-user-dirs/media/bin/migrate.sh encode &
+bash $MC_BIN_MIGRATE encode &
 pid_mig_encode=$!
-
-log 'starting clean'
-bash $MC_BIN_CLEAN
-(
-    cd $MC_DIR_MP4
-    for f in *.mp4;do
-        fuser "$f"
-        if [ $? -ne 0 -a -s "$f" ];then
-            smbclient -A ~/.smbauth -D contents -c "put $f" $MC_SMB_SERVER
-            /bin/rm $f
-        fi
-    done
-) &
+bash $MC_BIN_SMB &
 pid_smb=$!
 
 wait $pid_mig_encode

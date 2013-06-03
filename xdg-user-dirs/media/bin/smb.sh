@@ -1,8 +1,6 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
-trash-empty
-find $MC_DIR_MP4 -ctime +3 -delete
 for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
     egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
     awk -F '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' '
@@ -14,3 +12,14 @@ for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
     smbclient -A ~/.smbauth -D contents -c "del $f" $MC_SMB_SERVER
 
 done
+
+cd $MC_DIR_MP4
+for f in $(find . -name '*.mp4' -printf '%f\n');do
+    fuser "$f"
+    if [ $? -ne 0 -a -s "$f" ];then
+        smbclient -A ~/.smbauth -D contents -c "put $f" $MC_SMB_SERVER
+        /bin/rm $f
+    fi
+done
+
+find $MC_DIR_MP4 -ctime +3 -delete
