@@ -13,9 +13,6 @@ if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
 elif [ $prog_name = "usb-disk-power-on" -a $count -ne 0 ];then
     echo "USB disk power status is all ready on"
     exit 1
-elif [ $prog_name = "usb-disk-power-off-root" -a $count -ne 0 ];then
-    echo "USB hub power status is still on"
-    exit 1
 fi
 
 lockfile-create $lock_file
