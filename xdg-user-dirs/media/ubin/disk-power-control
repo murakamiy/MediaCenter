@@ -141,8 +141,9 @@ if [ "$control" = "on" ];then
 
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
     echo $usb_root > /sys/bus/usb/drivers/usb/bind
+    initctl emit wait-for-usb-disk
 
-    (sleep 60; /bin/rm -f $usb_disk_power_on) &
+    rm -f $usb_disk_power_on
 
 elif [ "$control" = "off_hub" ];then
 

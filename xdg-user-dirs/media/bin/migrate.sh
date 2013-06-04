@@ -40,6 +40,12 @@ if [ "$1" = "array" ];then
     done
 
     for ts in $(find $MC_DIR_TS -type f);do
+
+        fuser $ts
+        if [ $? -eq 0 ];then
+            continue
+        fi
+
         file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS/@@")
         log "move to hard disk : $file_info"
 
@@ -52,6 +58,12 @@ elif [ "$1" = "encode" ];then
 
     log "start encode"
     for en in $(find $MC_DIR_ENCODE -type f);do
+
+        fuser $en
+        if [ $? -eq 0 ];then
+            continue
+        fi
+
         log "move to hard disk : $en"
         /bin/mv $en $MC_DIR_ENCODE_HD
     done
