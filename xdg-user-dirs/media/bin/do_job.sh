@@ -49,7 +49,7 @@ else
         pid_avconv=$!
 
         touch ${MC_DIR_TS}/${job_file_ts}
-        tail --follow --retry --sleep-interval=0.1 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
+        tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
         pid_tail=$!
 
         if [ "$broadcasting" = "BS" ];then
