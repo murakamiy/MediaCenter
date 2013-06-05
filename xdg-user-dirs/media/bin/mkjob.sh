@@ -7,7 +7,18 @@ log "start: $temp"
 touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
 
-$MC_BIN_USB_POWER_ON
+today=$(date +%e)
+fsck_span=$(($today % 14))
+if [ $fsck_span -eq 0 ];then
+    log "starting fsck"
+    $MC_BIN_USB_POWER_ON
+    sudo /sbin/fsck.ext4 -fy /dev/md0p1
+    log "fsck usb_disk_array $?"
+    sudo /sbin/fsck.ext4 -fy /dev/sde1
+    log "fsck usb_disk $?"
+fi
+
+$MC_BIN_USB_MOUNT
 bash $MC_BIN_MIGRATE array &
 pid_mig_array=$!
 bash $MC_BIN_MIGRATE encode &

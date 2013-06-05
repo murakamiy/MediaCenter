@@ -40,7 +40,6 @@ if [ -n "$running" ];then
     exit
 fi
 
-$MC_BIN_DISK_POWER_CONTROL -u
 $MC_BIN_USB_POWER_OFF
 
 next_job_time=$(get_next_job_time)

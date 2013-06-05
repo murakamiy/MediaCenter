@@ -295,7 +295,7 @@ diff -ru src_old/etc/init/lightdm.conf src/etc/init/lightdm.conf
     media:x:1001:mc
 
     visudo
-    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control
+    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control,/sbin/fsck.ext4
 
     BCASカード
     /etc/rc.local

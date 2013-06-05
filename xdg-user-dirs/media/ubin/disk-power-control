@@ -1,20 +1,20 @@
 #!/bin/bash
 
 usb_disk_power_on=/home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on
+usb_disk_mount=/home/mc/xdg-user-dirs/media/job/state/usb_disk/mount
 
 function usage() {
 cat << EOF
 USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
         $(basename $0) -r USB_ROOT_ID
         $(basename $0) -p USB_ROOT_ID
-        $(basename $0) [-k|-u]
+        $(basename $0) -m USB_ROOT_ID
         -h print help
         -l output USB_ROOT_ID to specified file
+        -m usb disk mount
         -p usb hub power on
         -z usb hub power off
         -r usb root power off
-        -k change usb disk status to power on
-        -u change usb disk status to power off
 EOF
 exit 1
 }
@@ -88,16 +88,16 @@ EOF
 
 control=
 output_file=
-while getopts 'hkl:pruz' opt;do
+while getopts 'hl:mprz' opt;do
     case $opt in
         h)
             usage
             ;;
-        k)
-            control=lock
-            ;;
         l)
             output_file=$OPTARG
+            ;;
+        m)
+            control=mount
             ;;
         p)
             control=on
@@ -108,9 +108,6 @@ while getopts 'hkl:pruz' opt;do
         z)
             control=off_hub
             ;;
-        u)
-            control=unlock
-            ;;
     esac
 done
 shift $(($OPTIND -1))
@@ -118,19 +115,12 @@ shift $(($OPTIND -1))
 if [ "$control" = "" ];then
     usage
 fi
-if [ "$control" = "lock" ];then
-    touch $usb_disk_power_on
-    exit 0
-elif [ "$control" = "unlock" ];then
-    /bin/rm -f $usb_disk_power_on
-    exit 0
-fi
 
 if [ $# -lt 1 ];then
     usage
 fi
 
-if [ "$control" = "on" ];then
+if [ "$control" = "on" -o "$control" = "mount" ];then
 
     usb_root=$1
     if [ "$usb_root" = "" ];then
@@ -138,12 +128,23 @@ if [ "$control" = "on" ];then
     fi
 
     touch $usb_disk_power_on
+    if [ "$control" = "mount" ];then
+        touch $usb_disk_mount
+    fi
 
-    echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
-    echo $usb_root > /sys/bus/usb/drivers/usb/bind
-    initctl emit wait-for-usb-disk
+    count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
+    if [ $count -eq 0 ];then
+        echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
+        echo $usb_root > /sys/bus/usb/drivers/usb/bind
+        initctl emit wait-for-usb-disk
+    else
+        bash /home/mc/xdg-user-dirs/media/bin/usb-disk.sh
+    fi
 
     rm -f $usb_disk_power_on
+    if [ "$control" = "mount" ];then
+        rm -f $usb_disk_mount
+    fi
 
 elif [ "$control" = "off_hub" ];then
 
@@ -173,8 +174,8 @@ elif [ "$control" = "off_hub" ];then
         fi
     fi
 
-    echo "sync;sync"
-    sync;sync
+    echo sync
+    sync
 
     for device in $device_list;do
         do_stop $device

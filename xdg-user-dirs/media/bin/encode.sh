@@ -47,7 +47,7 @@ if [ -n "$xml" ];then
 
     mv $xml $MC_DIR_ENCODING
 
-    $MC_BIN_USB_POWER_ON
+    $MC_BIN_USB_MOUNT
     do_encode_ffmpeg $base
 
     if [ $? -eq 0 ];then
