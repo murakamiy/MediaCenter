@@ -18,6 +18,7 @@ channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
+avconv_rec_time_max=3600
 
 bash $MC_BIN_ENCODE $channel &
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
@@ -31,26 +32,28 @@ else
         log "start: $job_file_xml $temp"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
-        fifo_dir=/tmp/pt3/fifo
-        mkdir -p $fifo_dir
-        fifo_b25=${fifo_dir}/b25_$$
-        mkfifo -m 644 $fifo_b25
+        if (($rec_time < $avconv_rec_time_max));then
+            fifo_dir=/tmp/pt3/fifo
+            mkdir -p $fifo_dir
+            fifo_b25=${fifo_dir}/b25_$$
+            mkfifo -m 644 $fifo_b25
 
-        today=$(date +%d)
-        avconv -y -i $fifo_b25 -f mp4 \
-            -s 640x360 \
-            -loglevel quiet \
-            -threads 1 \
-            -vsync 1 \
-            -vcodec libx264 -acodec libvo_aacenc \
-            -profile:v baseline -crf 30 -level 30 \
-            -maxrate:v 10000k -r:a 44100 -b:a 64k \
-            "${MC_DIR_MP4}/${title}_${today}.mp4" &
-        pid_avconv=$!
+            today=$(date +%d)
+            avconv -y -i $fifo_b25 -f mp4 \
+                -s 640x360 \
+                -loglevel quiet \
+                -threads 1 \
+                -vsync 1 \
+                -vcodec libx264 -acodec libvo_aacenc \
+                -profile:v baseline -crf 30 -level 30 \
+                -maxrate:v 10000k -r:a 44100 -b:a 64k \
+                "${MC_DIR_MP4}/${title}_${today}.mp4" &
+            pid_avconv=$!
 
-        touch ${MC_DIR_TS}/${job_file_ts}
-        tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
-        pid_tail=$!
+            touch ${MC_DIR_TS}/${job_file_ts}
+            tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
+            pid_tail=$!
+        fi
 
         if [ "$broadcasting" = "BS" ];then
             channel_file=$MC_FILE_CHANNEL_BS
@@ -65,10 +68,12 @@ else
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
-        sync
-        kill -TERM $pid_tail
-        wait $pid_avconv
-        /bin/rm -f $fifo_b25
+        if (($rec_time < $avconv_rec_time_max));then
+            sync
+            kill -TERM $pid_tail
+            wait $pid_avconv
+            rm -f $fifo_b25
+        fi
 
         thumb_file=${MC_DIR_THUMB}/${job_file_ts}
         echo "ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
