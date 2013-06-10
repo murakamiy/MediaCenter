@@ -29,10 +29,11 @@ if [ $running -ge 4 ];then
 else
     if [ $now -lt $start ];then
         temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-        log "start: $job_file_xml $temp"
+        log "start : $title $temp"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
         if (($rec_time < $avconv_rec_time_max));then
+            log "start mp4 : $title"
             fifo_dir=/tmp/pt3/fifo
             mkdir -p $fifo_dir
             fifo_b25=${fifo_dir}/b25_$$
@@ -69,6 +70,7 @@ else
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         if (($rec_time < $avconv_rec_time_max));then
+            log "end mp4 : $title"
             sync
             kill -TERM $pid_tail
             wait $pid_avconv
@@ -96,7 +98,7 @@ else
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-        log "end: $job_file_xml $temp"
+        log "end : $title $temp"
 
         bash $MC_BIN_SAFE_SHUTDOWN
     else
