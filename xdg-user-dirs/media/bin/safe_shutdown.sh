@@ -40,8 +40,6 @@ if [ -n "$running" ];then
     exit
 fi
 
-$MC_BIN_USB_POWER_OFF
-
 next_job_time=$(get_next_job_time)
 wakeup_time=$(python $MC_BIN_WAKEUP_TIME $next_job_time)
 
@@ -55,10 +53,12 @@ if [ $wakeup_time -ne -1 ];then
         zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
             log "execute wakeuptool X Server running"
+            $MC_BIN_USB_POWER_OFF
             sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
         fi
     else
         log "execute wakeuptool X Server does not running"
+        $MC_BIN_USB_POWER_OFF
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi
 else
