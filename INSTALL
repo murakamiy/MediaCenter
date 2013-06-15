@@ -203,30 +203,36 @@ hdparm -S 240 /dev/sdd
 hdparm -S 240 /dev/sdb 
 hdparm -S 60 /dev/sdc
 
-
 # Hard Disk Array
 umount /dev/md0p1
 mdadm --stop /dev/md0
 mdadm --zero-superblock /dev/sdc
 mdadm --zero-superblock /dev/sdd
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 512 /dev/sdc /dev/sdd
-gdisk /dev/md0
 
 # SSD Array
 umount /dev/md1p1
 mdadm --stop /dev/md1
 mdadm --zero-superblock /dev/sda2
 mdadm --zero-superblock /dev/sdb2
+
+# Hard Disk Array
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 512 /dev/sdc /dev/sdd
+# SSD Array
 mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda2 /dev/sdb2
+
+# Hard Disk Array
+gdisk /dev/md0
+# SSD Array
 fdisk /dev/md1
 
-update-initramfs -u
-reboot
+# Hard Disk Array
+partprobe /dev/md0
+# SSD Array
+partprobe /dev/md1
 
 # Hard Disk Array
 mkfs.ext4 \
--cc \
--m 1 \
+-m 0 \
 -b 4096 \
 -E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
 -O extent,large_file,sparse_super \
@@ -234,20 +240,15 @@ mkfs.ext4 \
 
 # SSD Array
 mkfs.ext4 \
--m 1 \
+-m 0 \
 -b 4096 \
 -E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
 -O extent,large_file,sparse_super \
 /dev/md1p1
 
-# Hard Disk Single
-mkfs.ext4 \
--m 1 \
--b 4096 \
--E lazy_itable_init=0,lazy_journal_init=0 \
--O extent,large_file,sparse_super \
-/dev/sdf1
-
+# reboot
+update-initramfs -u
+reboot
 
 mdadmデーモンの自動起動無効
 diff -ru src_old/etc/default/mdadm src/etc/default/mdadm
