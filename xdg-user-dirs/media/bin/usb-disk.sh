@@ -13,10 +13,17 @@ fi
 if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on ];then
     date +"%Y/%m/%d %H:%M:%S.%N power on usb_disk" >> $log
 
+    hdparm -W0 /dev/sdc 
+    hdparm -W0 /dev/sdd 
+    hdparm -W0 /dev/sde 
+    hdparm -W0 /dev/sdf 
+
     if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/mount ];then
         date +"%Y/%m/%d %H:%M:%S.%N mount usb_disk" >> $log
+
         mount -o noatime,stripe=256 /dev/md0p1 /mnt/hd_array
         mount -o noatime /dev/sde1 /mnt/hd
+        mount -o noatime /dev/sdf1 /mnt/hd2
         mount --bind /mnt/hd_array/ts_hd /home/mc/xdg-user-dirs/media/video/ts_hd
         mount --bind /mnt/hd/encode_hd   /home/mc/xdg-user-dirs/media/video/encode_hd
     fi
