@@ -11,6 +11,7 @@ USAGE: $(basename $0) command
                 mk_title_encode [FILE]...
                 mk_title_ts [FILE]...
                 ts
+                title
                 rec
                 rsv
 EOF
@@ -29,6 +30,30 @@ case $command in
             ((time = (end - start) / 60))
             ts_file=$(ls -sh ${MC_DIR_TS_HD}/$(basename $f .xml).ts)
             echo "$ts_file $time $title"
+        done
+        ;;
+    title)
+        for f in $(find $MC_DIR_TITLE_TS -type f);do
+
+            png_file=$f
+            inode=$(stat --format='%i' $png_file)
+            thumb_file=$(basename $(find $MC_DIR_THUMB -inum $inode))
+            base=$(echo $thumb_file | awk -F . '{ print $1 }')
+            xml_file=${base}.xml
+
+            title=
+            if [ -f $MC_DIR_JOB_FINISHED/$xml_file ];then
+                title=$(print_title $MC_DIR_JOB_FINISHED/$xml_file)
+            fi
+
+            if [ -f $MC_DIR_TS_HD/$base.ts ];then
+                echo "hd  : $(ls -sh $MC_DIR_TS_HD/$base.ts) $title"
+            elif [ -f $MC_DIR_TS/$base.ts ];then
+                echo "ssd : $(ls -sh $MC_DIR_TS/$base.ts) $title"
+            else
+                echo "not_exist : $f"
+            fi
+
         done
         ;;
     rec)
