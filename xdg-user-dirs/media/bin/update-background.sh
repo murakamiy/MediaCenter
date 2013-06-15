@@ -31,11 +31,11 @@ gsettings set org.gnome.desktop.background secondary-color "$SECONDARY_COLOR"
 
 while [ true ];do
 
-    sleep 60
     run_file=$(ls -t $run_dir | tail -n 1)
     ls $job_dir > ${run_dir}/${run_file}
     diff -q ${run_dir}/* > /dev/null
     if [ $? -eq 0 ];then
+        sleep 60
         continue
     fi
 
@@ -83,4 +83,5 @@ EOF
 
     convert -append $list_work $list_in $job_file
 
+    sleep 60
 done
