@@ -13,10 +13,10 @@ fi
 if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on ];then
     date +"%Y/%m/%d %H:%M:%S.%N power on usb_disk" >> $log
 
-    hdparm -W0 /dev/sdc 
-    hdparm -W0 /dev/sdd 
-    hdparm -W0 /dev/sde 
-    hdparm -W0 /dev/sdf 
+    hdparm -W1 /dev/sdc 
+    hdparm -W1 /dev/sdd 
+    hdparm -W1 /dev/sde 
+    hdparm -W1 /dev/sdf 
 
     if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/mount ];then
         date +"%Y/%m/%d %H:%M:%S.%N mount usb_disk" >> $log

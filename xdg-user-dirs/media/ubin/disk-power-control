@@ -44,6 +44,16 @@ function unmount_partition() {
         mdadm --stop /dev/$array_name
     fi
 }
+function flush_disk_cache() {
+    device_list=$@
+
+    echo sync
+    sync
+    for device in $device_list;do
+        echo hdparm -F $device
+        hdparm -F $device
+    done
+}
 function do_stop() {
 
     device_file=$1
@@ -174,8 +184,7 @@ elif [ "$control" = "off_hub" ];then
         fi
     fi
 
-    echo sync
-    sync
+    flush_disk_cache $device_list
 
     for device in $device_list;do
         do_stop $device
