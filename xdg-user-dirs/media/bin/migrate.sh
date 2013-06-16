@@ -14,7 +14,6 @@ function has_free_space() {
     return 1
 }
 
-sleep 10
 if [ "$1" = "array" ];then
 
     log "start ts_hd"
@@ -49,9 +48,12 @@ if [ "$1" = "array" ];then
         file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS/@@")
         log "move to hard disk : $file_info"
 
-        sync
         /bin/mv $ts $MC_DIR_TS_HD
     done
+
+    dd if=/dev/urandom of=$MC_DIR_TS_HD/flush_hard_disk_write_cache bs=1M count=128
+    sync
+
     log "end ts_hd"
 
 elif [ "$1" = "encode" ];then

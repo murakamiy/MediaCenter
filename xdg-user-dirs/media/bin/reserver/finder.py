@@ -107,6 +107,8 @@ class TitleFinder(Finder):
         u'DEATH NOTE',
         u'刀語',
         u'NARUTO',
+        u'電脳コイル',
+        u'攻殻機動隊',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):

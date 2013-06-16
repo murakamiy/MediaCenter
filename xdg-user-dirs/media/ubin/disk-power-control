@@ -53,6 +53,7 @@ function flush_disk_cache() {
         echo hdparm -F $device
         hdparm -F $device
     done
+    sleep 1
 }
 function do_stop() {
 
