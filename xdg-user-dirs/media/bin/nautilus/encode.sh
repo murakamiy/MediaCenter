@@ -3,9 +3,10 @@ source $(dirname $0)/../00.conf
 
 xml=${MC_DIR_JOB_FINISHED}/${4}
 title=$(xmlsel -t -m '//title' -v '.' $xml)
+title=$(echo $title | sed -e 's/[<>]/ /g')
 
 killall zenity
-zenity --question --display=:0.0 --text="<span font_desc='40'>add to encode?\n\n$title</span>"
+zenity --question --display=:0.0 --text="<span font_desc='36'>add to encode?\n\n$title</span>"
 if [ $? -eq 0 ];then
 
     if [ -f ${MC_DIR_ENCODE_RESERVED}/$(basename ${xml}) ];then
