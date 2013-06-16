@@ -1,6 +1,9 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
+avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
+log "smb start $avail"
+
 for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
     egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
     awk -F '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' '
@@ -13,6 +16,9 @@ for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
 
 done
 
+avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
+log "smb delete end $avail"
+
 cd $MC_DIR_MP4
 for f in $(find . -name '*.mp4' -printf '%f\n');do
     fuser "$f"
@@ -21,5 +27,8 @@ for f in $(find . -name '*.mp4' -printf '%f\n');do
         /bin/rm $f
     fi
 done
+
+avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
+log "smb copy end $avail"
 
 find $MC_DIR_MP4 -ctime +3 -delete
