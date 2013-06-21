@@ -78,9 +78,9 @@ key_down 108
 # left
 key_left 105
 # 9
-key_l2 10
+key_l2 0
 # 0
-key_r2 11
+key_r2 0
 # page down
 key_l1 109
 # page up
@@ -99,9 +99,9 @@ axis_left_up 1
 axis_left_right 0
 axis_left_down 0
 axis_left_left 0
-axis_right_type 3
-axis_right_up 8
-axis_right_right 6
-axis_right_down 0
+axis_right_type 2
+axis_right_up 10
+axis_right_right 0
+axis_right_down 11
 axis_right_left 0
 axis_speed 6
