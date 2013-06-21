@@ -28,7 +28,11 @@ case $command in
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
-            ts_file=$(ls -sh ${MC_DIR_TS_HD}/$(basename $f .xml).ts)
+            ts_file=${MC_DIR_TS_HD}/$(basename $f .xml).ts
+            if [ ! -f $ts_file ];then
+                continue
+            fi
+            ts_file_print=$(ls -sh $ts_file)
             echo "$ts_file $time $title"
         done
         ;;
