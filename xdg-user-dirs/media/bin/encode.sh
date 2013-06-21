@@ -41,10 +41,10 @@ xml=$(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort | head -n 1)
 if [ -n "$xml" ];then
     time_start=$(awk 'BEGIN { print systime() }')
     base=$(basename $xml .xml)
-
+    title=$(print_title $xml)
+    title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
     temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-    log "start: $base $temp"
-
+    log "start: $title"
     mv $xml $MC_DIR_ENCODING
 
     $MC_BIN_USB_MOUNT
@@ -53,7 +53,7 @@ if [ -n "$xml" ];then
     if [ $? -eq 0 ];then
         time_end=$(awk 'BEGIN { print systime() }')
         (( took = (time_end - time_start) / 60 ))
-        log "encoding $base $title time: $took minutes"
+        log "encoding $title time: $took minutes"
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_ENCODE_FINISHED
 
         thumb_file=${MC_DIR_THUMB}/${base}.mp4
@@ -66,11 +66,6 @@ if [ -n "$xml" ];then
             cp $MC_FILE_THUMB $thumb_file
         fi
 
-        title=$base
-        if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
-            title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
-            title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
-        fi
         mp4tags -c "$title" ${MC_DIR_ENCODE_HD}/${base}.mp4
 
         ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
@@ -80,7 +75,7 @@ if [ -n "$xml" ];then
     fi
 
     temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-    log "end: $base $temp"
+    log "end: $title $temp"
 
     bash $MC_BIN_SAFE_SHUTDOWN
 fi
