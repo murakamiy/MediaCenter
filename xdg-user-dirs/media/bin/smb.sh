@@ -10,7 +10,7 @@ for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
     {
         "date +%Y%m%d%H%M%S -d \""$2"\"" | getline time
         printf("%d\t%s\n", time, $1)
-    }' | sort -k 1 -n -r | sed -n -e '301,$p' | awk '{ print $2 }');do
+    }' | sort -k 1 -n -r | sed -n -e '201,$p' | awk '{ print $2 }');do
 
     smbclient -A ~/.smbauth -D contents -c "del $f" $MC_SMB_SERVER
 
@@ -31,4 +31,4 @@ done
 avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
 log "smb copy end $avail"
 
-find $MC_DIR_MP4 -ctime +3 -delete
+find $MC_DIR_MP4 -ctime +5 -delete

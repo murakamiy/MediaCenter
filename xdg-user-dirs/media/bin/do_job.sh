@@ -46,8 +46,8 @@ else
                 -threads 1 \
                 -vsync 1 \
                 -vcodec libx264 -acodec libvo_aacenc \
-                -profile:v baseline -crf 30 -level 30 \
-                -maxrate:v 10000k -r:a 44100 -b:a 64k \
+                -preset:v ultrafast \
+                -maxrate:v 500k -r:a 44100 -b:a 64k \
                 "${MC_DIR_MP4}/${title}_${today}.mp4" &
             pid_avconv=$!
 
