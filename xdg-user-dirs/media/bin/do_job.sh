@@ -29,7 +29,8 @@ if [ $running -ge 4 ];then
 else
     if [ $now -lt $start ];then
         temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-        log "start : $title $temp"
+        lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
+        log "start : $title $temp lavg=$lavg"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
         if (($rec_time < $avconv_rec_time_max));then
@@ -98,7 +99,8 @@ else
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-        log "end : $title $temp"
+        lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
+        log "end : $title $temp lavg=$lavg"
 
         bash $MC_BIN_SAFE_SHUTDOWN
     else

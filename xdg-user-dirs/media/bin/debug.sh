@@ -14,6 +14,7 @@ USAGE: $(basename $0) command
                 title
                 rec
                 rsv
+                cpu [DAYS]
 EOF
 exit
 fi
@@ -146,5 +147,28 @@ case $command in
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
             echo -e "$time\t$channel\t$title"
         done | column -t -s '	'
+        ;;
+    cpu)
+        day=1
+        if [ -n "$2" ];then
+            day=$2
+        fi
+        for f in $(ls $MC_DIR_LOG | sort | tail -n $day);do
+            log_file=$MC_DIR_LOG/$f
+            echo $log_file
+            grep '°C' $log_file |
+            awk '{
+                for (i = 2; i <= NF; i++) {
+                    if (match($i, "°C") != 0) {
+                        t = $i
+                    }
+                    if (match($i, "lavg=") != 0) {
+                        split($i, array, "=")
+                        l = array[2]
+                    }
+                }
+                printf("%s    %s    %s\n", $1, t, l)
+            }'
+        done
         ;;
 esac
