@@ -201,6 +201,8 @@ elif [ "$control" = "off_root" ];then
         usage
     fi
 
+    echo "rm -f $usb_disk_power_on $usb_disk_mount"
+    rm -f $usb_disk_power_on $usb_disk_mount
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
     echo $usb_root > /sys/bus/usb/drivers/usb/unbind
 
