@@ -167,6 +167,7 @@ class F1Finder(Finder):
     priority = 60
     allow_list = [
         u'F1',
+        u'WRC',
     ]
     def allow(self, pinfo):
         if pinfo.category_2 == 'モータースポーツ' and re.search(self.allow_pattern, pinfo.title):
