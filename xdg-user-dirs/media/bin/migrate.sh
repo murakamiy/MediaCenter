@@ -14,6 +14,25 @@ function has_free_space() {
     return 1
 }
 
+function move_to_hd() {
+    file=$1
+    dir=$2
+
+    title=
+    if [ $dir = $MC_DIR_TS_HD ];then
+        title=$(print_title $MC_DIR_JOB_FINISHED/$(basename $file | awk -F . '{ print $1 }').xml)
+    elif [ $dir = $MC_DIR_ENCODE_HD ];then
+        title=$(print_title ${MC_DIR_ENCODE_FINISHED}/$(basename $file | awk -F . '{ print $1 }').xml)
+    fi
+
+    size=$(stat --format=%s $file)
+    start=$(date +%s.%N)
+    /bin/mv $file $dir
+    end=$(date +%s.%N)
+    speed=$(echo "scale=3; r = $size / ($end - $start); scale=0; r / 1024 / 1024" | bc)
+    log "move to hard disk : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"
+}
+
 if [ "$1" = "array" ];then
 
     log "start ts_hd"
@@ -45,10 +64,7 @@ if [ "$1" = "array" ];then
             continue
         fi
 
-        file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS/@@")
-        log "move to hard disk : $file_info"
-
-        /bin/mv $ts $MC_DIR_TS_HD
+        move_to_hd $ts $MC_DIR_TS_HD
     done
 
     dd if=/dev/urandom of=$MC_DIR_TS_HD/flush_hard_disk_write_cache bs=1M count=128
@@ -66,8 +82,7 @@ elif [ "$1" = "encode" ];then
             continue
         fi
 
-        log "move to hard disk : $en"
-        /bin/mv $en $MC_DIR_ENCODE_HD
+        move_to_hd $en $MC_DIR_ENCODE_HD
     done
     log "end encode"
 
