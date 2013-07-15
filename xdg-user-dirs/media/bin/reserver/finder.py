@@ -98,13 +98,9 @@ class BaseBallFinder(Finder):
 class TitleFinder(Finder):
     priority = 100
     allow_list = [
-        u'鋼の錬金術師',
         u'ジョジョの奇妙な冒険',
         u'はじめの一歩',
-        u'ペルソナ4',
-        u'偽物語',
         u'青の祓魔師',
-        u'DEATH NOTE',
         u'刀語',
         u'NARUTO',
         u'電脳コイル',
@@ -231,7 +227,7 @@ class RandomGenerator:
     getRandomHour = staticmethod(getRandomHour)
 
 class RandomFinder(Finder):
-    priority = 1
+    priority = 70
     random_channel = RandomGenerator.getRandomChannel()
     random_hour = RandomGenerator.getRandomHour()
     rectime = 29 * 60

@@ -34,37 +34,33 @@ if [ $do_fsck -eq 0 ];then
     fi
 fi
 
+sudo $MC_BIN_MOUNT_TMP mount
 $MC_BIN_USB_MOUNT
 bash $MC_BIN_MIGRATE array &
 pid_mig_array=$!
-bash $MC_BIN_MIGRATE encode &
-pid_mig_encode=$!
 bash $MC_BIN_SMB &
 pid_smb=$!
-
-wait $pid_mig_encode
-wait $pid_smb
-wait $pid_mig_array
 
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
-log 'starting create ts file'
+log 'starting epgdump_py digital'
 for c in $(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL);do
-    $MC_BIN_REC $c 60 ${MC_DIR_EPG}/${c}.ts
+    $MC_BIN_REC $c 60 ${MC_DIR_TMP}/${c}.ts
+    python $MC_BIN_EPGDUMP -e -c $channel -i ${MC_DIR_TMP}/${c}.ts -o ${MC_DIR_EPG}/${c}.xml
+    /bin/rm ${MC_DIR_TMP}/${c}.ts
 done
-$MC_BIN_REC BS15_0 60 ${MC_DIR_EPG}/bs_cs_0.ts
-$MC_BIN_REC CS2    60 ${MC_DIR_EPG}/bs_cs_2.ts
-$MC_BIN_REC CS4    60 ${MC_DIR_EPG}/bs_cs_4.ts
 
-log 'starting epgdump_py'
-for ts in ${MC_DIR_EPG}/[0-9]*.ts;do
-    channel=$(basename $ts .ts)
-    python $MC_BIN_EPGDUMP -e -c $channel -i $ts -o ${MC_DIR_EPG}/${channel}.xml
-done
-python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_EPG}/bs_cs_0.ts -o ${MC_DIR_EPG}/bs_cs_0.xml
-python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_EPG}/bs_cs_2.ts -o ${MC_DIR_EPG}/bs_cs_2.xml
-python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_EPG}/bs_cs_4.ts -o ${MC_DIR_EPG}/bs_cs_4.xml
+log 'starting epgdump_py bs cs'
+$MC_BIN_REC BS15_0 60 ${MC_DIR_TMP}/bs_cs_0.ts
+python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_TMP}/bs_cs_0.ts -o ${MC_DIR_EPG}/bs_cs_0.xml
+/bin/rm ${MC_DIR_TMP}/bs_cs_0.ts
+$MC_BIN_REC CS2    60 ${MC_DIR_TMP}/bs_cs_2.ts
+python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_TMP}/bs_cs_2.ts -o ${MC_DIR_EPG}/bs_cs_2.xml
+/bin/rm ${MC_DIR_TMP}/bs_cs_2.ts
+$MC_BIN_REC CS4    60 ${MC_DIR_TMP}/bs_cs_4.ts
+python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_TMP}/bs_cs_4.ts -o ${MC_DIR_EPG}/bs_cs_4.xml
+/bin/rm ${MC_DIR_TMP}/bs_cs_4.ts
 
 log 'starting find program'
 python $MC_BIN_RESERVER '[0-9]*.xml' 'bs_cs_[0-9]*.xml'
@@ -75,6 +71,15 @@ for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
     xmlstarlet format --encode utf-8 $f > $temp_file
     /bin/mv $temp_file $f
 done
+
+wait $pid_smb
+wait $pid_mig_array
+sudo $MC_BIN_MOUNT_TMP unmount
+
+running=$(find $MC_DIR_PLAY $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
+if [ -z "$running" ];then
+    $MC_BIN_USB_POWER_OFF
+fi
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 

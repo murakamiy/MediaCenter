@@ -10,7 +10,7 @@ for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
     {
         "date +%Y%m%d%H%M%S -d \""$2"\"" | getline time
         printf("%d\t%s\n", time, $1)
-    }' | sort -k 1 -n -r | sed -n -e '51,$p' | awk '{ print $2 }');do
+    }' | sort -k 1 -n -r | sed -n -e '71,$p' | awk '{ print $2 }');do
 
     smbclient -A ~/.smbauth -D contents -c "del $f" $MC_SMB_SERVER
 
@@ -19,12 +19,14 @@ done
 avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
 log "smb delete end $avail"
 
-cd $MC_DIR_MP4
-for f in $(find . -name '*.mp4' -printf '%f\n');do
-    fuser "$f"
-    if [ $? -ne 0 -a -s "$f" ];then
+cd $MC_DIR_TMP
+for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -printf '%f\n');do
+    fuser "${MC_DIR_MP4}/$f"
+    if [ $? -ne 0 -a -s "${MC_DIR_MP4}/$f" ];then
+        cp "${MC_DIR_MP4}/$f" $MC_DIR_TMP
         smbclient -A ~/.smbauth -D contents -c "put $f" $MC_SMB_SERVER
-        /bin/rm $f
+        /bin/rm "${MC_DIR_MP4}/$f"
+        /bin/rm "${MC_DIR_TMP}/$f"
     fi
 done
 
