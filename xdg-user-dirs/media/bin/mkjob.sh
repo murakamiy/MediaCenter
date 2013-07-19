@@ -47,7 +47,7 @@ python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 log 'starting epgdump_py digital'
 for c in $(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL);do
     $MC_BIN_REC $c 60 ${MC_DIR_TMP}/${c}.ts
-    python $MC_BIN_EPGDUMP -e -c $channel -i ${MC_DIR_TMP}/${c}.ts -o ${MC_DIR_EPG}/${c}.xml
+    python $MC_BIN_EPGDUMP -e -c $c -i ${MC_DIR_TMP}/${c}.ts -o ${MC_DIR_EPG}/${c}.xml
     /bin/rm ${MC_DIR_TMP}/${c}.ts
 done
 
