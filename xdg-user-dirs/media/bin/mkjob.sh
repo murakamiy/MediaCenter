@@ -9,7 +9,7 @@ touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
 
 today=$(date +%e)
-fsck_span=1
+fsck_span=7
 do_fsck=$(($today % $fsck_span))
 if [ $do_fsck -eq 0 ];then
     log "starting fsck"

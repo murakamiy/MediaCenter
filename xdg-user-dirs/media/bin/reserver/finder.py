@@ -95,6 +95,16 @@ class BaseBallFinder(Finder):
             self.next_flag = True
         return False
 
+class BoxingFinder(Finder):
+    priority = 1
+    allow_list = [
+        u'ボクシング',
+    ]
+    def allow(self, pinfo):
+        if re.search(self.allow_pattern, pinfo.title):
+            return True
+        return False
+
 class TitleFinder(Finder):
     priority = 100
     allow_list = [
@@ -103,8 +113,10 @@ class TitleFinder(Finder):
         u'青の祓魔師',
         u'刀語',
         u'NARUTO',
-        u'電脳コイル',
         u'攻殻機動隊',
+        u'CLANNAD',
+        u'ささみさん',
+        u'ベストヒットUSA',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
