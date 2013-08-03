@@ -123,10 +123,22 @@ class TitleFinder(Finder):
             return True
         return False
 
+class CreditFinderHigh(Finder):
+    priority = 100
+    allow_list = [
+        u'西尾維新',
+    ]
+    deny_list = [
+        u'BSプレマップ',
+    ]
+    def allow(self, pinfo):
+        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
+            return True
+        return False
+
 class CreditFinder(Finder):
     priority = 40
     allow_list = [
-        u'西尾維新',
         u'浜田雅功',
         u'ダウンタウン',
         u'星野真里',
@@ -140,7 +152,6 @@ class CreditFinder(Finder):
         u'菊川怜',
         u'新垣結衣',
         u'安田美沙子',
-        u'西尾維新',
         u'麻枝准',
         u'大塚愛',
         u'レディー・ガガ',
@@ -172,7 +183,7 @@ class NewsFinder(Finder):
         return False
 
 class F1Finder(Finder):
-    priority = 60
+    priority = 40
     allow_list = [
         u'F1',
         u'WRC',
@@ -193,7 +204,7 @@ class DarwinFinder(Finder):
         return False
 
 class VarietyFinder(Finder):
-    priority = 60
+    priority = 40
     allow_list = [
         u'リンカーン',
         u'ダウンタウンのガキの使いやあらへんで',
