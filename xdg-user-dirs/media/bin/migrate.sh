@@ -33,57 +33,43 @@ function move_to_hd() {
     log "move to hard disk : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"
 }
 
-if [ "$1" = "array" ];then
+log "start ts_hd"
 
-    log "start ts_hd"
-    for ts in $(find $MC_DIR_TS_HD -type f | sort);do
+sudo $MC_BIN_USB_CONTROL -f
 
-        has_free_space
-        if [ $? -eq 0 ];then
-            break
-        fi
+for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
-        xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
-        png_thumb=${MC_DIR_THUMB}/$(basename $ts)
+    has_free_space
+    if [ $? -eq 0 ];then
+        break
+    fi
 
-        if [ -f "$png_thumb" ];then
-            inode=$(stat --format='%i' $png_thumb)
-            find $MC_DIR_TITLE_TS -inum $inode -delete
-        fi
+    xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
+    png_thumb=${MC_DIR_THUMB}/$(basename $ts)
 
-        file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS_HD/@@")
-        log "delete : $file_info $png_thumb $xml"
-        /bin/rm -f $ts $png_thumb $xml
+    if [ -f "$png_thumb" ];then
+        inode=$(stat --format='%i' $png_thumb)
+        find $MC_DIR_TITLE_TS -inum $inode -delete
+    fi
 
-    done
+    file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS_HD/@@")
+    log "delete : $file_info $png_thumb $xml"
+    /bin/rm -f $ts $png_thumb $xml
 
-    for ts in $(find $MC_DIR_TS -type f);do
+done
 
-        fuser $ts
-        if [ $? -eq 0 ];then
-            continue
-        fi
+sudo $MC_BIN_USB_CONTROL -f
 
-        move_to_hd $ts $MC_DIR_TS_HD
-    done
+for ts in $(find $MC_DIR_TS -type f);do
 
-    dd if=/dev/urandom of=$MC_DIR_TS_HD/flush_hard_disk_write_cache bs=1M count=128
-    sync
+    fuser $ts
+    if [ $? -eq 0 ];then
+        continue
+    fi
 
-    log "end ts_hd"
+    move_to_hd $ts $MC_DIR_TS_HD
+done
 
-elif [ "$1" = "encode" ];then
+sudo $MC_BIN_USB_CONTROL -f
 
-    log "start encode"
-    for en in $(find $MC_DIR_ENCODE -type f);do
-
-        fuser $en
-        if [ $? -eq 0 ];then
-            continue
-        fi
-
-        move_to_hd $en $MC_DIR_ENCODE_HD
-    done
-    log "end encode"
-
-fi
+log "end ts_hd"

@@ -15,6 +15,7 @@ USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
         -p usb hub power on
         -z usb hub power off
         -r usb root power off
+        -f flush write cache buffer
 EOF
 exit 1
 }
@@ -45,7 +46,11 @@ function unmount_partition() {
     fi
 }
 function flush_disk_cache() {
-    device_list=$@
+    if [ $# -eq 0 ];then
+        device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
+    else
+        device_list=$@
+    fi
 
     echo sync
     sync
@@ -53,7 +58,7 @@ function flush_disk_cache() {
         echo hdparm -F $device
         hdparm -F $device
     done
-    sleep 1
+    sleep 3
 }
 function do_stop() {
 
@@ -99,8 +104,12 @@ EOF
 
 control=
 output_file=
-while getopts 'hl:mprz' opt;do
+while getopts 'fhl:mprz' opt;do
     case $opt in
+        f)
+            flush_disk_cache
+            exit
+            ;;
         h)
             usage
             ;;
