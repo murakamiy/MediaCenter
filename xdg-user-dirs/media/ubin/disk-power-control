@@ -161,6 +161,8 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
         bash /home/mc/xdg-user-dirs/media/bin/usb-disk.sh
     fi
 
+    flush_disk_cache
+
     rm -f $usb_disk_power_on
     if [ "$control" = "mount" ];then
         rm -f $usb_disk_mount
@@ -210,6 +212,7 @@ elif [ "$control" = "off_root" ];then
         usage
     fi
 
+    flush_disk_cache
     echo "rm -f $usb_disk_power_on $usb_disk_mount"
     rm -f $usb_disk_power_on $usb_disk_mount
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
