@@ -74,6 +74,7 @@ else
             log "end mp4 : $title"
             sync
             kill -TERM $pid_tail
+            ( sleep 60; kill -KILL $pid_avconv ) &
             wait $pid_avconv
             rm -f $fifo_b25
         fi
