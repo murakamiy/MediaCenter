@@ -73,6 +73,8 @@ class AnimeFinder(Finder):
         u'TIGER&BUNNY',
         u'戦国乙女',
         u'DOG　DAYS',
+        u'ワンピース',
+        u'デジタルリマスターHD版',
     ]
     def allow(self, pinfo):
         if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and pinfo.start.hour < 6:
@@ -99,6 +101,7 @@ class BoxingFinder(Finder):
     priority = 1
     allow_list = [
         u'ボクシング',
+        u'エキサイトマッチ',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
