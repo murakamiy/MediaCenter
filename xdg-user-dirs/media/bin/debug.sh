@@ -63,7 +63,7 @@ case $command in
         ;;
     rec)
         echo MC_DIR_RECORDING
-        for f in $(find $MC_DIR_RECORDING -type f);do
+        for f in $(find $MC_DIR_RECORDING -type f -not -name mkjob.xml);do
             title=$(print_title $f)
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
