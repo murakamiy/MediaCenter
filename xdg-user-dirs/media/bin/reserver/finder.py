@@ -75,6 +75,7 @@ class AnimeFinder(Finder):
         u'DOG　DAYS',
         u'ワンピース',
         u'デジタルリマスターHD版',
+        u'銀魂',
     ]
     def allow(self, pinfo):
         if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and pinfo.start.hour < 6:
@@ -120,6 +121,7 @@ class TitleFinder(Finder):
         u'CLANNAD',
         u'ささみさん',
         u'ベストヒットUSA',
+        u'ブラック・ジャック',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
