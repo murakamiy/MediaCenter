@@ -81,6 +81,24 @@ case $command in
             echo "$ts_file $time $title"
         done
         ;;
+    encode)
+        for f in $MC_DIR_ENCODE_HD/*;do
+            base=$(basename $f | awk -F . '{ print $1 }')
+            ext=$(basename $f | awk -F . '{ print $2 }')
+
+            title=$base
+            tag=
+            if [ "$ext" = "mp4" ];then
+                tag=$(mp4info $f | grep Comments: | awk -F ': ' '{ print $2 }')
+            fi
+            if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
+                title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
+            elif [ -n "$tag" ];then
+                title=$tag
+            fi
+            echo "$base.$ext $title"
+        done
+        ;;
     mk_title_encode)
         shift
         for f in $@;do
