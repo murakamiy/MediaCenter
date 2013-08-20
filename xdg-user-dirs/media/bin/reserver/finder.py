@@ -76,6 +76,9 @@ class AnimeFinder(Finder):
         u'ワンピース',
         u'デジタルリマスターHD版',
         u'銀魂',
+        u'ベルサイユのばら',
+        u'コレクター・ユイ',
+        u'トリコ',
     ]
     def allow(self, pinfo):
         if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and pinfo.start.hour < 6:
