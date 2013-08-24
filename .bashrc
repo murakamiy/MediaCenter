@@ -42,7 +42,7 @@ alias psp='ps --headers --sort=pid -e -o user,args'
 alias psm='ps --headers --sort=pid -a -o %cpu,%mem,rss,ppid,pgrp,pid,user,args'
 alias getclip='xclip -o'
 alias putclip='xclip -i'
-alias vimemo='vi ~/work/memo'
+alias vimemo='vi ~/work/memo.txt'
 
 alias xml='xmlstarlet'
 alias myindent='indent -kr --no-tabs --line-length 100'
@@ -61,7 +61,7 @@ alias cdfile='cd /home/mc/xdg-user-dirs/media/files'
 # Function
 #####################################################################################################
 function m() {
-    mount | grep ^/
+    mount | grep ^/ | sort
 }
 function vip() {
     vi -p $(find $@ -type f)
