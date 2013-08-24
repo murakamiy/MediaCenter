@@ -56,6 +56,7 @@ alias cdbin='cd /home/mc/xdg-user-dirs/media/bin'
 alias cdubin='cd /home/mc/xdg-user-dirs/media/ubin'
 alias cdjob='cd /home/mc/xdg-user-dirs/media/job'
 alias cdvideo='cd /home/mc/xdg-user-dirs/media/video'
+alias cdfile='cd /home/mc/xdg-user-dirs/media/files'
 #####################################################################################################
 # Function
 #####################################################################################################
