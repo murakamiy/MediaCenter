@@ -1,12 +1,31 @@
 #!/bin/bash
-
+source $(dirname $0)/00.conf
 log=/tmp/$(basename $0)
 
-echo '##################################################' >> $log
 
-mount | grep -q '/mnt/ssd_array/video'
+assemble=false
+if [ -f /proc/mdstat ];then
+    grep -q '^md1 : active ' /proc/mdstat
+    if [ $? -ne 0 ];then
+        assemble=true
+    fi
+else
+    assemble=true
+fi
+if [ "$assemble" = "true" ];then
+    date +"%Y/%m/%d %H:%M:%S.%N ssd array assembled" >> $log
+    mdadm --assemble --scan
+fi
+
+mount | grep -q '^/dev/md1p1'
 if [ $? -ne 0 ];then
-    date +"%Y/%m/%d %H:%M:%S.%N mount ssd_array" >> $log
+    date +"%Y/%m/%d %H:%M:%S.%N mount ssd_array device" >> $log
+    mount -o noatime,stripe=256 /dev/md1p1 /mnt/ssd_array
+fi
+
+mount | grep -q '/home/mc/xdg-user-dirs/media/video'
+if [ $? -ne 0 ];then
+    date +"%Y/%m/%d %H:%M:%S.%N mount ssd_array bind" >> $log
     mount --bind /mnt/ssd_array/video /home/mc/xdg-user-dirs/media/video
 fi
 
@@ -21,7 +40,7 @@ if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on ];then
     if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/mount ];then
         date +"%Y/%m/%d %H:%M:%S.%N mount usb_disk" >> $log
 
-        mount -o noatime,stripe=4 /dev/md0p1 /mnt/hd_array
+        mount -o noatime,stripe=5120 /dev/md0p1 /mnt/hd_array
         mount -o noatime /dev/sde1 /mnt/hd
         mount -o noatime /dev/sdf1 /mnt/hd2
         mount --bind /mnt/hd_array/ts_hd /home/mc/xdg-user-dirs/media/video/ts_hd

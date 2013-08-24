@@ -2,6 +2,7 @@
 
 usb_disk_power_on=/home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on
 usb_disk_mount=/home/mc/xdg-user-dirs/media/job/state/usb_disk/mount
+mount_sh=/home/mc/xdg-user-dirs/media/bin/mount.sh
 
 function usage() {
 cat << EOF
@@ -63,6 +64,7 @@ function flush_disk_cache() {
 function do_stop() {
 
     device_file=$1
+    device_file_link=$device_file
     if [ -L $device_file ];then
         device_file=$(find $device_file -printf '%h/%l')
     fi
@@ -87,6 +89,7 @@ function do_stop() {
     fi
 
 cat << EOF
+device file : $device_file_link -> $device_file
 echo 0           > /sys/${usb_hub_path}/power/autosuspend
 echo auto        > /sys/${usb_hub_path}/power/level
 echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
@@ -156,17 +159,23 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
     if [ $count -eq 0 ];then
         echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
         echo $usb_root > /sys/bus/usb/drivers/usb/bind
-        initctl emit wait-for-usb-disk
-    else
-        bash /home/mc/xdg-user-dirs/media/bin/usb-disk.sh
     fi
+
+    for i in $(seq 60);do
+        echo "power on $i"
+        if [ -h /dev/usbhda1 -a -h /dev/usbhdb1 -a -h /dev/usbhdc1 -a -h /dev/usbhdd1 ];then
+            echo "power on $i all device found"
+            break
+        fi
+        sleep 1
+    done
+
+    mdadm --assemble --scan
 
     flush_disk_cache
+    bash $mount_sh
 
-    rm -f $usb_disk_power_on
-    if [ "$control" = "mount" ];then
-        rm -f $usb_disk_mount
-    fi
+    rm -f $usb_disk_power_on $usb_disk_mount
 
 elif [ "$control" = "off_hub" ];then
 
@@ -213,7 +222,6 @@ elif [ "$control" = "off_root" ];then
     fi
 
     flush_disk_cache
-    echo "rm -f $usb_disk_power_on $usb_disk_mount"
     rm -f $usb_disk_power_on $usb_disk_mount
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
     echo $usb_root > /sys/bus/usb/drivers/usb/unbind

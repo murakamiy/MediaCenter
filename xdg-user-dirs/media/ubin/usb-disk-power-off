@@ -1,57 +1,64 @@
 #!/bin/bash
-prog_name=$(basename $0)
 
+prog_name=$(basename $0)
 lock_file=/tmp/usb_disk_power_lock_file
 power_control=/home/mc/xdg-user-dirs/media/ubin/disk-power-control
 usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk/id
 
-count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
+function do_usb_disk_opration() {
 
-if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
-    echo "USB disk power status is all ready off"
-    exit 1
-elif [ $prog_name = "usb-disk-power-on" -a $count -ne 0 ];then
-    echo "USB disk power status is all ready on"
-    exit 1
-elif [ $prog_name = "usb-disk-mount" ];then
+    count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
 
-    mount_point_count=$(mount | grep ^/ | wc -l)
-    if [ $mount_point_count -gt 6 ];then
-        # 1 root
-        # 2 ssd_array
-        # 3 ssd_array bind
-        # 4 usb_disk_array
-        # 5 usb_disk_array bind
-        # 6 usb_disk
-        # 7 usb_disk bind
-        echo "USB disk is all ready mounted"
-        exit 1
+    if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
+        echo "USB disk power status is all ready off"
+        return 1
+    elif [ $prog_name = "usb-disk-power-on" -a $count -ne 0 ];then
+        echo "USB disk power status is all ready on"
+        return 1
+    elif [ $prog_name = "usb-disk-mount" ];then
+
+        mount_point_count=$(mount | grep ^/ | wc -l)
+        if [ $mount_point_count -gt 6 ];then
+            # 1 root
+            # 2 ssd_array
+            # 3 ssd_array bind
+            # 4 usb_disk_array
+            # 5 usb_disk_array bind
+            # 6 usb_disk
+            # 7 usb_disk bind
+            echo "USB disk is all ready mounted"
+            return 1
+        fi
     fi
-fi
+
+    if [ $prog_name = "usb-disk-power-off" ];then
+
+        if [ $# -eq 0 ];then
+            device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
+        else
+            device_list=$@
+        fi
+        sudo $power_control -l $usb_disk_id -z $device_list
+        sudo $power_control -r $(cat $usb_disk_id)
+
+    elif [ $prog_name = "usb-disk-power-on" ];then
+
+        sudo $power_control -p $(cat $usb_disk_id)
+
+    elif [ $prog_name = "usb-disk-mount" ];then
+
+        sudo $power_control -m $(cat $usb_disk_id)
+
+    fi
+}
+
+####################################################################################################
 
 lockfile-create $lock_file
 lockfile-touch $lock_file &
 pid_lock=$!
 
-if [ $prog_name = "usb-disk-power-off" ];then
-
-    if [ $# -eq 0 ];then
-        device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
-    else
-        device_list=$@
-    fi
-    sudo $power_control -l $usb_disk_id -z $device_list
-    sudo $power_control -r $(cat $usb_disk_id)
-
-elif [ $prog_name = "usb-disk-power-on" ];then
-
-    sudo $power_control -p $(cat $usb_disk_id)
-
-elif [ $prog_name = "usb-disk-mount" ];then
-
-    sudo $power_control -m $(cat $usb_disk_id)
-
-fi
+do_usb_disk_opration
 
 kill -TERM $pid_lock
 lockfile-remove $lock_file
