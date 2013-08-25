@@ -340,99 +340,88 @@ udevadm info --query=path --name=/dev/input/js0 --attribute-walk
 
 
 -- usb disk power off
-2013/08/25 03:51:52.735031616 ssd array assembled
-2013/08/25 03:51:53.371262382 mount ssd_array device
-2013/08/25 03:51:53.408137251 mount ssd_array bind
-2013/08/25 03:51:53.412415288 power off usb_disk
-/devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/4-1.4:1.0/host9/target9:0:0/9:0:0:0/block/sdf
-/devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/4-1.3:1.0/host8/target8:0:0/8:0:0:0/block/sde
-/devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/4-1.2:1.0/host7/target7:0:0/7:0:0:0/block/sdd
-/devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/4-1.1:1.0/host6/target6:0:0/6:0:0:0/block/sdc
+2013/08/25 11:04:56.673248544 ssd array assembled
+2013/08/25 11:04:57.290993128 mount ssd_array device
+2013/08/25 11:04:57.329008071 mount ssd_array bind
+
+usb disk device : /dev/sdc /dev/sdd /dev/sde /dev/sdf
+
+2013/08/25 11:04:57.398583981 power off usb_disk
+wait for usb disk device 1
+wait for usb disk device 1 all device found
+/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.1/2-1.1:1.0/host6/target6:0:0/6:0:0:0/block/sdc
+/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.2/2-1.2:1.0/host7/target7:0:0/7:0:0:0/block/sdd
+/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.3/2-1.3:1.0/host8/target8:0:0/8:0:0:0/block/sde
+/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.4/2-1.4:1.0/host9/target9:0:0/9:0:0:0/block/sdf
 sync
-hdparm -F /dev/usbhdd
+hdparm -F /dev/sdc
 
-/dev/usbhdd:
-hdparm -F /dev/usbhdc
+/dev/sdc:
+hdparm -F /dev/sdd
 
-/dev/usbhdc:
-hdparm -F /dev/usbhdb
+/dev/sdd:
+hdparm -F /dev/sde
 
-/dev/usbhdb:
-hdparm -F /dev/usbhda
+/dev/sde:
+hdparm -F /dev/sdf
 
-/dev/usbhda:
-
-device file : /dev/usbhdd -> /dev/sdf
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.4/power/level
-echo 4-1.4 > /sys/bus/usb/drivers/usb/unbind
-
-device file : /dev/usbhdc -> /dev/sde
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.3/power/level
-echo 4-1.3 > /sys/bus/usb/drivers/usb/unbind
+/dev/sdf:
 
 mdadm --stop /dev/md0
 mdadm: stopped /dev/md0
-device file : /dev/usbhdb -> /dev/sdd
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.2/power/level
-echo 4-1.2 > /sys/bus/usb/drivers/usb/unbind
+device file : /dev/sdc -> /dev/sdc
+echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.1/power/autosuspend
+echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.1/power/level
+echo 2-1.1 > /sys/bus/usb/drivers/usb/unbind
 
-device file : /dev/usbhda -> /dev/sdc
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb4/4-1/4-1.1/power/level
-echo 4-1.1 > /sys/bus/usb/drivers/usb/unbind
+device file : /dev/sdd -> /dev/sdd
+echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.2/power/autosuspend
+echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.2/power/level
+echo 2-1.2 > /sys/bus/usb/drivers/usb/unbind
+
+device file : /dev/sde -> /dev/sde
+echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.3/power/autosuspend
+echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.3/power/level
+echo 2-1.3 > /sys/bus/usb/drivers/usb/unbind
+
+device file : /dev/sdf -> /dev/sdf
+echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.4/power/autosuspend
+echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.4/power/level
+echo 2-1.4 > /sys/bus/usb/drivers/usb/unbind
 sync
-echo usb4 > /sys/bus/usb/drivers/usb/unbind
+echo usb2 > /sys/bus/usb/drivers/usb/unbind
 
 
 -- usb disk mount
-echo usb4 > /sys/bus/usb/drivers/usb/bind
-power on 1
-power on 2
-power on 3
-power on 4
-power on 5
-power on 6
-power on 7
-power on 8
-power on 9
-power on 10
-power on 11
-power on 12
-power on 13
-power on 13 all device found
+echo usb2 > /sys/bus/usb/drivers/usb/bind
+wait for usb disk device 1
+wait for usb disk device 2
+wait for usb disk device 3
+wait for usb disk device 4
+wait for usb disk device 5
+wait for usb disk device 6
+wait for usb disk device 7
+wait for usb disk device 8
+wait for usb disk device 9
+wait for usb disk device 10
+wait for usb disk device 11
+wait for usb disk device 12
+wait for usb disk device 13
+wait for usb disk device 13 all device found
 mdadm: /dev/md0 has been started with 2 drives.
 sync
-hdparm -F /dev/usbhdb
-
-/dev/usbhdb:
-hdparm -F /dev/usbhda
-
-/dev/usbhda:
-hdparm -F /dev/usbhdd
-
-/dev/usbhdd:
-hdparm -F /dev/usbhdc
-
-/dev/usbhdc:
+hdparm -F /dev/sdc
 
 /dev/sdc:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
+hdparm -F /dev/sdd
 
 /dev/sdd:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
+hdparm -F /dev/sde
 
 /dev/sde:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
+hdparm -F /dev/sdf
 
 /dev/sdf:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
 
 /dev/md0p1 on /home/mc/xdg-user-dirs/media/video/ts_hd type ext4 (rw,noatime,stripe=5120,data=ordered)
 /dev/md0p1 on /mnt/hd_array type ext4 (rw,noatime,stripe=5120,data=ordered)
@@ -442,56 +431,3 @@ hdparm -F /dev/usbhdc
 /dev/sde1 on /home/mc/xdg-user-dirs/media/video/encode_hd type ext4 (rw,noatime,data=ordered)
 /dev/sde1 on /mnt/hd type ext4 (rw,noatime,data=ordered)
 /dev/sdf1 on /mnt/hd2 type vfat (rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro)
-
-
--- usb disk power on
-echo usb4 > /sys/bus/usb/drivers/usb/bind
-power on 1
-power on 2
-power on 3
-power on 4
-power on 5
-power on 6
-power on 7
-power on 8
-power on 9
-power on 10
-power on 11
-power on 12
-power on 13
-power on 14
-power on 14 all device found
-mdadm: /dev/md0 has been started with 2 drives.
-sync
-hdparm -F /dev/usbhdb
-
-/dev/usbhdb:
-hdparm -F /dev/usbhda
-
-/dev/usbhda:
-hdparm -F /dev/usbhdd
-
-/dev/usbhdd:
-hdparm -F /dev/usbhdc
-
-/dev/usbhdc:
-
-/dev/sdc:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
-
-/dev/sdd:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
-
-/dev/sde:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
-
-/dev/sdf:
- setting drive write-caching to 1 (on)
- write-caching =  1 (on)
-
-/dev/md1p1 on /home/mc/xdg-user-dirs/media/video type ext4 (rw,noatime,stripe=256,data=ordered)
-/dev/md1p1 on /mnt/ssd_array type ext4 (rw,noatime,stripe=256,data=ordered)
-/dev/sdb1 on / type ext4 (rw,noatime,errors=remount-ro,data=ordered)

@@ -3,10 +3,11 @@
 usb_disk_power_on=/home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on
 usb_disk_mount=/home/mc/xdg-user-dirs/media/job/state/usb_disk/mount
 mount_sh=/home/mc/xdg-user-dirs/media/bin/mount.sh
+realpath=/home/mc/xdg-user-dirs/media/ubin/realpath
 
 function usage() {
 cat << EOF
-USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
+USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z
         $(basename $0) -r USB_ROOT_ID
         $(basename $0) -p USB_ROOT_ID
         $(basename $0) -m USB_ROOT_ID
@@ -17,6 +18,7 @@ USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z [USB_DEVICE_FILE]...
         -z usb hub power off
         -r usb root power off
         -f flush write cache buffer
+        -d print usb device list
 EOF
 exit 1
 }
@@ -46,9 +48,28 @@ function unmount_partition() {
         mdadm --stop /dev/$array_name
     fi
 }
+function print_usb_device_list() {
+    if [ -d /dev/usbhd/ ];then
+        for l in $(find /dev/usbhd/ -type l | sort);do
+            $realpath $l
+        done
+    fi
+}
+function wait_for_usb_disk_device() {
+    for i in $(seq 60);do
+        echo "wait for usb disk device $i"
+        count=$(print_usb_device_list | wc -l)
+        if [ $count -eq 4 ];then
+            echo "wait for usb disk device $i all device found"
+            break
+        fi
+        sleep 1
+    done
+}
 function flush_disk_cache() {
+    echo -e "\nusb disk flush start"
     if [ $# -eq 0 ];then
-        device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
+        device_list=$(print_usb_device_list)
     else
         device_list=$@
     fi
@@ -60,6 +81,7 @@ function flush_disk_cache() {
         hdparm -F $device
     done
     sleep 3
+    echo -e "usb disk flush end\n"
 }
 function do_stop() {
 
@@ -107,8 +129,12 @@ EOF
 
 control=
 output_file=
-while getopts 'fhl:mprz' opt;do
+while getopts 'dfhl:m:p:r:z' opt;do
     case $opt in
+        d)
+            print_usb_device_list
+            exit
+            ;;
         f)
             flush_disk_cache
             exit
@@ -121,12 +147,15 @@ while getopts 'fhl:mprz' opt;do
             ;;
         m)
             control=mount
+            usb_root=$OPTARG
             ;;
         p)
             control=on
+            usb_root=$OPTARG
             ;;
         r)
             control=off_root
+            usb_root=$OPTARG
             ;;
         z)
             control=off_hub
@@ -139,13 +168,8 @@ if [ "$control" = "" ];then
     usage
 fi
 
-if [ $# -lt 1 ];then
-    usage
-fi
-
 if [ "$control" = "on" -o "$control" = "mount" ];then
 
-    usb_root=$1
     if [ "$usb_root" = "" ];then
         usage
     fi
@@ -155,23 +179,14 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
         touch $usb_disk_mount
     fi
 
-    count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
+    count=$(print_usb_device_list | wc -l)
     if [ $count -eq 0 ];then
         echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
         echo $usb_root > /sys/bus/usb/drivers/usb/bind
+        wait_for_usb_disk_device
     fi
 
-    for i in $(seq 60);do
-        echo "power on $i"
-        if [ -h /dev/usbhda1 -a -h /dev/usbhdb1 -a -h /dev/usbhdc1 -a -h /dev/usbhdd1 ];then
-            echo "power on $i all device found"
-            break
-        fi
-        sleep 1
-    done
-
     mdadm --assemble --scan
-
     flush_disk_cache
     bash $mount_sh
 
@@ -179,7 +194,9 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
 
 elif [ "$control" = "off_hub" ];then
 
-    device_list=$@
+    wait_for_usb_disk_device
+    device_list=$(print_usb_device_list)
+
     for device in $device_list;do
         if [ ! -e $device ];then
             echo "ERROR : DEVICE_FILE does not exist $device"
@@ -187,6 +204,7 @@ elif [ "$control" = "off_hub" ];then
         fi
         udevadm info --query=path --name=$device
         if [ $? -ne 0 ];then
+            echo "ERROR : udevadm command failed $device"
             exit 1
         fi
     done
@@ -216,7 +234,6 @@ elif [ "$control" = "off_hub" ];then
 
 elif [ "$control" = "off_root" ];then
 
-    usb_root=$1
     if [ "$usb_root" = "" ];then
         usage
     fi

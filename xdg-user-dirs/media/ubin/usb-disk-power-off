@@ -7,7 +7,7 @@ usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk/id
 
 function do_usb_disk_opration() {
 
-    count=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]' | wc -l)
+    count=$($power_control -d | wc -l)
 
     if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
         echo "USB disk power status is all ready off"
@@ -33,12 +33,7 @@ function do_usb_disk_opration() {
 
     if [ $prog_name = "usb-disk-power-off" ];then
 
-        if [ $# -eq 0 ];then
-            device_list=$(find /dev -maxdepth 1 -type l -name 'usbhd*' -not -name '*[0-9]')
-        else
-            device_list=$@
-        fi
-        sudo $power_control -l $usb_disk_id -z $device_list
+        sudo $power_control -l $usb_disk_id -z
         sudo $power_control -r $(cat $usb_disk_id)
 
     elif [ $prog_name = "usb-disk-power-on" ];then
