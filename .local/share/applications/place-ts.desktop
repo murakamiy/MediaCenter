@@ -2,5 +2,5 @@
 Name=PlaceTS
 Type=Application
 Exec=/home/mc/xdg-user-dirs/media/bin/place-ts.sh %U
-Icon=folder-video
+Icon=totem
 Terminal=false

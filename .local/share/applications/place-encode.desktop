@@ -2,5 +2,5 @@
 Name=PlaceEncode
 Type=Application
 Exec=/home/mc/xdg-user-dirs/media/bin/place-encode.sh %U
-Icon=folder-pictures
+Icon=user-bookmarks
 Terminal=false
