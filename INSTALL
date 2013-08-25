@@ -339,6 +339,13 @@ USBデバイス情報取得
 udevadm info --query=path --name=/dev/input/js0 --attribute-walk
 
 
+xfce config
+export DISPLAY=":0.0"
+xfconf-query -l
+xfconf-query -lv -c xfce4-desktop
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s /home/mc/xdg-user-dirs/media/job/state/background/job.bmp
+
+
 -- usb disk power off
 2013/08/25 11:04:56.673248544 ssd array assembled
 2013/08/25 11:04:57.290993128 mount ssd_array device

@@ -1,18 +1,6 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
-# centered  : 中央
-# scaled    : サイズ調整
-# wallpaper : 並べる
-# zoom      : ズーム
-# stretched : 引き伸ばす
-# spanned   : スパン?
-STYLE=scaled
-
-# 背景色
-PRIMARY_COLOR=#2c001e # Ubuntu 11.04のデフォルト値
-SECONDARY_COLOR=#2c001e
-
 job_dir=$MC_DIR_RECORDING
 root_dir=$MC_DIR_BACKGROUND
 run_dir=${root_dir}/run
@@ -22,12 +10,9 @@ job_file=${root_dir}/job.bmp
 font_name=/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf
 font_size=128
 font_color=black
-x=150
+x=220
 
-gsettings set org.gnome.desktop.background picture-uri file://${job_file}
-gsettings set org.gnome.desktop.background picture-options "$STYLE"
-gsettings set org.gnome.desktop.background primary-color "$PRIMARY_COLOR"
-gsettings set org.gnome.desktop.background secondary-color "$SECONDARY_COLOR"
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s $job_file
 
 while [ true ];do
 
@@ -82,6 +67,7 @@ EOF
     fi
 
     convert -append $list_work $list_in $job_file
+    xfdesktop --reload
 
     sleep 60
 done
