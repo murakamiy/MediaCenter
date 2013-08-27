@@ -45,6 +45,8 @@ function unmount_partition() {
         do_unmount_partition $array_name
         echo mdadm --stop /dev/$array_name
         mdadm --stop /dev/$array_name
+        echo mdadm --wait /dev/$array_name
+        mdadm --wait /dev/$array_name
     fi
 }
 function print_usb_device_list() {
@@ -191,7 +193,11 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
         fi
     fi
 
+    echo "mdadm --assemble --scan"
     mdadm --assemble --scan
+    echo "mdadm --wait $(mdadm --detail --scan | awk '{ print $2 }')"
+    mdadm --wait $(mdadm --detail --scan | awk '{ print $2 }')
+
     flush_disk_cache
 
     touch $usb_disk_power_on
