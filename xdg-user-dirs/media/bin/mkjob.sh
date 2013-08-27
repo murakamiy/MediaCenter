@@ -23,15 +23,6 @@ if [ $do_fsck -eq 0 ];then
         fsck_stat=$?
         log "fsck usb_disk_array $fsck_stat"
     fi
-
-    sudo /sbin/fsck.ext4 -fy /dev/sde1
-    fsck_stat=$?
-    log "fsck usb_disk $fsck_stat"
-    if [ $fsck_stat -ne 0 ];then
-        sudo /sbin/fsck.ext4 -fy /dev/sde1
-        fsck_stat=$?
-        log "fsck usb_disk $fsck_stat"
-    fi
 fi
 
 sudo $MC_BIN_MOUNT_TMP mount

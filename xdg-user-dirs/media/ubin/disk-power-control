@@ -7,16 +7,15 @@ realpath=/home/mc/xdg-user-dirs/media/ubin/realpath
 
 function usage() {
 cat << EOF
-USAGE : $(basename $0) [-l OUTPUT_FILE_NAME] -z
-        $(basename $0) -r USB_ROOT_ID
+USAGE : $(basename $0) -l OUTPUT_FILE_NAME -z
         $(basename $0) -p USB_ROOT_ID
         $(basename $0) -m USB_ROOT_ID
+        $(basename $0) [-f|-d]
         -h print help
         -l output USB_ROOT_ID to specified file
         -m usb disk mount
-        -p usb hub power on
-        -z usb hub power off
-        -r usb root power off
+        -p usb power on
+        -z usb power off
         -f flush write cache buffer
         -d print usb device list
 EOF
@@ -49,22 +48,33 @@ function unmount_partition() {
     fi
 }
 function print_usb_device_list() {
+
     if [ -d /dev/usbhd/ ];then
         for l in $(find /dev/usbhd/ -type l | sort);do
             $realpath $l
         done
     fi
+
+#     for b in "usbhda" "usbhdb" "usbhdc" "usbhdd";do
+#         d=/dev/$b
+#         if [ -b $d ];then
+#             echo $d
+#         fi
+#     done
+
 }
 function wait_for_usb_disk_device() {
-    for i in $(seq 60);do
+    for i in $(seq 30);do
         echo "wait for usb disk device $i"
         count=$(print_usb_device_list | wc -l)
         if [ $count -eq 4 ];then
             echo "wait for usb disk device $i all device found"
-            break
+            return 0
         fi
         sleep 1
     done
+
+    return 1
 }
 function flush_disk_cache() {
     echo -e "\nusb disk flush start"
@@ -129,7 +139,7 @@ EOF
 
 control=
 output_file=
-while getopts 'dfhl:m:p:r:z' opt;do
+while getopts 'dfhl:m:p:z' opt;do
     case $opt in
         d)
             print_usb_device_list
@@ -153,12 +163,8 @@ while getopts 'dfhl:m:p:r:z' opt;do
             control=on
             usb_root=$OPTARG
             ;;
-        r)
-            control=off_root
-            usb_root=$OPTARG
-            ;;
         z)
-            control=off_hub
+            control=off
             ;;
     esac
 done
@@ -174,27 +180,36 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
         usage
     fi
 
-    touch $usb_disk_power_on
-    if [ "$control" = "mount" ];then
-        touch $usb_disk_mount
-    fi
-
     count=$(print_usb_device_list | wc -l)
     if [ $count -eq 0 ];then
         echo "echo $usb_root > /sys/bus/usb/drivers/usb/bind"
         echo $usb_root > /sys/bus/usb/drivers/usb/bind
         wait_for_usb_disk_device
+        if [ $? -ne 0 ];then
+            echo "ERROR : not found all usb disk device"
+            exit
+        fi
     fi
 
     mdadm --assemble --scan
     flush_disk_cache
+
+    touch $usb_disk_power_on
+    if [ "$control" = "mount" ];then
+        touch $usb_disk_mount
+    fi
     bash $mount_sh
+    rm -f $usb_disk_power_on $usb_disk_mount
+
+elif [ "$control" = "off" ];then
 
     rm -f $usb_disk_power_on $usb_disk_mount
 
-elif [ "$control" = "off_hub" ];then
-
     wait_for_usb_disk_device
+    if [ $? -ne 0 ];then
+        echo "ERROR : not found all usb disk device"
+        exit
+    fi
     device_list=$(print_usb_device_list)
 
     for device in $device_list;do
@@ -232,14 +247,6 @@ elif [ "$control" = "off_hub" ];then
         fi
     done
 
-elif [ "$control" = "off_root" ];then
-
-    if [ "$usb_root" = "" ];then
-        usage
-    fi
-
-    flush_disk_cache
-    rm -f $usb_disk_power_on $usb_disk_mount
     echo "echo $usb_root > /sys/bus/usb/drivers/usb/unbind"
     echo $usb_root > /sys/bus/usb/drivers/usb/unbind
 

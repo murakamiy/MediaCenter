@@ -1,3 +1,18 @@
 # "CENTURY USB Hard Disk"
 
-KERNEL=="sd*", SUBSYSTEM=="block",  SUBSYSTEMS=="usb", DRIVERS=="usb-storage", SYMLINK+="usbhd%p%n"
+ACTION=="add", KERNEL=="sd*", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", SYMLINK+="usbhd%p"
+
+ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.1", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="sdc%n"
+ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.2", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="sdd%n"
+ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.3", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="sde%n"
+ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.4", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="sdf%n"
+
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.1", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="usbhda%n"
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.2", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="usbhdb%n"
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.3", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="usbhdc%n"
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.4", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", NAME="usbhdd%n"
+
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.1", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", SYMLINK+="usbhda%n"
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.2", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", SYMLINK+="usbhdb%n"
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.3", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", SYMLINK+="usbhdc%n"
+# ACTION=="add", KERNEL=="sd*", ATTRS{devpath}=="1.4", ATTRS{manufacturer}=="asmedia", ATTRS{product}=="CRCH35U3IS", SYMLINK+="usbhdd%n"

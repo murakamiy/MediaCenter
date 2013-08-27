@@ -52,12 +52,12 @@ if [ $wakeup_time -ne -1 ];then
     if [ $? -eq 0 ];then
         zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
-            log "execute wakeuptool X Server running"
+            log "shutdown : X Server running"
             $MC_BIN_USB_POWER_OFF
             sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
         fi
     else
-        log "execute wakeuptool X Server does not running"
+        log "shutdown : X Server does not running"
         $MC_BIN_USB_POWER_OFF
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi

@@ -34,7 +34,6 @@ function do_usb_disk_opration() {
     if [ $prog_name = "usb-disk-power-off" ];then
 
         sudo $power_control -l $usb_disk_id -z
-        sudo $power_control -r $(cat $usb_disk_id)
 
     elif [ $prog_name = "usb-disk-power-on" ];then
 

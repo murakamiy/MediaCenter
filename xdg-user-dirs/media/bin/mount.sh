@@ -34,8 +34,6 @@ echo -e "\nusb disk device : ${arr[@]}\n" >> $log
 if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on ];then
     date +"%Y/%m/%d %H:%M:%S.%N power on usb_disk" >> $log
 
-#     hdparm -W1 ${arr[@]}
-
     if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/mount ];then
         date +"%Y/%m/%d %H:%M:%S.%N mount usb_disk" >> $log
 
