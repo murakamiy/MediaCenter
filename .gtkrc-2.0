@@ -1,0 +1,5 @@
+style "myfont" {
+    font_name = "TakaoGothic 32"
+}
+
+widget_class "*.ThunarDetailsView.*" style "myfont"
