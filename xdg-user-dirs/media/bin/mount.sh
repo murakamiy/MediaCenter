@@ -13,8 +13,7 @@ else
 fi
 if [ "$assemble" = "true" ];then
     date +"%Y/%m/%d %H:%M:%S.%N ssd array assembled" >> $log
-    mdadm --assemble --scan
-    mdadm --wait $(mdadm --detail --scan | awk '{ print $2 }')
+    $MC_BIN_USB_CONTROL -r
 fi
 
 mount | grep -q '^/dev/md1p1'

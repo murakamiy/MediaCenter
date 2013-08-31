@@ -6,7 +6,7 @@ function set_wakeup_time() {
 }
 
 function do_wakeup() {
-    halt -h
+    halt -p
 }
 
 function do_shutdown() {
