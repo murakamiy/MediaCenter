@@ -10,7 +10,7 @@ cat << EOF
 USAGE : $(basename $0) -l OUTPUT_FILE_NAME -z
         $(basename $0) -p USB_ROOT_ID
         $(basename $0) -m USB_ROOT_ID
-        $(basename $0) [-f|-d|-r]
+        $(basename $0) [-f|-d|-r|-e]
         $(basename $0) -s ARRAY_NAME
         -h print help
         -l output USB_ROOT_ID to specified file
@@ -21,6 +21,7 @@ USAGE : $(basename $0) -l OUTPUT_FILE_NAME -z
         -d print usb device list
         -r start raid
         -s stop  raid ARRAY_NAME
+        -e remove module for shutdown
 EOF
 exit 1
 }
@@ -165,10 +166,14 @@ EOF
 
 control=
 output_file=
-while getopts 'dfhl:m:p:rs:z' opt;do
+while getopts 'defhl:m:p:rs:z' opt;do
     case $opt in
         d)
             print_usb_device_list
+            exit
+            ;;
+        e)
+            modprobe -r ehci_pci ehci_hcd xhci_hcd
             exit
             ;;
         f)

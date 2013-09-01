@@ -54,11 +54,13 @@ if [ $wakeup_time -ne -1 ];then
         if [ $? -ne 1 ];then
             log "shutdown : X Server running"
             $MC_BIN_USB_POWER_OFF
+            sudo $MC_BIN_USB_CONTROL -e
             sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
         fi
     else
         log "shutdown : X Server does not running"
         $MC_BIN_USB_POWER_OFF
+        sudo $MC_BIN_USB_CONTROL -e
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi
 else
