@@ -63,6 +63,8 @@ timeout_mins 30
 out_of_reach_disconnects 0
 
 # Input - "Gnome", by "falkTX"
+
+# xev keycode - 8
 # left mouse button
 key_select 273
 key_l3 0
@@ -93,7 +95,8 @@ key_cir 28
 key_squ 272
 # delete
 key_cro 111
-key_ps 0
+# backspace
+key_ps 14
 axis_left_type 3
 axis_left_up 1
 axis_left_right 0
