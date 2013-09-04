@@ -64,7 +64,7 @@ out_of_reach_disconnects 0
 
 # Input - "Gnome", by "falkTX"
 
-# xev keycode - 8
+# keycode = xev_keycode - 8
 # left mouse button
 key_select 273
 key_l3 0
@@ -79,10 +79,10 @@ key_right 106
 key_down 108
 # left
 key_left 105
-# 9
-key_l2 0
-# 0
-key_r2 0
+# shift
+key_l2 42
+# alt
+key_r2 56
 # page down
 key_l1 109
 # page up
@@ -103,8 +103,10 @@ axis_left_right 0
 axis_left_down 0
 axis_left_left 0
 axis_right_type 2
+# 9
 axis_right_up 10
 axis_right_right 0
+# 0
 axis_right_down 11
 axis_right_left 0
 axis_speed 6
