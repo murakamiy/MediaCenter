@@ -345,6 +345,15 @@ xfconf-query -l
 xfconf-query -lv -c xfce4-desktop
 xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s /home/mc/xdg-user-dirs/media/job/state/background/job.bmp
 
+console-setup
+dpkg-reconfigure console-setup
+/etc/default/console-setup
+CHARMAP="UTF-8"
+CODESET="guess"
+FONTFACE="TerminusBold"
+FONTSIZE="16x32"
+
+
 
 -- usb disk power off
 2013/08/25 11:04:56.673248544 ssd array assembled
