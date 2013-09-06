@@ -8,7 +8,7 @@ function do_encode_ffmpeg() {
 
     avconv -y -i $input \
         -loglevel quiet \
-        -threads 1 \
+        -threads 2 \
         -f mp4 \
         -s 1280x720 \
         -vsync 1 \
