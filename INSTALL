@@ -73,6 +73,17 @@ pulseaudio
 
 handbrake-cli
 
+libusb-dev
+libbluetooth3-dev
+libdbus-1-dev
+libdbus-glib-1-dev
+python-qt4-dev
+python-qt4
+pyqt4-dev-tools
+libjack-jackd2-dev
+python-dbus
+bluez
+
 ####################################################################################################
 # firewall
 ####################################################################################################
