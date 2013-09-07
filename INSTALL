@@ -1,4 +1,16 @@
 ####################################################################################################
+# debian multimedia repository
+####################################################################################################
+
+/etc/apt/sources.list
+deb http://www.deb-multimedia.org unstable main non-free
+deb-src http://www.deb-multimedia.org unstable main non-free
+
+aptitude update
+aptitude install deb-multimedia-keyring
+aptitude update 
+
+####################################################################################################
 # package install
 ####################################################################################################
 
@@ -58,6 +70,8 @@ lightdm
 openssh-server
 lsof
 pulseaudio
+
+handbrake-cli
 
 ####################################################################################################
 # firewall
