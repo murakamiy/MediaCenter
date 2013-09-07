@@ -54,7 +54,7 @@ if [ -n "$xml" ];then
     if [ $? -eq 0 ];then
         time_end=$(awk 'BEGIN { print systime() }')
         (( took = (time_end - time_start) / 60 ))
-        log "encoding $title time: $took minutes"
+        log "encode time $took min $title"
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_ENCODE_FINISHED
 
         thumb_file=${MC_DIR_THUMB}/${base}.mp4
