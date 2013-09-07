@@ -1,351 +1,75 @@
-ファイアーウオールの設定
-    ufw allow from 192.168.0.0/24 to 192.168.0.0/24 port 22 
-    ufw enable
+####################################################################################################
+# package install
+####################################################################################################
 
-packageのremove
-libreoffice-base-core
-libreoffice-calc
-libreoffice-common
-libreoffice-core
-libreoffice-draw
-libreoffice-emailmerge
-libreoffice-gnome
-libreoffice-gtk
-libreoffice-help-en-us
-libreoffice-impress
-libreoffice-math
-libreoffice-ogltrans
-libreoffice-pdfimport
-libreoffice-presentation-minimizer
-libreoffice-presenter-console
-libreoffice-style-human
-libreoffice-style-tango
-libreoffice-writer
-thunderbird
-
-packageのアップデート
-apt-get update; apt-get dist-upgrade
-
-mediubuntuレポジトリの追加
-
-packageのinstall
-libavcodec-extra-53
-libavdevice-extra-53
-libavfilter-extra-2
-libavformat-extra-53
-libavutil-extra-51
-libdvdcss2
-libpostproc-extra-52
-libswscale-extra-2
-non-free-codecs
-w64codecs
-
-apport-hooks-medibuntu
-aptitude
-aptitude-common
-astyle
-autoconf
-automake
-autotools-dev
+autoconf automake
 build-essential
-cabextract
 dkms
-dpkg-dev
-exim4
-exim4-base
-exim4-config
-exim4-daemon-light
-fakeroot
-ffmpeg 
-g++
-g++-4.7
+ffmpeg
 gawk
 gdisk
 git
-git-man
-gstreamer0.10-plugins-bad-multiverse
-handbrake-cli
-handbrake-gtk
-heirloom-mailx
+hwinfo
+iotop
+linux-headers-amd64
+linux-kernel-headers
+lm-sensors
+lockfile-progs
+parted
+pcscd libpcsclite1 libpcsclite-dev pcsc-tools
+pkg-config
+python-dateutil
+screen
+smbclient
+sqlite3
+trash-cli
+ufw
+unzip
+vim
+xmlstarlet
+zenity
+zip
+astyle
 htop
 imagemagick
-imagemagick-common
 iotop
-javascript-common
-kernel-package
-libav-tools 
-libpcsclite-dev
-linux-headers-generic
-lm-sensors
-m4
-mdadm
 mkvtoolnix
 mp4v2-utils
 mplayer2
-mysql-common
-ncurses-term
-netpbm
-nkf
-non-free-codecs
-openssh-server
-pcsc-tools
-pcscd
-po-debconf
-python-dateutil
-python-pyscard
 python-pysqlite2
-qtsixa
-screen
-smplayer
-smplayer-themes
-smplayer-translations
-sqlite3
-ssh-import-id
-trash-cli
-ttf-mscorefonts-installer
-ubuntu-restricted-extras
-unrar
-vim
-vim-runtime
 vlc
-vlc-data
-vlc-nox
-vlc-plugin-notify
-vlc-plugin-pulse
 vobcopy
-w64codecs
-wwwconfig-common
-xbase-clients
-xmlstarlet
+xdg-utils
 
-カードリーダーの設定
---- /etc/libccid_Info.plist.0	2013-04-07 03:13:14.229812866 +0900
-+++ /etc/libccid_Info.plist	2013-04-07 03:15:19.517817017 +0900
-@@ -325,6 +325,7 @@
- 		<string>0x08C3</string>
- 		<string>0x08C3</string>
- 		<string>0x15E1</string>
-+		<string>0x04e6</string>
- 	</array>
- 
- 	<key>ifdProductID</key>
-@@ -550,6 +551,7 @@
- 		<string>0x0401</string>
- 		<string>0x0402</string>
- 		<string>0x2007</string>
-+		<string>0x511a</string>
- 	</array>
- 
- 	<key>ifdFriendlyName</key>
-@@ -775,6 +777,7 @@
- 		<string>Precise Biometrics Precise 250 MC</string>
- 		<string>Precise Biometrics Precise 200 MC</string>
- 		<string>RSA RSA SecurID (R) Authenticator</string>
-+		<string>SCM Microsystems, Inc.</string>
- 	</array>
- 
- 	<key>Copyright</key>
+fonts-takao
+fonts-takao-gothic
+fonts-takao-mincho
 
---- /etc/init.d/pcscd.0	2013-04-07 03:29:43.197838525 +0900
-+++ /etc/init.d/pcscd	2013-04-07 03:03:12.872529338 +0900
-@@ -43,11 +43,11 @@
- 
- # Do not start at boot using systemd but start using on-demand
- # http://ludovicrousseau.blogspot.com/2011/11/pcscd-auto-start-using-systemd.html
--if [ $1 = "start" -a -d /sys/fs/cgroup/systemd ]
--then
--	# Do not start from this script
--	exit 0
--fi
-+# if [ $1 = "start" -a -d /sys/fs/cgroup/systemd ]
-+# then
-+# 	# Do not start from this script
-+# 	exit 0
-+# fi
- 
- # Define LSB log_* functions.
- # Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+xfce4
+xfce4-artwork
+xfce4-panel
+xfce4-session
+xfce4-settings
+xfce4-taskmanager
+xfce4-terminal
+thunar
+lightdm
 
+openssh-server
+lsof
+pulseaudio
 
-USB ディスク自動マウント無効化
-$ gsettings set org.gnome.desktop.media-handling automount false
-$ gsettings get org.gnome.desktop.media-handling automount
+####################################################################################################
+# firewall
+####################################################################################################
 
-raid array 作成
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 512 /dev/sda /dev/sdb
-mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+ufw allow from 192.168.0.0/24 to 192.168.0.0/24 port 22
+ufw enable
 
-raid 停止
-cat /proc/mdstat 
-mdadm --stop /dev/md3
-cat /proc/mdstat 
+####################################################################################################
+# console font
+####################################################################################################
 
-raid 開始 個別
-mdadm --examine /dev/sdc
-     Array UUID : [UUID]
-mdadm /dev/md3 --assemble -u [UUID]
-cat /proc/mdstat 
-
-raid 開始 /etc/mdadm.conf 全て
-mdadm --assemble --scan
-cat /proc/mdstat 
-
-raid array 削除
-umount /dev/md0p1
-mdadm --detail /dev/md0
-mdadm --stop /dev/md0
-mdadm --zero-superblock /dev/sda2
-mdadm --zero-superblock /dev/sdb2
-
-ハードディスクスリープ設定
-hdparm -S 240 /dev/sda
-hdparm -S 240 /dev/sdd 
-hdparm -S 240 /dev/sdb 
-hdparm -S 60 /dev/sdc
-
-# Hard Disk Array
-umount /dev/md0p1
-mdadm --stop /dev/md0
-mdadm --zero-superblock /dev/sdc1
-mdadm --zero-superblock /dev/sdd1
-
-# SSD Array
-umount /dev/md1p1
-mdadm --stop /dev/md1
-mdadm --zero-superblock /dev/sda2
-mdadm --zero-superblock /dev/sdb2
-
-# Hard Disk Array
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 /dev/sdc1 /dev/sdd1
-# SSD Array
-mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda2 /dev/sdb2
-
-# Hard Disk Array
-gdisk /dev/md0
-# SSD Array
-gdisk /dev/md1
-
-# Hard Disk Array
-partprobe /dev/md0
-# SSD Array
-partprobe /dev/md1
-
-# Hard Disk Array
-mkfs.ext4 \
--m 0 \
--b 4096 \
--E stride=2560,stripe-width=5120,lazy_itable_init=0,lazy_journal_init=0 \
--O extent,large_file,sparse_super \
-/dev/md0p1
-
-# SSD Array
-mkfs.ext4 \
--m 0 \
--b 4096 \
--E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
--O extent,large_file,sparse_super \
-/dev/md1p1
-
-mdadm --detail --scan >> /etc/mdadm/mdadm.conf
-mdadm --assemble --scan
-
-# reboot
-update-initramfs -u
-reboot
-
-mdadmデーモンの自動起動無効
-/etc/default/mdadm
-INITRDSTART='none'
-AUTOSTART=false
-AUTOCHECK=false
-START_DAEMON=false
-
-mdadm cron job 削除
-cron.d/mdadm
-cron.daily/mdadm
-
-
-インテルグラフィクスドライバ
-インテルのサイトからインストーラをダウンロードして、
-インストール
-intel-linux-graphics-installer_1.0_amd64.deb
-
-
-XOrgが起動しないことがある場合の対応
-diff -ru src_old/etc/init/lightdm.conf src/etc/init/lightdm.conf
---- src_old/etc/init/lightdm.conf	2013-05-12 07:40:16.427263750 +0900
-+++ src/etc/init/lightdm.conf	2013-05-12 07:39:55.751263470 +0900
-@@ -44,6 +44,7 @@
- 	fi
-     fi
- 
-+    sleep 5
-     exec lightdm
- end script
- 
-
-/etcファイル編集
-    groupadd media
-    vigr
-    vigr -s
-    media:x:1001:mc
-
-    visudo
-    %media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control,/sbin/fsck.ext4,/home/mc/xdg-user-dirs/media/ubin/mounttmp,/home/mc/xdg-user-dirs/media/bin/mount.sh
-
-    BCASカード
-    /etc/rc.local
-    cmd=$(lsusb | grep 'SCM Microsystems, Inc.' | awk -F ':' '{ print $1 }' | awk '{ printf("chown root:media /dev/bus/usb/%s/%s", $2, $4) }')
-    $cmd
-
-    /etc/init/hwclock-save.conf
-    #exec hwclock --rtc=/dev/rtc0 --systohc $tz --noadjfile $badyear
-
-    /etc/default/apport
-    enabled=0
-
-    /etc/default/grub
-    # GRUB_HIDDEN_TIMEOUT=0
-    GRUB_TIMEOUT=5
-    GRUB_CMDLINE_LINUX_DEFAULT=""
-    GRUB_TERMINAL=console
-    GRUB_GFXMODE=1024x768
-    GRUB_DISABLE_LINUX_UUID=true
-
-起動時の設定アップデート
-update-initramfs -u
-update-grub2 
-
-crontabの編集
-    PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-    5 13 * * * bash /home/mc/xdg-user-dirs/media/bin/mkjob.sh
-
-nautilus pngファイルの設定
-    /home/mc/xdg-user-dirs/media/bin/nautilus/png/main.sh
-    nautilus 起動 -> PNGファイル選択 -> 右クリック -> プロパティ -> 開き方 -> PNGHandler -> デフォルトに設定する
-
-wakeuptool のテスト
-wakeup_time=$(awk 'BEGIN { print systime() + 120 }')
-date
-sleep 20
-sudo /home/mc/xdg-user-dirs/media/ubin/wakeuptool -w -t $wakeup_time
-
-sshd の設定
-/etc/ssh/sshd_config
-PasswordAuthentication no
-stop ssh; start ssh;
-
-USBデバイス情報取得
-udevadm info --query=path --name=/dev/input/js0 --attribute-walk
-
-
-xfce config
-export DISPLAY=":0.0"
-xfconf-query -l
-xfconf-query -lv -c xfce4-desktop
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s /home/mc/xdg-user-dirs/media/job/state/background/job.bmp
-
-console-setup
 dpkg-reconfigure console-setup
 /etc/default/console-setup
 CHARMAP="UTF-8"
@@ -353,97 +77,175 @@ CODESET="guess"
 FONTFACE="TerminusBold"
 FONTSIZE="16x32"
 
+####################################################################################################
+# mount point
+####################################################################################################
 
+/etc/fstab
+/dev/sdb1  /               ext4    noatime,errors=remount-ro 0       1
 
--- usb disk power off
-2013/08/25 11:04:56.673248544 ssd array assembled
-2013/08/25 11:04:57.290993128 mount ssd_array device
-2013/08/25 11:04:57.329008071 mount ssd_array bind
+####################################################################################################
+# boot loader
+####################################################################################################
 
-usb disk device : /dev/sdc /dev/sdd /dev/sde /dev/sdf
+dpkg-reconfigure grub-pc
+grub install devices:
 
-2013/08/25 11:04:57.398583981 power off usb_disk
-wait for usb disk device 1
-wait for usb disk device 1 all device found
-/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.1/2-1.1:1.0/host6/target6:0:0/6:0:0:0/block/sdc
-/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.2/2-1.2:1.0/host7/target7:0:0/7:0:0:0/block/sdd
-/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.3/2-1.3:1.0/host8/target8:0:0/8:0:0:0/block/sde
-/devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.4/2-1.4:1.0/host9/target9:0:0/9:0:0:0/block/sdf
-sync
-hdparm -F /dev/sdc
+####################################################################################################
+# sshd
+####################################################################################################
 
-/dev/sdc:
-hdparm -F /dev/sdd
+/etc/ssh/sshd_config
+PasswordAuthentication no
 
-/dev/sdd:
-hdparm -F /dev/sde
+####################################################################################################
+# mdadm
+####################################################################################################
 
-/dev/sde:
-hdparm -F /dev/sdf
+/etc/default/mdadm
+INITRDSTART='none'
+AUTOSTART=false
+AUTOCHECK=false
+START_DAEMON=false
 
-/dev/sdf:
+rm /etc/cron.d/mdadm
+rm /etc/cron.daily/mdadm
 
+####################################################################################################
+# grub
+####################################################################################################
+
+/etc/default/grub
+GRUB_TIMEOUT=5
+GRUB_CMDLINE_LINUX_DEFAULT=""
+GRUB_TERMINAL=console
+GRUB_GFXMODE=1024x768
+GRUB_DISABLE_LINUX_UUID=true
+
+####################################################################################################
+# group
+####################################################################################################
+
+groupadd media
+vigr
+vigr -s
+media:x:1001:mc
+
+####################################################################################################
+# sudoers
+####################################################################################################
+
+%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control,/sbin/fsck.ext4,/home/mc/xdg-user-dirs/media/ubin/mounttmp,/home/mc/xdg-user-dirs/media/bin/mount.sh
+
+####################################################################################################
+# crontab
+####################################################################################################
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+5 13 * * * bash /home/mc/xdg-user-dirs/media/bin/mkjob.sh
+
+####################################################################################################
+# user directory
+####################################################################################################
+
+~/.config/user-dirs.dirs
+
+xdg-user-dirs-update  --set  DESKTOP      "$HOME/xdg-user-dirs/desktop"
+xdg-user-dirs-update  --set  DOWNLOAD     "$HOME/xdg-user-dirs/download"
+xdg-user-dirs-update  --set  TEMPLATES    "$HOME/xdg-user-dirs/templates"
+xdg-user-dirs-update  --set  PUBLICSHARE  "$HOME/xdg-user-dirs/publicshare"
+xdg-user-dirs-update  --set  DOCUMENTS    "$HOME/xdg-user-dirs/documents"
+xdg-user-dirs-update  --set  MUSIC        "$HOME/xdg-user-dirs/music"
+xdg-user-dirs-update  --set  PICTURES     "$HOME/xdg-user-dirs/pictures"
+xdg-user-dirs-update  --set  VIDEOS       "$HOME/xdg-user-dirs/videos"
+
+####################################################################################################
+# autologin
+####################################################################################################
+
+/etc/lightdm/lightdm.conf
+autologin-user=mc
+autologin-user-timeout=0
+
+####################################################################################################
+# raid
+####################################################################################################
+
+# Hard Disk Array
+umount /dev/md0p1
 mdadm --stop /dev/md0
-mdadm: stopped /dev/md0
-device file : /dev/sdc -> /dev/sdc
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.1/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.1/power/level
-echo 2-1.1 > /sys/bus/usb/drivers/usb/unbind
+mdadm --zero-superblock /dev/sdc1
+mdadm --zero-superblock /dev/sdd1
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 /dev/sdc1 /dev/sdd1
 
-device file : /dev/sdd -> /dev/sdd
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.2/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.2/power/level
-echo 2-1.2 > /sys/bus/usb/drivers/usb/unbind
+gdisk /dev/md0
+partprobe /dev/md0
 
-device file : /dev/sde -> /dev/sde
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.3/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.3/power/level
-echo 2-1.3 > /sys/bus/usb/drivers/usb/unbind
-
-device file : /dev/sdf -> /dev/sdf
-echo 0           > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.4/power/autosuspend
-echo auto        > /sys//devices/pci0000:00/0000:00:14.0/usb2/2-1/2-1.4/power/level
-echo 2-1.4 > /sys/bus/usb/drivers/usb/unbind
-sync
-echo usb2 > /sys/bus/usb/drivers/usb/unbind
+mkfs.ext4 \
+-m 0 \
+-b 4096 \
+-E stride=2560,stripe-width=5120,lazy_itable_init=0,lazy_journal_init=0 \
+-O extent,large_file,sparse_super \
+/dev/md0p1
 
 
--- usb disk mount
-echo usb2 > /sys/bus/usb/drivers/usb/bind
-wait for usb disk device 1
-wait for usb disk device 2
-wait for usb disk device 3
-wait for usb disk device 4
-wait for usb disk device 5
-wait for usb disk device 6
-wait for usb disk device 7
-wait for usb disk device 8
-wait for usb disk device 9
-wait for usb disk device 10
-wait for usb disk device 11
-wait for usb disk device 12
-wait for usb disk device 13
-wait for usb disk device 13 all device found
-mdadm: /dev/md0 has been started with 2 drives.
-sync
-hdparm -F /dev/sdc
+# SSD Array
+umount /dev/md1p1
+mdadm --stop /dev/md1
+mdadm --zero-superblock /dev/sda2
+mdadm --zero-superblock /dev/sdb2
+mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda2 /dev/sdb2
 
-/dev/sdc:
-hdparm -F /dev/sdd
+gdisk /dev/md1
+partprobe /dev/md1
 
-/dev/sdd:
-hdparm -F /dev/sde
+mkfs.ext4 \
+-m 0 \
+-b 4096 \
+-E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
+-O extent,large_file,sparse_super \
+/dev/md1p1
 
-/dev/sde:
-hdparm -F /dev/sdf
 
-/dev/sdf:
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 
-/dev/md0p1 on /home/mc/xdg-user-dirs/media/video/ts_hd type ext4 (rw,noatime,stripe=5120,data=ordered)
-/dev/md0p1 on /mnt/hd_array type ext4 (rw,noatime,stripe=5120,data=ordered)
-/dev/md1p1 on /home/mc/xdg-user-dirs/media/video type ext4 (rw,noatime,stripe=256,data=ordered)
-/dev/md1p1 on /mnt/ssd_array type ext4 (rw,noatime,stripe=256,data=ordered)
-/dev/sdb1 on / type ext4 (rw,noatime,errors=remount-ro,data=ordered)
-/dev/sde1 on /home/mc/xdg-user-dirs/media/video/encode_hd type ext4 (rw,noatime,data=ordered)
-/dev/sde1 on /mnt/hd type ext4 (rw,noatime,data=ordered)
-/dev/sdf1 on /mnt/hd2 type vfat (rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro)
+update-initramfs -u
+
+mount -o noatime,stripe=256 /dev/md1p1 /mnt/ssd_array
+mount -o noatime,stripe=5120 /dev/md0p1 /mnt/hd_array
+mkdir /mnt/hd_array/ts_hd
+mkdir /mnt/ssd_array/video
+chown mc:mc /mnt/hd_array/ts_hd
+chown mc:mc /mnt/ssd_array/video
+
+####################################################################################################
+# mime type png
+####################################################################################################
+
+application -> setting -> mime type editor -> png -> PNGHandler
+
+####################################################################################################
+# wakeuptool
+####################################################################################################
+
+wakeup_time=$(awk 'BEGIN { print systime() + 120 }')
+date
+sleep 20
+sudo /home/mc/xdg-user-dirs/media/ubin/wakeuptool -w -t $wakeup_time
+
+####################################################################################################
+# USBデバイス情報取得
+####################################################################################################
+
+udevadm info --query=path --name=/dev/input/js0 --attribute-walk
+
+####################################################################################################
+# xfce config
+####################################################################################################
+
+xfce config
+export DISPLAY=":0.0"
+xfconf-query -l
+xfconf-query -lv -c xfce4-desktop
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s /home/mc/xdg-user-dirs/media/job/state/background/job.bmp
+
