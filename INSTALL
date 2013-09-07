@@ -8,7 +8,7 @@ deb-src http://www.deb-multimedia.org unstable main non-free
 
 aptitude update
 aptitude install deb-multimedia-keyring
-aptitude update 
+aptitude update
 
 ####################################################################################################
 # package install
@@ -263,3 +263,11 @@ xfconf-query -l
 xfconf-query -lv -c xfce4-desktop
 xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s /home/mc/xdg-user-dirs/media/job/state/background/job.bmp
 
+####################################################################################################
+# pt3
+####################################################################################################
+
+dkms add /usr/src/pt3_drv-0.0.1
+dkms build pt3_drv/0.0.1
+dkms install pt3_drv/0.0.1
+dkms status
