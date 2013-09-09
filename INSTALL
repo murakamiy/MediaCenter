@@ -84,6 +84,15 @@ libjack-jackd2-dev
 python-dbus
 bluez
 
+firmware-linux
+firmware-linux-nonfree 
+
+####################################################################################################
+# remove package
+####################################################################################################
+
+udisks2
+
 ####################################################################################################
 # firewall
 ####################################################################################################
@@ -231,17 +240,17 @@ mkfs.ext4 \
 -O extent,large_file,sparse_super \
 /dev/md1p1
 
-
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 
 update-initramfs -u
 
 mount -o noatime,stripe=256 /dev/md1p1 /mnt/ssd_array
+mkdir /mnt/ssd_array/video
+chown mc:mc /mnt/ssd_array/video
+
 mount -o noatime,stripe=5120 /dev/md0p1 /mnt/hd_array
 mkdir /mnt/hd_array/ts_hd
-mkdir /mnt/ssd_array/video
 chown mc:mc /mnt/hd_array/ts_hd
-chown mc:mc /mnt/ssd_array/video
 
 ####################################################################################################
 # mime type png
