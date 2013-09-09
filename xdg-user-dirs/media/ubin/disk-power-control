@@ -29,11 +29,6 @@ function raid_start() {
     echo "mdadm --assemble --scan"
     mdadm --assemble --scan
 
-    for d in $(mdadm --detail --scan | awk '{ print $2 }');do
-        echo mdadm --wait $d
-        mdadm --wait $d
-    done
-
     echo mdadm --wait-clean --scan
     mdadm --wait-clean --scan
 }
@@ -43,11 +38,8 @@ function raid_stop() {
     echo mdadm --stop /dev/$array_name
     mdadm --stop /dev/$array_name
 
-    echo mdadm --wait /dev/$array_name
-    mdadm --wait /dev/$array_name
-
-    echo mdadm --wait-clean /dev/$array_name
-    mdadm --wait-clean /dev/$array_name
+    echo mdadm --wait-clean --scan
+    mdadm --wait-clean --scan
 }
 function do_unmount_partition() {
 
@@ -135,8 +127,8 @@ function do_stop() {
         echo "ERROR : does not exists /sys/${usb_hub_path}/power/autosuspend"
         return 1
     fi
-    if [ ! -e /sys/${usb_hub_path}/power/level ];then
-        echo "ERROR : does not exists /sys/${usb_hub_path}/power/level"
+    if [ ! -e /sys/${usb_hub_path}/power/control ];then
+        echo "ERROR : does not exists /sys/${usb_hub_path}/power/control"
         return 1
     fi
 
@@ -150,12 +142,12 @@ function do_stop() {
 cat << EOF
 device file : $device_file_link -> $device_file
 echo 0           > /sys/${usb_hub_path}/power/autosuspend
-echo auto        > /sys/${usb_hub_path}/power/level
+echo auto        > /sys/${usb_hub_path}/power/control
 echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
 EOF
 
     echo 0           > /sys/${usb_hub_path}/power/autosuspend
-    echo auto        > /sys/${usb_hub_path}/power/level
+    echo auto        > /sys/${usb_hub_path}/power/control
     echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
 
     return 0
