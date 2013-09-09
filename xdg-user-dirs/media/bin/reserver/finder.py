@@ -125,6 +125,7 @@ class TitleFinder(Finder):
         u'ささみさん',
         u'ベストヒットUSA',
         u'ブラック・ジャック',
+        u'セカンドシーズン',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
