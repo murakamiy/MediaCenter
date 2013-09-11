@@ -116,7 +116,7 @@ FONTSIZE="16x32"
 ####################################################################################################
 
 /etc/fstab
-/dev/sdb1  /               ext4    noatime,errors=remount-ro 0       1
+/dev/md1p1  /               ext4    noatime,nodiratime,discard,errors=remount-ro     0       1
 
 ####################################################################################################
 # boot loader
@@ -208,9 +208,9 @@ autologin-user-timeout=0
 # Hard Disk Array
 umount /dev/md0p1
 mdadm --stop /dev/md0
-mdadm --zero-superblock /dev/sdc1
-mdadm --zero-superblock /dev/sdd1
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 /dev/sdc1 /dev/sdd1
+mdadm --zero-superblock /dev/sdc
+mdadm --zero-superblock /dev/sdd
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 /dev/sdc /dev/sdd
 
 gdisk /dev/md0
 partprobe /dev/md0
@@ -226,9 +226,9 @@ mkfs.ext4 \
 # SSD Array
 umount /dev/md1p1
 mdadm --stop /dev/md1
-mdadm --zero-superblock /dev/sda2
-mdadm --zero-superblock /dev/sdb2
-mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda2 /dev/sdb2
+mdadm --zero-superblock /dev/sda
+mdadm --zero-superblock /dev/sdb
+mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda /dev/sdb
 
 gdisk /dev/md1
 partprobe /dev/md1
