@@ -2,11 +2,11 @@
 # Environmental variables
 #####################################################################################################
 PS1="[\u \W]\\$ "
-# LANG=ja_JP.eucJP
-# LANG=C
 PATH=$PATH:/home/mc/xdg-user-dirs/media/ubin
-LANG=ja_JP.SJIS
+# LANG=ja_JP.SJIS
+# LANG=ja_JP.eucJP
 LANG=ja_JP.utf8
+# LANG=C
 PAGER='less -MQXcgi -x4'
 EDITOR='vim'
 HISTSIZE=2000
