@@ -2,32 +2,6 @@
 source $(dirname $0)/00.conf
 log=/tmp/$(basename $0)
 
-assemble=false
-if [ -f /proc/mdstat ];then
-    grep -q '^md1 : active ' /proc/mdstat
-    if [ $? -ne 0 ];then
-        assemble=true
-    fi
-else
-    assemble=true
-fi
-if [ "$assemble" = "true" ];then
-    date +"%Y/%m/%d %H:%M:%S.%N ssd array assembled" >> $log
-    $MC_BIN_USB_CONTROL -r
-fi
-
-mount | grep -q '^/dev/md1p1'
-if [ $? -ne 0 ];then
-    date +"%Y/%m/%d %H:%M:%S.%N mount ssd_array device" >> $log
-    mount -o noatime,stripe=256 /dev/md1p1 /mnt/ssd_array
-fi
-
-mount | grep -q '/home/mc/xdg-user-dirs/media/video'
-if [ $? -ne 0 ];then
-    date +"%Y/%m/%d %H:%M:%S.%N mount ssd_array bind" >> $log
-    mount --bind /mnt/ssd_array/video /home/mc/xdg-user-dirs/media/video
-fi
-
 arr=($($MC_BIN_USB_CONTROL -d))
 echo -e "\nusb disk device : ${arr[@]}\n" >> $log
 
