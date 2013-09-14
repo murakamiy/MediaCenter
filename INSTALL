@@ -87,6 +87,7 @@ iotop
 linux-headers-amd64
 lm-sensors
 lockfile-progs
+mdadm
 parted
 pcscd libpcsclite1 libpcsclite-dev pcsc-tools
 pkg-config
@@ -170,7 +171,7 @@ PasswordAuthentication no
 
 /etc/default/mdadm
 INITRDSTART='none'
-AUTOSTART=false
+AUTOSTART=true
 AUTOCHECK=false
 START_DAEMON=false
 
@@ -216,6 +217,15 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 ~/.config/user-dirs.dirs
 
+mkdir "$HOME/xdg-user-dirs/desktop"
+mkdir "$HOME/xdg-user-dirs/download"
+mkdir "$HOME/xdg-user-dirs/templates"
+mkdir "$HOME/xdg-user-dirs/publicshare"
+mkdir "$HOME/xdg-user-dirs/documents"
+mkdir "$HOME/xdg-user-dirs/music"
+mkdir "$HOME/xdg-user-dirs/pictures"
+mkdir "$HOME/xdg-user-dirs/videos"
+
 xdg-user-dirs-update  --set  DESKTOP      "$HOME/xdg-user-dirs/desktop"
 xdg-user-dirs-update  --set  DOWNLOAD     "$HOME/xdg-user-dirs/download"
 xdg-user-dirs-update  --set  TEMPLATES    "$HOME/xdg-user-dirs/templates"
@@ -240,9 +250,11 @@ autologin-user-timeout=0
 # Hard Disk Array
 umount /dev/md0p1
 mdadm --stop /dev/md0
-mdadm --zero-superblock /dev/sdc
-mdadm --zero-superblock /dev/sdd
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 /dev/sdc /dev/sdd
+mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530
+mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 \
+/dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530 \
+/dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
 
 gdisk /dev/md0
 partprobe /dev/md0
@@ -253,7 +265,6 @@ mkfs.ext4 \
 -E stride=2560,stripe-width=5120,lazy_itable_init=0,lazy_journal_init=0 \
 -O extent,large_file,sparse_super \
 /dev/md0p1
-
 
 # SSD Array
 umount /dev/md1p1
