@@ -24,7 +24,6 @@ git
 hwinfo
 iotop
 linux-headers-amd64
-linux-kernel-headers
 lm-sensors
 lockfile-progs
 parted
@@ -74,7 +73,7 @@ pulseaudio
 handbrake-cli
 
 libusb-dev
-libbluetooth3-dev
+libbluetooth-dev
 libdbus-1-dev
 libdbus-glib-1-dev
 python-qt4-dev
