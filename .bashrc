@@ -136,5 +136,5 @@ function selactor() {
         -v 'normalize-space(../title)' -o '  ' -v '../@start' -n $2
 }
 function smbaterm() {
-    smbclient -A ~/.smbauth '//ATERM-CE6499/hts54806-1/'
+    smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1'
 }
