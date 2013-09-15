@@ -60,6 +60,9 @@ alias cdfile='cd /home/mc/xdg-user-dirs/media/files'
 #####################################################################################################
 # Function
 #####################################################################################################
+function vlog() {
+    view $(find /home/mc/xdg-user-dirs/media/job/log/ -type f | sort | tail -n 1)
+}
 function m() {
     mount | grep ^/ | sort
 }
@@ -68,18 +71,6 @@ function vip() {
 }
 function vio() {
     vi -o $@
-}
-function nautilus() {
-    /usr/bin/nautilus $@ > /dev/null 2>&1 &
-}
-function kakasi-hiragana() {
-    echo "$@" | nkfeuc | kakasi -i euc -JH | nkfutf 
-}
-function kakasi-roman() {
-    echo "$@" | nkfeuc | kakasi -i euc -Jaj | nkfutf 
-}
-function kakasi-katakana() {
-    echo "$@" | nkfeuc | kakasi -i euc -JK | nkfutf 
 }
 function xmlformat() {
     tmp=$(mktemp)
@@ -101,16 +92,6 @@ function vinfom() {
 }
 function vinfof() {
     ffmpeg -i "$1" 2>&1 | egrep 'Stream #' | grep -v ': Data: ' | sed -e 's/  */ /' -e 's/^ Stream //'
-}
-function vinfog() {
-    video_id=$(ffmpeg -i $1 2>&1 | grep 'Video:' | grep mpeg2video | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-    audio_id=$(ffmpeg -i $1 2>&1 | grep 'Audio:' | awk -F ',' '{ print $5" "$1 }' | sort -n -k 1 | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-    echo -e "video=$video_id\naudio=$audio_id"
-}
-function vinfoh() {
-    video_id=$(ffmpeg -i $1 2>&1 | grep 'Video:' | grep h264 | tail -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-    audio_id=$(ffmpeg -i $1 2>&1 | grep 'Audio:' | awk -F ',' '{ print $5" "$1 }' | sort -n -k 1 | head -n 1 | awk -F '[' '{ print $1 }' | awk -F '#' '{ print $2 }')
-    echo -e "video=$video_id\naudio=$audio_id"
 }
 function epgdumpy() {
     python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@

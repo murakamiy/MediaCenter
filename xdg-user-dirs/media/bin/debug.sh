@@ -11,7 +11,7 @@ USAGE: $(basename $0) command
                 mk_title_encode [FILE]...
                 mk_title_ts [FILE]...
                 ts
-                title
+                encode
                 rec
                 rsv
                 cpu [DAYS]
@@ -24,41 +24,35 @@ case $command in
         for i in $(atq | awk '{ print $1 }');do atrm $i; done
         ;;
     ts)
-        for f in $MC_DIR_JOB_FINISHED/*;do
-            title=$(print_title $f)
-            start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
-            end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
-            ((time = (end - start) / 60))
-            ts_file=${MC_DIR_TS_HD}/$(basename $f .xml).ts
-            if [ ! -f $ts_file ];then
+        for f in $(find $MC_DIR_TS $MC_DIR_TS_HD);do
+            xml_file=$MC_DIR_JOB_FINISHED/$(basename $f .ts).xml
+            if [ ! -f $xml_file ];then
                 continue
             fi
-            ts_file_print=$(ls -sh $ts_file)
-            echo "$ts_file $time $title"
+            title=$(print_title $xml_file)
+            ts_file=$f
+            size=$(ls -sh $ts_file | awk '{ print $1 }')
+            time=$(xmlsel -t -m "//rec-time" -v '.' $xml_file)
+            time=$(( $time / 60 ))
+            echo "${time}min $size $title $ts_file"
         done
         ;;
-    title)
-        for f in $(find $MC_DIR_TITLE_TS -type f);do
-
-            png_file=$f
-            inode=$(stat --format='%i' $png_file)
-            thumb_file=$(basename $(find $MC_DIR_THUMB -inum $inode))
-            base=$(echo $thumb_file | awk -F . '{ print $1 }')
-            xml_file=${base}.xml
-
-            title=
-            if [ -f $MC_DIR_JOB_FINISHED/$xml_file ];then
-                title=$(print_title $MC_DIR_JOB_FINISHED/$xml_file)
+    encode)
+        for f in $(find $MC_DIR_ENCODE_HD -type f);do
+            base=$(basename $f | awk -F . '{ print $1 }')
+            ext=$(basename $f | awk -F . '{ print $2 }')
+            size=$(ls -sh $f | awk '{ print $1 }')
+            title=$base
+            tag=
+            if [ "$ext" = "mp4" ];then
+                tag=$(mp4info $f | grep Comments: | awk -F ': ' '{ print $2 }')
             fi
-
-            if [ -f $MC_DIR_TS_HD/$base.ts ];then
-                echo "hd  : $(ls -sh $MC_DIR_TS_HD/$base.ts) $title"
-            elif [ -f $MC_DIR_TS/$base.ts ];then
-                echo "ssd : $(ls -sh $MC_DIR_TS/$base.ts) $title"
-            else
-                echo "not_exist : $f"
+            if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
+                title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
+            elif [ -n "$tag" ];then
+                title=$tag
             fi
-
+            echo "$size $title $f"
         done
         ;;
     rec)
@@ -79,24 +73,6 @@ case $command in
             ((time = (end - start) / 60))
             ts_file=${MC_DIR_TS}/$(basename $f .xml).ts 
             echo "$ts_file $time $title"
-        done
-        ;;
-    encode)
-        for f in $MC_DIR_ENCODE_HD/*;do
-            base=$(basename $f | awk -F . '{ print $1 }')
-            ext=$(basename $f | awk -F . '{ print $2 }')
-
-            title=$base
-            tag=
-            if [ "$ext" = "mp4" ];then
-                tag=$(mp4info $f | grep Comments: | awk -F ': ' '{ print $2 }')
-            fi
-            if [ -f "${MC_DIR_ENCODE_FINISHED}/${base}.xml" ];then
-                title=$(print_title ${MC_DIR_ENCODE_FINISHED}/${base}.xml)
-            elif [ -n "$tag" ];then
-                title=$tag
-            fi
-            echo "$base.$ext $title"
         done
         ;;
     mk_title_encode)
@@ -159,7 +135,7 @@ case $command in
         done
         ;;
     rsv)
-        for f in $MC_DIR_RESERVED/*;do
+        for f in $(find $MC_DIR_RESERVED -type f);do
             title=$(print_title $f)
             time=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
