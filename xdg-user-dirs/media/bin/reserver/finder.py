@@ -167,7 +167,6 @@ class CreditFinder(Finder):
         u'LADY GAGA',
         u'LADY　GAGA',
         u'石原さとみ',
-        u'阿部寛',
     ]
     deny_list = [
         u'BSプレマップ',
