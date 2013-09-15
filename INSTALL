@@ -250,8 +250,10 @@ autologin-user-timeout=0
 # Hard Disk Array
 umount /dev/md0p1
 mdadm --stop /dev/md0
+
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
+
 mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 \
 /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530 \
 /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
@@ -266,34 +268,12 @@ mkfs.ext4 \
 -O extent,large_file,sparse_super \
 /dev/md0p1
 
-# SSD Array
-umount /dev/md1p1
-mdadm --stop /dev/md1
-mdadm --zero-superblock /dev/sda
-mdadm --zero-superblock /dev/sdb
-mdadm --create /dev/md1 --level=0 --raid-devices=2 -c 512 /dev/sda /dev/sdb
-
-gdisk /dev/md1
-partprobe /dev/md1
-
-mkfs.ext4 \
--m 0 \
--b 4096 \
--E stride=128,stripe-width=256,lazy_itable_init=0,lazy_journal_init=0 \
--O extent,large_file,sparse_super \
-/dev/md1p1
-
-mdadm --detail --scan >> /etc/mdadm/mdadm.conf
-
-update-initramfs -u
-
-mount -o noatime,stripe=256 /dev/md1p1 /mnt/ssd_array
-mkdir /mnt/ssd_array/video
-chown mc:mc /mnt/ssd_array/video
-
 mount -o noatime,stripe=5120 /dev/md0p1 /mnt/hd_array
 mkdir /mnt/hd_array/ts_hd
 chown mc:mc /mnt/hd_array/ts_hd
+
+mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+update-initramfs -u
 
 ####################################################################################################
 # mime type png
