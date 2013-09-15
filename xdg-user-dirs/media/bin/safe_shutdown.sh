@@ -49,16 +49,17 @@ if [ $wakeup_time -ne -1 ];then
     echo "next wakeup time: $next_wakeup_time\n\nShutDown ?"
 
     xdpyinfo -display :0.0 > /dev/null
+    avail=$(df -h | grep ^/dev/sda |awk '{ print $4 }')
     if [ $? -eq 0 ];then
         zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
-            log "shutdown : X Server running"
+            log "shutdown : X Server $avail"
             $MC_BIN_USB_POWER_OFF
             sudo $MC_BIN_USB_CONTROL -e
             sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
         fi
     else
-        log "shutdown : X Server does not running"
+        log "shutdown : console $avail"
         $MC_BIN_USB_POWER_OFF
         sudo $MC_BIN_USB_CONTROL -e
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
