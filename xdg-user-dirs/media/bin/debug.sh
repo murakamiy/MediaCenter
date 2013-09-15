@@ -140,7 +140,7 @@ case $command in
             time=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
             echo -e "$time\t$channel\t$title"
-        done | column -t -s '	'
+        done | sort | column -t -s '	'
         ;;
     cpu)
         day=1
