@@ -61,7 +61,7 @@ alias cdfile='cd /home/mc/xdg-user-dirs/media/files'
 # Function
 #####################################################################################################
 function vlog() {
-    view $(find /home/mc/xdg-user-dirs/media/job/log/ -type f | sort | tail -n 1)
+    less $(find /home/mc/xdg-user-dirs/media/job/log/ -type f | sort | tail -n 1)
 }
 function m() {
     mount | grep ^/ | sort
