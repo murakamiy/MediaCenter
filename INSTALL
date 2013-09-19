@@ -255,7 +255,7 @@ autologin-user-timeout=0
 ####################################################################################################
 
 # Hard Disk Array
-umount /dev/md0p1
+umount /dev/md0
 mdadm --stop /dev/md0
 
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530
@@ -273,9 +273,9 @@ mkfs.ext4 \
 -b 4096 \
 -E stride=256,stripe-width=512,lazy_itable_init=0,lazy_journal_init=0 \
 -O extent,large_file,sparse_super \
-/dev/md0p1
+/dev/md0
 
-mount -o noatime,stripe=5120 /dev/md0p1 /mnt/hd_array
+mount -o noatime,stripe=512 /dev/md0 /mnt/hd_array
 mkdir /mnt/hd_array/ts_hd
 chown mc:mc /mnt/hd_array/ts_hd
 

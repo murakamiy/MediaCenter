@@ -11,7 +11,7 @@ if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on ];then
     if [ -e /home/mc/xdg-user-dirs/media/job/state/usb_disk/mount ];then
         date +"%Y/%m/%d %H:%M:%S.%N mount usb_disk" >> $log
 
-        mount -o noatime,stripe=5120 /dev/md0p1 /mnt/hd_array
+        mount -o noatime,stripe=512 $MC_DEVICE_USB_DISK_TS /mnt/hd_array
         mount -o noatime ${arr[2]}1 /mnt/hd
         mount -o noatime ${arr[3]}1 /mnt/hd2
         mount --bind /mnt/hd_array/ts_hd /home/mc/xdg-user-dirs/media/video/ts_hd
