@@ -261,7 +261,7 @@ mdadm --stop /dev/md0
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
 
-mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 10240 \
+mdadm --create /dev/md0 --level=0 --raid-devices=2 -c 1024 \
 /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530 \
 /dev/disk/by-id/ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
 
@@ -271,7 +271,7 @@ partprobe /dev/md0
 mkfs.ext4 \
 -m 0 \
 -b 4096 \
--E stride=2560,stripe-width=5120,lazy_itable_init=0,lazy_journal_init=0 \
+-E stride=256,stripe-width=512,lazy_itable_init=0,lazy_journal_init=0 \
 -O extent,large_file,sparse_super \
 /dev/md0p1
 
