@@ -148,25 +148,9 @@ class CreditFinderHigh(Finder):
 class CreditFinder(Finder):
     priority = 40
     allow_list = [
-        u'浜田雅功',
-        u'ダウンタウン',
-        u'星野真里',
-        u'多部未華子',
-        u'宮崎あおい',
-        u'堀北真希',
         u'YUI',
         u'ユイ',
-        u'蒼井優',
-        u'名越康文',
-        u'菊川怜',
-        u'新垣結衣',
-        u'安田美沙子',
         u'麻枝准',
-        u'大塚愛',
-        u'レディー・ガガ',
-        u'LADY GAGA',
-        u'LADY　GAGA',
-        u'石原さとみ',
     ]
     deny_list = [
         u'BSプレマップ',
