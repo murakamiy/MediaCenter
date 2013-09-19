@@ -8,23 +8,6 @@ log "start: $temp lavg=$lavg"
 touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
 
-today=$(date +%e)
-fsck_span=1
-do_fsck=$(($today % $fsck_span))
-if [ $do_fsck -eq 0 ];then
-    log "starting fsck"
-    $MC_BIN_USB_POWER_ON
-
-    sudo /sbin/fsck.ext4 -fy /dev/md0p1
-    fsck_stat=$?
-    log "fsck usb_disk_array $fsck_stat"
-    if [ $fsck_stat -ne 0 ];then
-        sudo /sbin/fsck.ext4 -fy /dev/md0p1
-        fsck_stat=$?
-        log "fsck usb_disk_array $fsck_stat"
-    fi
-fi
-
 sudo $MC_BIN_MOUNT_TMP mount
 $MC_BIN_USB_MOUNT
 bash $MC_BIN_MIGRATE &
