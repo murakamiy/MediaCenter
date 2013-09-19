@@ -15,6 +15,7 @@ USAGE: $(basename $0) command
                 rec
                 rsv
                 cpu [DAYS]
+                du  [DAYS]
 EOF
 exit
 fi
@@ -163,6 +164,17 @@ case $command in
                 }
                 printf("%s    %s    %s\n", $1, t, l)
             }'
+        done
+        ;;
+    du)
+        day=1
+        if [ -n "$2" ];then
+            day=$2
+        fi
+        for f in $(ls $MC_DIR_LOG | sort | tail -n $day);do
+            log_file=$MC_DIR_LOG/$f
+            echo $log_file
+            grep 'disk used' $log_file
         done
         ;;
 esac
