@@ -42,27 +42,25 @@ function raid_stop() {
     mdadm --wait-clean --scan
 }
 function do_unmount_partition() {
-
-    device_name=$1
-    for partition in $(find /dev -maxdepth 1 -not -name $device_name -name "$device_name*");do
-
-        cmd=$(awk -v pt=$partition '{ if ($1 == pt) printf("fuser -k %s; umount %s;\n", $2, $2) }' /proc/mounts | tac)
-        echo $cmd
-        eval $cmd
-
+    device=$1
+    for p in $(tac /proc/mounts | grep "^$device" | awk '{ print $2 }');do
+        echo fuser -k $p
+        echo umount $p
+        fuser -k $p
+        umount $p
     done
 }
 function unmount_partition() {
 
-    device_file=$1
-    device_file_base=$(basename $device_file)
+    device=$1
+    device_base=$(basename $device)
     array_name=$(grep ' active ' /proc/mdstat | \
-        awk -v dev=$device_file_base '{ for (i = 5; i <= NF; i++) if (match($i, dev)) printf("%s", $1) }')
+        awk -v dev=$device_base '{ for (i = 5; i <= NF; i++) if (match($i, dev)) printf("%s", $1) }')
 
     if [ "$array_name" = "" ];then
-        do_unmount_partition $device_file_base
+        do_unmount_partition /dev/$device_base
     else
-        do_unmount_partition $array_name
+        do_unmount_partition /dev/$array_name
         raid_stop $array_name
     fi
 }
@@ -105,6 +103,8 @@ function flush_disk_cache() {
     echo sync
     sync
     for device in $device_list;do
+        echo blockdev --flushbufs $device
+        blockdev --flushbufs $device
         echo hdparm -F $device
         hdparm -F $device
     done
@@ -112,14 +112,10 @@ function flush_disk_cache() {
     echo -e "usb disk flush end\n"
 }
 function do_stop() {
-
     device_file=$1
-    device_file_link=$device_file
-    if [ -L $device_file ];then
-        device_file=$(find $device_file -printf '%h/%l')
-    fi
 
     unmount_partition $device_file
+    flush_disk_cache $device_file
 
     usb_hub_path=$(udevadm info --query=path --name=$device_file | sed -r -e 's@(/[^/]+){6}$@@')
     if [ ! -e /sys/${usb_hub_path}/power/autosuspend ];then
@@ -139,12 +135,16 @@ function do_stop() {
     fi
 
 cat << EOF
-device file : $device_file_link -> $device_file
+
+unbind : $device_file
+echo 1           > /sys/block/$(basename $device_file)/device/delete
 echo 0           > /sys/${usb_hub_path}/power/autosuspend
 echo auto        > /sys/${usb_hub_path}/power/control
 echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
+
 EOF
 
+    echo 1           > /sys/block/$(basename $device_file)/device/delete
     echo 0           > /sys/${usb_hub_path}/power/autosuspend
     echo auto        > /sys/${usb_hub_path}/power/control
     echo $usb_hub_id > /sys/bus/usb/drivers/usb/unbind
@@ -222,7 +222,6 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
     fi
 
     raid_start
-    flush_disk_cache
 
     touch $usb_disk_power_on
     if [ "$control" = "mount" ];then
@@ -268,8 +267,7 @@ elif [ "$control" = "off" ];then
         fi
     fi
 
-    flush_disk_cache $device_list
-
+    sync
     for device in $device_list;do
         do_stop $device
         if [ $? -ne 0 ];then

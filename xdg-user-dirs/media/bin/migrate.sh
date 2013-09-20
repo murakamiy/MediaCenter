@@ -35,8 +35,6 @@ function move_to_hd() {
 
 log "start ts_hd"
 
-sudo $MC_BIN_USB_CONTROL -f
-
 for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
     has_free_space
@@ -58,8 +56,6 @@ for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
 done
 
-sudo $MC_BIN_USB_CONTROL -f
-
 for ts in $(find $MC_DIR_TS -type f);do
 
     fuser $ts
@@ -69,7 +65,5 @@ for ts in $(find $MC_DIR_TS -type f);do
 
     move_to_hd $ts $MC_DIR_TS_HD
 done
-
-sudo $MC_BIN_USB_CONTROL -f
 
 log "end ts_hd"
