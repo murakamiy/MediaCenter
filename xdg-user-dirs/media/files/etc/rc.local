@@ -16,6 +16,8 @@
 # echo 1 > /proc/sys/kernel/panic_on_oops
 
 echo deadline > /sys/block/sda/queue/scheduler
+ethtool -s eth0 wol d
+ethtool -s eth0 wol g
 
 cmd=$(lsusb | grep 'SCM Microsystems, Inc.' | awk -F ':' '{ print $1 }' | awk '{ printf("chown root:media /dev/bus/usb/%s/%s", $2, $4) }')
 $cmd
