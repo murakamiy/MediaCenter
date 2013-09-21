@@ -164,7 +164,7 @@ while getopts 'defhl:m:p:rs:z' opt;do
             exit
             ;;
         e)
-            modprobe -r ehci_pci ehci_hcd xhci_hcd
+            modprobe -r xhci_hcd
             exit
             ;;
         f)
