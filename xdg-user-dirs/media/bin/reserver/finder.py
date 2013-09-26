@@ -45,7 +45,7 @@ class Finder:
         buf = '(' + buf + re.escape(plist[-1].encode('utf-8')) + ')'
         return re.compile(buf)
     def like(self, pinfo):
-        if (pinfo.epoch_end - pinfo.epoch_start) > (60 * 60 * 3):
+        if (pinfo.epoch_end - pinfo.epoch_start) > (60 * 60 * 6):
             return False
         if (
                 (cron_time.hour == pinfo.start.hour and pinfo.start.minute <= cron_time.minute + 30) or 
@@ -81,7 +81,7 @@ class AnimeFinder(Finder):
         u'トリコ',
     ]
     def allow(self, pinfo):
-        if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and pinfo.start.hour < 6:
+        if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
             if not re.search(self.deny_pattern, pinfo.title):
                 if pinfo.channel != 'CS_331':
                     return True
@@ -126,6 +126,7 @@ class TitleFinder(Finder):
         u'ベストヒットUSA',
         u'ブラック・ジャック',
         u'セカンドシーズン',
+        u'墓場鬼太郎',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):

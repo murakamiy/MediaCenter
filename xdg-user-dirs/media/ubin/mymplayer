@@ -57,7 +57,6 @@ input=$1
 mplayer $media $delay $volume \
 -volstep 10 \
 -fs -geometry 960x540+0+50 -monitoraspect 16:9 \
--cache 500000 -cache-min 50 -cache-seek-min 10 \
 -dr -vf pp=ac/linblenddeint \
 -vo gl:swapinterval=1 \
 $aid $sid $audio \
