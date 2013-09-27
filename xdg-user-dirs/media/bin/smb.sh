@@ -20,9 +20,9 @@ avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ p
 log "smb delete end $avail"
 
 cd $MC_DIR_TMP
-for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -printf '%f\n');do
+for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -size +10M -printf '%f\n');do
     fuser "${MC_DIR_MP4}/$f"
-    if [ $? -ne 0 -a -s "${MC_DIR_MP4}/$f" ];then
+    if [ $? -ne 0 ];then
         cp "${MC_DIR_MP4}/$f" $MC_DIR_TMP
         smbclient -A ~/.smbauth -D contents -c "put $f" $MC_SMB_SERVER
         /bin/rm "${MC_DIR_MP4}/$f"

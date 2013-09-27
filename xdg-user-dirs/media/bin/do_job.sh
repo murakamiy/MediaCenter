@@ -18,9 +18,11 @@ channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
-avconv_rec_time_max=3600
+avconv_rec_time_max=7200
 
+bash $MC_BIN_SMB_JOB &
 bash $MC_BIN_ENCODE $channel &
+
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
 if [ $running -ge 4 ];then
     log "failed: $job_file_xml"
