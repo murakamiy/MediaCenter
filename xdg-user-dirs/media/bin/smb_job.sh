@@ -7,7 +7,7 @@ function copy_mp4() {
     log "smb job start $avail"
 
     cd $MC_DIR_MP4
-    mp4=$(find . -type f -size -500M -size +10M -printf '%TY%Tm%Td %TT %f\n' | sort | head -n 1 | awk '{ print $3}')
+    mp4=$(find . -type f -size +10M -printf '%TY%Tm%Td %TT %f\n' | sort | head -n 1 | awk '{ print $3}')
 
     if [ -n "$mp4" ];then
         fuser "$mp4"
