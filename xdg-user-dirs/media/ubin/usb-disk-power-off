@@ -18,7 +18,7 @@ function do_usb_disk_opration() {
     elif [ $prog_name = "usb-disk-mount" ];then
 
         mount_point_count=$(mount | grep ^/ | wc -l)
-        if [ $mount_point_count -gt 6 ];then
+        if [ $mount_point_count -ge 6 ];then
             # 1 root
             # 2 usb_disk_array
             # 3 usb_disk_array bind
