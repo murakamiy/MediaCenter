@@ -3,8 +3,9 @@ source $(dirname $0)/00.conf
 
 function has_free_space() {
 
-    used=$(df -Ph --sync | awk -v dev=$MC_DEVICE_USB_DISK_TS '{ if ($1 == dev) printf("%d\n", $5) }')
-    log "used : $MC_DEVICE_USB_DISK_TS ${used}%"
+    arr=($($MC_BIN_USB_CONTROL -d))
+    used=$(df -Ph --sync | awk -v dev=${arr[1]}1 '{ if ($1 == dev) printf("%d\n", $5) }')
+    log "used : ${arr[1]}1 ${used}%"
     if [ -z "$used" ];then
         return 0
     fi
