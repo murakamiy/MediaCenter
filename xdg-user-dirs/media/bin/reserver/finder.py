@@ -115,12 +115,11 @@ class BoxingFinder(Finder):
 class TitleFinder(Finder):
     priority = 100
     allow_list = [
-        u'ジョジョの奇妙な冒険',
+        u'機巧少女',
         u'はじめの一歩',
         u'青の祓魔師',
         u'刀語',
         u'NARUTO',
-        u'攻殻機動隊',
         u'CLANNAD',
         u'ささみさん',
         u'ベストヒットUSA',
