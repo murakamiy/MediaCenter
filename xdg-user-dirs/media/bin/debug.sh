@@ -22,7 +22,9 @@ fi
 
 case $command in
     atrm)
-        for i in $(atq | awk '{ print $1 }');do atrm $i; done
+        for i in $(atq | grep -v ' = ' | awk '{ print $1 }');do
+            atrm $i
+        done
         ;;
     ts)
         for f in $(find $MC_DIR_TS $MC_DIR_TS_HD);do
