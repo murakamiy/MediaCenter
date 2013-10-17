@@ -13,7 +13,7 @@ function copy_mp4() {
         fuser "$mp4"
         if [ $? -ne 0 ];then
             log "smb job put $(ls -sh $mp4)"
-            smbclient -A ~/.smbauth -D contents -c "put $mp4" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -D contents -c "put \"$mp4\"" $MC_SMB_SERVER
             /bin/rm "$mp4"
         fi
     fi

@@ -12,7 +12,7 @@ for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
         printf("%d\t%s\n", time, $1)
     }' | sort -k 1 -n -r | sed -n -e '301,$p' | awk '{ print $2 }');do
 
-    smbclient -A ~/.smbauth -D contents -c "del $f" $MC_SMB_SERVER
+    smbclient -A ~/.smbauth -D contents -c "del \"$f\"" $MC_SMB_SERVER
 
 done
 
@@ -22,7 +22,7 @@ for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -size +10M -printf '%f\n');do
     if [ $? -ne 0 ];then
         cp "${MC_DIR_MP4}/$f" $MC_DIR_TMP
         log "smb migrate put $(ls -sh $f)"
-        smbclient -A ~/.smbauth -D contents -c "put $f" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D contents -c "put \"$f\"" $MC_SMB_SERVER
         /bin/rm "${MC_DIR_MP4}/$f"
         /bin/rm "${MC_DIR_TMP}/$f"
     fi
