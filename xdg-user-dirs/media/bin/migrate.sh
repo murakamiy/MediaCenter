@@ -5,7 +5,9 @@ function has_free_space() {
 
     arr=($($MC_BIN_USB_CONTROL -d))
     used=$(df -Ph --sync | awk -v dev=${arr[1]}1 '{ if ($1 == dev) printf("%d\n", $5) }')
-    log "used : ${arr[1]}1 ${used}%"
+    if [ "$1" = "print" ];then
+        log "used : ${arr[1]}1 ${used}%"
+    fi
     if [ -z "$used" ];then
         return 0
     fi
@@ -36,6 +38,7 @@ function move_to_hd() {
 
 log "start ts_hd"
 
+has_free_space print
 for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
     has_free_space
@@ -57,6 +60,7 @@ for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
 done
 
+has_free_space print
 for ts in $(find $MC_DIR_TS -type f);do
 
     fuser $ts
@@ -67,4 +71,5 @@ for ts in $(find $MC_DIR_TS -type f);do
     move_to_hd $ts $MC_DIR_TS_HD
 done
 
+has_free_space print
 log "end ts_hd"
