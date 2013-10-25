@@ -14,7 +14,10 @@ function copy_mp4() {
         if [ $? -ne 0 ];then
             log "smb job put $(ls -sh $mp4)"
             smbclient -A ~/.smbauth -D contents -c "put \"$mp4\"" $MC_SMB_SERVER
-            /bin/rm "$mp4"
+            smbclient -A ~/.smbauth -D contents -c "ls \"$mp4\"" $MC_SMB_SERVER
+            if [ $? -eq 0 ];then
+                /bin/rm "$mp4"
+            fi
         fi
     fi
 
