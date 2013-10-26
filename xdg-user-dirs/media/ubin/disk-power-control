@@ -67,10 +67,10 @@ function unmount_partition() {
 function print_usb_device_list() {
 
     device_list=(
-    ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1376530
-    ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
-    ata-Hitachi_HDS721050CLA362_JP1521HN02G4EA
-    ata-Hitachi_HDS721050CLA362_JP1521HN02G4TA
+        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164
+        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397
+        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0680500
+        ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
     )
 
     for i in ${device_list[@]};do
