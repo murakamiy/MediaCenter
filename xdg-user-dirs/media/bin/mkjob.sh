@@ -1,9 +1,7 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
-temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
-log "start: $temp lavg=$lavg"
+log "start: $(hard_ware_info)"
 
 touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
@@ -57,8 +55,6 @@ fi
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 
-temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
-log "end: $temp lavg=$lavg"
+log "end: $(hard_ware_info)"
 
 bash $MC_BIN_SAFE_SHUTDOWN

@@ -43,9 +43,7 @@ if [ -n "$xml" ];then
     base=$(basename $xml .xml)
     title=$(print_title $xml)
     title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
-    temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-    lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
-    log "start: $title $temp lavg=$lavg"
+    log "start: $title $(hard_ware_info)"
     mv $xml $MC_DIR_ENCODING
 
     $MC_BIN_USB_MOUNT
@@ -75,9 +73,7 @@ if [ -n "$xml" ];then
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_FAILED
     fi
 
-    temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-    lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
-    log "end: $title $temp lavg=$lavg"
+    log "end: $title $(hard_ware_info)"
 
     bash $MC_BIN_SAFE_SHUTDOWN
 fi

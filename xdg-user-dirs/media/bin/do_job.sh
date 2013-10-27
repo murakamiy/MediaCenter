@@ -30,9 +30,7 @@ if [ $running -ge 4 ];then
     mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_FAILED
 else
     if [ $now -lt $start ];then
-        temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-        lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
-        log "start : $title $temp lavg=$lavg"
+        log "start : $title $(hard_ware_info)"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
         if (($rec_time < $avconv_rec_time_max));then
@@ -42,6 +40,7 @@ else
             fifo_b25=${fifo_dir}/b25_$$
             mkfifo -m 644 $fifo_b25
 
+            title_mp4=$(echo $title | sed -r -e 's/[[:punct:]]+/_/g')
             today=$(date +%d)
             avconv -y -i $fifo_b25 -f mp4 \
                 -s 640x360 \
@@ -51,7 +50,7 @@ else
                 -vcodec libx264 -acodec libvo_aacenc \
                 -preset:v ultrafast \
                 -maxrate:v 500k -r:a 44100 -b:a 64k \
-                "${MC_DIR_MP4}/${title}_${today}.mp4" &
+                "${MC_DIR_MP4}/${title_mp4}_${today}.mp4" &
             pid_avconv=$!
 
             touch ${MC_DIR_TS}/${job_file_ts}
@@ -101,9 +100,7 @@ else
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
-        temp=$(sensors | grep 'Physical id 0:' | awk -F : '{ print $2 }' | awk '{ print $1 }')
-        lavg=$(uptime | awk -F 'average: ' '{ print $2 }' | tr -d ' ')
-        log "end : $title $temp lavg=$lavg"
+        log "end : $title $(hard_ware_info)"
 
         bash $MC_BIN_SAFE_SHUTDOWN
     else
