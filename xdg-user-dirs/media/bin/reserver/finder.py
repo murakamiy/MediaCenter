@@ -115,17 +115,13 @@ class BoxingFinder(Finder):
 class TitleFinder(Finder):
     priority = 100
     allow_list = [
-        u'機巧少女',
+        u'Kanon',
         u'はじめの一歩',
         u'青の祓魔師',
-        u'刀語',
         u'NARUTO',
-        u'CLANNAD',
-        u'ささみさん',
+        u'猫物語',
         u'ベストヒットUSA',
-        u'ブラック・ジャック',
         u'セカンドシーズン',
-        u'墓場鬼太郎',
         u'魔法少女まどか☆マギカ',
     ]
     def allow(self, pinfo):
