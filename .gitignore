@@ -15,3 +15,5 @@ xdg-user-dirs/media/bin/epgdump_py
 xdg-user-dirs/media/bin/database/rating/log
 xdg-user-dirs/media/bin/database/tv.db
 xdg-user-dirs/media/bin/nautilus/action.sh
+xdg-user-dirs/media/bin/rrd/png
+xdg-user-dirs/media/bin/rrd/stat.rrd
