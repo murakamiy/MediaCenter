@@ -2,11 +2,11 @@
 
 LANG=C vlc \
 --overlay \
+--vout xcb_glx \
 --deinterlace=1 \
 --video-filter=deinterlace \
 --deinterlace-mode=blend \
 --fullscreen \
---audio-filter=headphone_channel_mixer \
 --global-key-jump+long='Page Up' \
 --global-key-jump+medium=Up \
 --global-key-jump+short=Right \
