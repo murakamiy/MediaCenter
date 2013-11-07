@@ -37,6 +37,9 @@ function move_to_hd() {
 
 log "start ts_hd"
 
+total_size=0
+total_count=0
+last_date=
 has_free_space print
 for ts in $(find $MC_DIR_TS_HD -type f | sort);do
 
@@ -53,11 +56,17 @@ for ts in $(find $MC_DIR_TS_HD -type f | sort);do
         find $MC_DIR_TITLE_TS -inum $inode -delete
     fi
 
-    file_info=$(ls -sh $ts | sed -e "s@$MC_DIR_TS_HD/@@")
-    log "delete : $file_info $png_thumb $xml"
-    /bin/rm -f $ts $png_thumb $xml
+    last_date=$(basename $ts | awk -F - '{ print $1 }')
+    size=$(stat --format=%s $ts)
+    total_size=$(($total_size + $size))
+    total_count=$(($total_count + 1))
 
+    /bin/rm -f $ts $png_thumb $xml
 done
+
+if [ $total_count -ne 0 ];then
+    log "hd delete $total_count files $(($total_size / 1024 / 1024 / 1024))GB $last_date"
+fi
 
 has_free_space print
 for ts in $(find $MC_DIR_TS -type f);do
