@@ -1,5 +1,5 @@
 #!/bin/bash
-source $(dirname $0)/00.conf
+source $(dirname $0)/../00.conf
 
 log "smb graph put start"
 start_date=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d\n", systime() - 60 * 60 * 24)) }')
@@ -18,5 +18,6 @@ for f in $(smbclient -A ~/.smbauth -D $work_dir -c "ls" $MC_SMB_SERVER |
 done
 
 for f in ${MC_DIR_RRD}/png/*;do
-    smbclient -A ~/.smbauth -D $work_dir -c "put \"$f\" \"${start_date}_$f\"" $MC_SMB_SERVER
+    b=$(basename $f)
+    smbclient -A ~/.smbauth -D $work_dir -c "put \"$f\" \"${start_date}_${b}\"" $MC_SMB_SERVER
 done
