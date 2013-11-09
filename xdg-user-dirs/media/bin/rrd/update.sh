@@ -147,8 +147,27 @@ HD_READ=${iostat_arr[16]}
 HD_WRITE=${iostat_arr[17]}
 
 LOAD_AVERAGE=$(uptime | awk -F 'load average: ' '{ print $2 }' | awk -F , '{ print $1 }')
-MEMORY=$(free -m | grep '^-/+ buffers/cache:' | awk '{ print $3 }')
 DISK_USAGE=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
+
+mem_arr=($(free -m | grep '^Mem:' | awk '
+{
+    free = $4
+    shared = $5
+    buffers = $6
+    cached = $7
+    used = $3 - buffers - cached
+    total = free + shared + buffers + cached + used
+
+    printf("%d %d %d %d %d %d\n", used, free, shared, buffers, cached, total)
+}'))
+
+MEMORY_USED=${mem_arr[0]}
+MEMORY_FREE=${mem_arr[1]}
+MEMORY_SHARED=${mem_arr[2]}
+MEMORY_BUFFERS=${mem_arr[3]}
+MEMORY_CACHED=${mem_arr[4]}
+MEMORY_TOTAL=${mem_arr[5]}
+
 
 sensors_arr=($(LANG=C sensors -A | awk '
 BEGIN {
@@ -279,6 +298,7 @@ VOLT_VBAT=${sensors_arr[11]}
 FAN1=${sensors_arr[12]}
 FAN2=${sensors_arr[13]}
 
+
 # cat << EOF
 # CPU_USER            $CPU_USER
 # CPU_NICE            $CPU_NICE
@@ -299,7 +319,11 @@ FAN2=${sensors_arr[13]}
 # HD_READ             $HD_READ
 # HD_WRITE            $HD_WRITE
 # LOAD_AVERAGE        $LOAD_AVERAGE
-# MEMORY              $MEMORY
+# MEMORY_USED         $MEMORY_USED
+# MEMORY_FREE         $MEMORY_FREE
+# MEMORY_SHARED       $MEMORY_SHARED
+# MEMORY_BUFFERS      $MEMORY_BUFFERS
+# MEMORY_CACHED       $MEMORY_CACHED
 # DISK_USAGE          $DISK_USAGE
 # TEMP_CPU            $TEMP_CPU
 # TEMP_MOTHER_BORD_1  $TEMP_MOTHER_BORD_1
@@ -317,5 +341,6 @@ FAN2=${sensors_arr[13]}
 # FAN2                $FAN2
 # EOF
 
+
 rrdtool update $db_file \
-N:$CPU_USER:$CPU_NICE:$CPU_SYSTEM:$CPU_IOWAIT:$CPU_STEAL:$CPU_IDLE:$SSD_READ:$SSD_WRITE:$HD_ARRAY_1_READ:$HD_ARRAY_1_WRITE:$HD_ARRAY_2_READ:$HD_ARRAY_2_WRITE:$HD_ARRAY_3_READ:$HD_ARRAY_3_WRITE:$HD_RAID_READ:$HD_RAID_WRITE:$HD_READ:$HD_WRITE:$LOAD_AVERAGE:$MEMORY:$DISK_USAGE:$TEMP_CPU:$TEMP_MOTHER_BORD_1:$TEMP_MOTHER_BORD_2:$VOLT_IN0:$VOLT_IN1:$VOLT_IN2:$VOLT_IN3:$VOLT_IN4:$VOLT_IN5:$VOLT_IN6:$VOLT_3VSB:$VOLT_VBAT:$FAN1:$FAN2
+N:$CPU_USER:$CPU_NICE:$CPU_SYSTEM:$CPU_IOWAIT:$CPU_STEAL:$CPU_IDLE:$SSD_READ:$SSD_WRITE:$HD_ARRAY_1_READ:$HD_ARRAY_1_WRITE:$HD_ARRAY_2_READ:$HD_ARRAY_2_WRITE:$HD_ARRAY_3_READ:$HD_ARRAY_3_WRITE:$HD_RAID_READ:$HD_RAID_WRITE:$HD_READ:$HD_WRITE:$LOAD_AVERAGE:$MEMORY_USED:$MEMORY_FREE:$MEMORY_SHARED:$MEMORY_BUFFERS:$MEMORY_CACHED:$DISK_USAGE:$TEMP_CPU:$TEMP_MOTHER_BORD_1:$TEMP_MOTHER_BORD_2:$VOLT_IN0:$VOLT_IN1:$VOLT_IN2:$VOLT_IN3:$VOLT_IN4:$VOLT_IN5:$VOLT_IN6:$VOLT_3VSB:$VOLT_VBAT:$FAN1:$FAN2
