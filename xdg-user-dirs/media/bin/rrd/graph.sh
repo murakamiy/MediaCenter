@@ -60,8 +60,6 @@ LANG=C rrdtool graph ${png_dir}/io_raid_13.png \
 --imgformat PNG \
 --start "$start_date_13" \
 --end start+1h \
---upper-limit 300 \
---lower-limit -300 \
 --width 700 \
 --height 300 \
 DEF:HD_1_W=$db_file:HD_ARRAY_1_WRITE:AVERAGE \
@@ -230,8 +228,6 @@ LANG=C rrdtool graph ${png_dir}/io_13.png \
 --imgformat PNG \
 --start "$start_date_13" \
 --end start+1h \
---upper-limit 300 \
---lower-limit -300 \
 --width 700 \
 --height 300 \
 DEF:SSD_R=$db_file:SSD_READ:AVERAGE \
