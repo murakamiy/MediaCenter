@@ -40,7 +40,6 @@ else
             fifo_b25=${fifo_dir}/b25_$$
             mkfifo -m 644 $fifo_b25
 
-            title_mp4=$(echo $title | sed -r -e 's/[[:punct:]]+/_/g')
             today=$(date +%d)
             avconv -y -i $fifo_b25 -f mp4 \
                 -s 640x360 \
@@ -50,7 +49,7 @@ else
                 -vcodec libx264 -acodec libvo_aacenc \
                 -preset:v ultrafast \
                 -maxrate:v 500k -r:a 44100 -b:a 64k \
-                "${MC_DIR_MP4}/${title_mp4}_${today}.mp4" &
+                "${MC_DIR_MP4}/${title}_${today}.mp4" &
             pid_avconv=$!
 
             touch ${MC_DIR_TS}/${job_file_ts}
