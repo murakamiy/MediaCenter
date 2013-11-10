@@ -4,8 +4,13 @@ rrd_dir=/home/mc/xdg-user-dirs/media/bin/rrd
 png_dir=${rrd_dir}/png
 db_file=${rrd_dir}/stat.rrd
 
-start_date=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d\n", systime() - 60 * 60 * 24)) }')
-start_date_str=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d\n", systime() - 60 * 60 * 24)) }')
+start_date=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 24)) }')
+start_date_str=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 * 60 * 24)) }')
+start_date_13=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 13:00", systime() - 60 * 60 * 24)) }')
+
+ignore_begin=$(date --date "$start_date 13:00:00" +%s)
+ignore_end=$(date --date "$start_date 14:00:00" +%s)
+
 
 LANG=C rrdtool graph ${png_dir}/cpu.png \
 --title "CPU usage $start_date_str" \
@@ -49,13 +54,12 @@ GPRINT:IOWAIT_MAX:"IO wait maximum\: %2.2lf%%" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/io_raid.png \
+LANG=C rrdtool graph ${png_dir}/io_raid_13.png \
 --title "IO HD raid $start_date_str" \
 --vertical-label "MB per second" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_date_13" \
+--end start+1h \
 --upper-limit 300 \
 --lower-limit -300 \
 --width 700 \
@@ -94,7 +98,7 @@ VDEF:HD_3_R_TOTAL=HD_3_R,TOTAL \
 VDEF:HD_ALL_R_TOTAL=HD_ALL_R,TOTAL \
 COMMENT:" " \
 LINE1:HD_ALL_W#000000:"raid write" \
-LINE1:HD_ALL_R#000000:"raid read" \
+LINE1:HD_ALL_R_NEGATIVE#000000:"raid read" \
 COMMENT:" \j" \
 COMMENT:" " \
 AREA:HD_1_W#FF8C00:"HD1 write"  \
@@ -132,13 +136,100 @@ GPRINT:HD_3_R_TOTAL:"HD3 \: %3.2lf" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/io.png \
---title "IO SSD HD $start_date_str" \
---vertical-label "MB per second" \
+LANG=C rrdtool graph ${png_dir}/io_raid.png \
+--title "IO HD raid $start_date_str" \
+--vertical-label "per second" \
 --imgformat PNG \
 --start $start_date \
 --end start+24h \
 --x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--width 700 \
+--height 300 \
+DEF:HD_1_W_IN=$db_file:HD_ARRAY_1_WRITE:AVERAGE \
+DEF:HD_2_W_IN=$db_file:HD_ARRAY_2_WRITE:AVERAGE \
+DEF:HD_3_W_IN=$db_file:HD_ARRAY_3_WRITE:AVERAGE \
+DEF:HD_ALL_W_IN=$db_file:HD_RAID_WRITE:AVERAGE \
+DEF:HD_1_R_IN=$db_file:HD_ARRAY_1_READ:AVERAGE \
+DEF:HD_2_R_IN=$db_file:HD_ARRAY_2_READ:AVERAGE \
+DEF:HD_3_R_IN=$db_file:HD_ARRAY_3_READ:AVERAGE \
+DEF:HD_ALL_R_IN=$db_file:HD_RAID_READ:AVERAGE \
+CDEF:HD_1_W=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_1_W_IN,IF \
+CDEF:HD_2_W=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_2_W_IN,IF \
+CDEF:HD_3_W=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_3_W_IN,IF \
+CDEF:HD_ALL_W=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_ALL_W_IN,IF \
+CDEF:HD_1_R=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_1_R_IN,IF \
+CDEF:HD_2_R=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_2_R_IN,IF \
+CDEF:HD_3_R=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_3_R_IN,IF \
+CDEF:HD_ALL_R=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_ALL_R_IN,IF \
+CDEF:HD_1_R_NEGATIVE=HD_1_R,-1,* \
+CDEF:HD_2_R_NEGATIVE=HD_2_R,-1,* \
+CDEF:HD_3_R_NEGATIVE=HD_3_R,-1,* \
+CDEF:HD_ALL_R_NEGATIVE=HD_ALL_R,-1,* \
+CDEF:HD_1_W_NEGATIVE=HD_1_W,-1,* \
+CDEF:HD_2_W_NEGATIVE=HD_2_W,-1,* \
+CDEF:HD_3_W_NEGATIVE=HD_3_W,-1,* \
+CDEF:HD_ALL_W_NEGATIVE=HD_ALL_W,-1,* \
+VDEF:HD_1_W_MAX=HD_1_W,MAXIMUM \
+VDEF:HD_2_W_MAX=HD_2_W,MAXIMUM \
+VDEF:HD_3_W_MAX=HD_3_W,MAXIMUM \
+VDEF:HD_ALL_W_MAX=HD_ALL_W,MAXIMUM \
+VDEF:HD_1_R_MAX=HD_1_R,MAXIMUM \
+VDEF:HD_2_R_MAX=HD_2_R,MAXIMUM \
+VDEF:HD_3_R_MAX=HD_3_R,MAXIMUM \
+VDEF:HD_ALL_R_MAX=HD_ALL_R,MAXIMUM \
+VDEF:HD_1_W_TOTAL=HD_1_W,TOTAL \
+VDEF:HD_2_W_TOTAL=HD_2_W,TOTAL \
+VDEF:HD_3_W_TOTAL=HD_3_W,TOTAL \
+VDEF:HD_ALL_W_TOTAL=HD_ALL_W,TOTAL \
+VDEF:HD_1_R_TOTAL=HD_1_R,TOTAL \
+VDEF:HD_2_R_TOTAL=HD_2_R,TOTAL \
+VDEF:HD_3_R_TOTAL=HD_3_R,TOTAL \
+VDEF:HD_ALL_R_TOTAL=HD_ALL_R,TOTAL \
+COMMENT:" " \
+LINE1:HD_ALL_W#000000:"raid write" \
+LINE1:HD_ALL_R_NEGATIVE#000000:"raid read" \
+COMMENT:" \j" \
+COMMENT:" " \
+AREA:HD_1_W#FF8C00:"HD1 write"  \
+STACK:HD_2_W#FFFF00:"HD2 write" \
+STACK:HD_3_W#FF0000:"HD3 write" \
+COMMENT:" \j" \
+COMMENT:" " \
+AREA:HD_1_R_NEGATIVE#0000FF:"HD1 read"  \
+STACK:HD_2_R_NEGATIVE#00FF00:"HD2 read"  \
+STACK:HD_3_R_NEGATIVE#9400D3:"HD3 read" \
+COMMENT:" \j" \
+COMMENT:" write maximum MB/s" \
+GPRINT:HD_ALL_W_MAX:"raid \: %3.2lf" \
+GPRINT:HD_1_W_MAX:"HD1 \: %3.2lf" \
+GPRINT:HD_2_W_MAX:"HD2 \: %3.2lf" \
+GPRINT:HD_3_W_MAX:"HD3 \: %3.2lf" \
+COMMENT:" \j" \
+COMMENT:" read  maximum MB/s" \
+GPRINT:HD_ALL_R_MAX:"raid \: %3.2lf" \
+GPRINT:HD_1_R_MAX:"HD1 \: %3.2lf" \
+GPRINT:HD_2_R_MAX:"HD2 \: %3.2lf" \
+GPRINT:HD_3_R_MAX:"HD3 \: %3.2lf" \
+COMMENT:" \j" \
+COMMENT:" write total MB/s" \
+GPRINT:HD_ALL_W_TOTAL:"raid \: %3.2lf" \
+GPRINT:HD_1_W_TOTAL:"HD1 \: %3.2lf" \
+GPRINT:HD_2_W_TOTAL:"HD2 \: %3.2lf" \
+GPRINT:HD_3_W_TOTAL:"HD3 \: %3.2lf" \
+COMMENT:" \j" \
+COMMENT:" read  total MB/s" \
+GPRINT:HD_ALL_R_TOTAL:"raid \: %3.2lf" \
+GPRINT:HD_1_R_TOTAL:"HD1 \: %3.2lf" \
+GPRINT:HD_2_R_TOTAL:"HD2 \: %3.2lf" \
+GPRINT:HD_3_R_TOTAL:"HD3 \: %3.2lf" \
+COMMENT:" \j"
+
+
+LANG=C rrdtool graph ${png_dir}/io_13.png \
+--title "IO SSD HD $start_date_str" \
+--imgformat PNG \
+--start "$start_date_13" \
+--end start+1h \
 --upper-limit 300 \
 --lower-limit -300 \
 --width 700 \
@@ -147,6 +238,62 @@ DEF:SSD_R=$db_file:SSD_READ:AVERAGE \
 DEF:HD_R=$db_file:HD_READ:AVERAGE \
 DEF:SSD_W=$db_file:SSD_WRITE:AVERAGE \
 DEF:HD_W=$db_file:HD_WRITE:AVERAGE \
+CDEF:SSD_R_NEGATIVE=SSD_R,-1,* \
+CDEF:HD_R_NEGATIVE=HD_R,-1,* \
+VDEF:SSD_R_MAX=SSD_R,MAXIMUM \
+VDEF:HD_R_MAX=HD_R,MAXIMUM \
+VDEF:SSD_W_MAX=SSD_W,MAXIMUM \
+VDEF:HD_W_MAX=HD_W,MAXIMUM \
+VDEF:SSD_R_TOTAL=SSD_R,TOTAL \
+VDEF:HD_R_TOTAL=HD_R,TOTAL \
+VDEF:SSD_W_TOTAL=SSD_W,TOTAL \
+VDEF:HD_W_TOTAL=HD_W,TOTAL \
+COMMENT:" " \
+AREA:SSD_W#FF8C00:"SSD write" \
+STACK:HD_W#FFFF00:"HD write" \
+COMMENT:" \j" \
+COMMENT:" " \
+AREA:SSD_R_NEGATIVE#0000FF:"SSD read" \
+STACK:HD_R_NEGATIVE#00FF00:"HD read" \
+COMMENT:" \j" \
+COMMENT:" " \
+COMMENT:" write maximum MB/s" \
+GPRINT:SSD_W_MAX:"SSD \: %3.2lf" \
+GPRINT:HD_W_MAX:"HD \: %3.2lf" \
+COMMENT:" \j" \
+COMMENT:" " \
+COMMENT:" read  maximum MB/s" \
+GPRINT:SSD_R_MAX:"SSD \: %3.2lf" \
+GPRINT:HD_R_MAX:"HD \: %3.2lf" \
+COMMENT:" \j" \
+COMMENT:" " \
+COMMENT:" write total MB/s" \
+GPRINT:SSD_W_TOTAL:"SSD \: %3.2lf" \
+GPRINT:HD_W_TOTAL:"HD \: %3.2lf" \
+COMMENT:" \j" \
+COMMENT:" " \
+COMMENT:" read  total MB/s" \
+GPRINT:SSD_R_TOTAL:"SSD \: %3.2lf" \
+GPRINT:HD_R_TOTAL:"HD \: %3.2lf" \
+COMMENT:" \j"
+
+
+LANG=C rrdtool graph ${png_dir}/io.png \
+--title "IO SSD HD $start_date_str" \
+--imgformat PNG \
+--start $start_date \
+--end start+24h \
+--x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--width 700 \
+--height 300 \
+DEF:SSD_R_IN=$db_file:SSD_READ:AVERAGE \
+DEF:HD_R_IN=$db_file:HD_READ:AVERAGE \
+DEF:SSD_W_IN=$db_file:SSD_WRITE:AVERAGE \
+DEF:HD_W_IN=$db_file:HD_WRITE:AVERAGE \
+CDEF:SSD_R=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,SSD_R_IN,IF \
+CDEF:HD_R=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_R_IN,IF \
+CDEF:SSD_W=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,SSD_W_IN,IF \
+CDEF:HD_W=TIME,$ignore_begin,GT,TIME,$ignore_end,LE,*,0,HD_W_IN,IF \
 CDEF:SSD_R_NEGATIVE=SSD_R,-1,* \
 CDEF:HD_R_NEGATIVE=HD_R,-1,* \
 VDEF:SSD_R_MAX=SSD_R,MAXIMUM \
