@@ -1,12 +1,21 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
+smb_dir=contents
 avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
 log "smb migrate start $avail"
 
+for f in $(smbclient -A ~/.smbauth -D $smb_dir -c "ls" $MC_SMB_SERVER |
+    egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
+    awk '{ print $1 }' | grep '^\.');do
+
+    smbclient -A ~/.smbauth -D $smb_dir -c "del \"$f\"" $MC_SMB_SERVER
+
+done
+
 total_size=0
 total_count=0
-for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
+for f in $(smbclient -A ~/.smbauth -D $smb_dir -c "ls" $MC_SMB_SERVER |
     egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
     awk -F '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' '
     {
@@ -14,12 +23,12 @@ for f in $(smbclient -A ~/.smbauth -D contents -c "ls" $MC_SMB_SERVER |
         printf("%d\t%s\n", time, $1)
     }' | sort -k 1 -n -r | sed -n -e '301,$p' | awk '{ print $2 }');do
 
-    size=$(smbclient -A ~/.smbauth -D contents -c "ls \"$f\"" $MC_SMB_SERVER |
+    size=$(smbclient -A ~/.smbauth -D $smb_dir -c "ls \"$f\"" $MC_SMB_SERVER |
     head -n 1 | awk -F ' A ' '{ print $2 }' | awk '{ print $1}')
     total_size=$(($total_size + $size))
     total_count=$(($total_count + 1))
 
-    smbclient -A ~/.smbauth -D contents -c "del \"$f\"" $MC_SMB_SERVER
+    smbclient -A ~/.smbauth -D $smb_dir -c "del \"$f\"" $MC_SMB_SERVER
 
 done
 
@@ -31,7 +40,7 @@ for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -size +10M -printf '%f\n');do
     if [ $? -ne 0 ];then
         cp "${MC_DIR_MP4}/$f" $MC_DIR_TMP
         log "smb migrate put $(ls -sh $f)"
-        smbclient -A ~/.smbauth -D contents -c "put \"$f\"" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D $smb_dir -c "put \"$f\"" $MC_SMB_SERVER
         /bin/rm "${MC_DIR_MP4}/$f"
         /bin/rm "${MC_DIR_TMP}/$f"
     fi
