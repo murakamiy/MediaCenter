@@ -67,7 +67,7 @@ function m() {
     mount | grep ^/ | sort
 }
 function vip() {
-    vi -p $(find $@ -type f)
+    vi -p $(find $@ -type f | sort)
 }
 function vio() {
     vi -o $@
