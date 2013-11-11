@@ -12,7 +12,7 @@ ignore_begin=$(date --date "$start_date 13:00:00" +%s)
 ignore_end=$(date --date "$start_date 14:00:00" +%s)
 
 
-LANG=C rrdtool graph ${png_dir}/cpu.png \
+LANG=C rrdtool graph ${png_dir}/daily/cpu.png \
 --title "CPU usage $start_date_str" \
 --vertical-label "Percent" \
 --imgformat PNG \
@@ -54,7 +54,7 @@ GPRINT:IOWAIT_MAX:"IO wait maximum\: %2.2lf%%" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/io_raid_13.png \
+LANG=C rrdtool graph ${png_dir}/daily/io_raid_13.png \
 --title "IO HD raid $start_date_str" \
 --vertical-label "MB per second" \
 --imgformat PNG \
@@ -134,7 +134,7 @@ GPRINT:HD_3_R_TOTAL:"HD3 \: %3.2lf" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/io_raid.png \
+LANG=C rrdtool graph ${png_dir}/daily/io_raid.png \
 --title "IO HD raid $start_date_str" \
 --vertical-label "per second" \
 --imgformat PNG \
@@ -223,7 +223,7 @@ GPRINT:HD_3_R_TOTAL:"HD3 \: %3.2lf" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/io_13.png \
+LANG=C rrdtool graph ${png_dir}/daily/io_13.png \
 --title "IO SSD HD $start_date_str" \
 --imgformat PNG \
 --start "$start_date_13" \
@@ -274,7 +274,7 @@ GPRINT:HD_R_TOTAL:"HD \: %3.2lf" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/io.png \
+LANG=C rrdtool graph ${png_dir}/daily/io.png \
 --title "IO SSD HD $start_date_str" \
 --imgformat PNG \
 --start $start_date \
@@ -330,7 +330,7 @@ GPRINT:HD_R_TOTAL:"HD \: %3.2lf" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/temp.png \
+LANG=C rrdtool graph ${png_dir}/daily/temp.png \
 --title "Temparature $start_date_str" \
 --imgformat PNG \
 --start $start_date \
@@ -421,7 +421,7 @@ GPRINT:FAN2_MAX:"fan2 \: %4.0lf RPM" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/mem.png \
+LANG=C rrdtool graph ${png_dir}/daily/mem.png \
 --title "Memory usage $start_date_str" \
 --imgformat PNG \
 --start $start_date \
@@ -470,7 +470,7 @@ GPRINT:FREE_MAX:"free \: %4.0lf" \
 COMMENT:" \j"
 
 
-LANG=C rrdtool graph ${png_dir}/du.png \
+LANG=C rrdtool graph ${png_dir}/daily/du.png \
 --title "Disk usage $start_date_str" \
 --imgformat PNG \
 --start $start_date \
