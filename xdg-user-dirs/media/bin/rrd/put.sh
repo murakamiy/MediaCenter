@@ -3,11 +3,11 @@ source $(dirname $0)/../00.conf
 
 log "smb graph put start"
 
-function delete_put() {
+function smb_update() {
 
     prefix=$1
     cycle=$2
-    stock=$3
+    stock=$(($3 + 1))
     smb_dir=graph/${cycle}
 
     for f in $(smbclient -A ~/.smbauth -D $smb_dir -c "ls" $MC_SMB_SERVER |
@@ -30,7 +30,7 @@ function delete_put() {
 
     done
 
-    for f in ${MC_DIR_RRD}/png/${cycle}/*;do
+    for f in $(find ${MC_DIR_RRD}/png/${cycle} -type f);do
         b=$(basename $f)
         smbclient -A ~/.smbauth -D $smb_dir -c "put \"$f\" \"${prefix}_${b}\"" $MC_SMB_SERVER
     done
@@ -38,4 +38,10 @@ function delete_put() {
 
 
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d\n", systime() - 60 * 60 * 24)) }')
-delete_put $prefix daily 57
+smb_update $prefix daily 56
+
+prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%V\n", systime() - 60 * 60 * 24)) }')
+smb_update $prefix weekly 35
+
+prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m\n", systime() - 60 * 60 * 24)) }')
+smb_update $prefix monthly 48
