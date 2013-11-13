@@ -1,46 +1,10 @@
 #!/bin/bash
 
-# date --date "20131101 00:00:00" +%s
-# 1383231600
-#
-# DS:データセット名:データ型:heatbeat:min:max
-# RRA:CFタイプ:xff:steps:rows
-
-# S.M.A.R.T. HD
-# Spin_Up_Time     Spin_Up_Time
-# Start_Stop       Start_Stop_Count
-# Power_On_Hours   Power_On_Hours
-# Power_Cycle      Power_Cycle_Count
-# Power_Off_Ret    Power_Off_Retract_Count
-# Load_Cycle       Load_Cycle_Count
-# Temperature      Temperature_Celsius
-# Raw_Read_Error   Raw_Read_Error_Rate
-# Reallocated_Sec  Reallocated_Sector_Ct
-# Seek_Error_Rate  Seek_Error_Rate
-# Spin_Retry       Spin_Retry_Count
-# Calibration_Ret  Calibration_Retry_Count
-# Reallocated_Evt  Reallocated_Event_Count
-# Current_Pending  Current_Pending_Sector
-# UDMA_CRC_Error   UDMA_CRC_Error_Count
-# Offline_Uncrect  Offline_Uncorrectable
-# Multi_Zone_Err   Multi_Zone_Error_Rate
-
-# S.M.A.R.T. SSD
-# Power_On_Hours   Power_On_Hours
-# Power_Cycle      Power_Cycle_Count
-# Power_Off_Ret    Power_Off_Retract_Count
-# Temperature      Temperature_Celsius
-# Spin_Up_Time     Spin_Up_Time
-# Throughput_Perf  Throughput_Performance
-# Raw_Read_Error   Raw_Read_Error_Rate
-# Reallocated_Sec  Reallocated_Sector_Ct
-# Program_Fail_Ct  Program_Fail_Count_Chip
-# Current_Pending  Current_Pending_Sector
-
+start_date=$(date --date "20131101 00:00:00" +%s)
 
 db_file=/home/mc/xdg-user-dirs/media/bin/rrd/stat.rrd
 rrdtool create $db_file \
---start 1383231600 \
+--start $start_date \
 --step 300 \
 DS:CPU_USER:GAUGE:600:0:100 \
 DS:CPU_NICE:GAUGE:600:0:100 \
@@ -81,15 +45,46 @@ DS:VOLT_3VSB:GAUGE:600:0:6.12 \
 DS:VOLT_VBAT:GAUGE:600:0:U \
 DS:FAN1:GAUGE:600:0:1500 \
 DS:FAN2:GAUGE:600:0:1600 \
-RRA:AVERAGE:0.5:1:8640 \
-RRA:AVERAGE:0.5:288:30 \
-RRA:MIN:0.5:288:30 \
-RRA:MAX:0.5:288:30
+RRA:AVERAGE:0.5:1:10080 \
+RRA:AVERAGE:0.5:288:35 \
+RRA:MIN:0.5:288:35 \
+RRA:MAX:0.5:288:35
 
+
+# S.M.A.R.T. HD
+# Spin_Up_Time     Spin_Up_Time
+# Start_Stop       Start_Stop_Count
+# Power_On_Hours   Power_On_Hours
+# Power_Cycle      Power_Cycle_Count
+# Power_Off_Ret    Power_Off_Retract_Count
+# Load_Cycle       Load_Cycle_Count
+# Temperature      Temperature_Celsius
+# Raw_Read_Error   Raw_Read_Error_Rate
+# Reallocated_Sec  Reallocated_Sector_Ct
+# Seek_Error_Rate  Seek_Error_Rate
+# Spin_Retry       Spin_Retry_Count
+# Calibration_Ret  Calibration_Retry_Count
+# Reallocated_Evt  Reallocated_Event_Count
+# Current_Pending  Current_Pending_Sector
+# UDMA_CRC_Error   UDMA_CRC_Error_Count
+# Offline_Uncrect  Offline_Uncorrectable
+# Multi_Zone_Err   Multi_Zone_Error_Rate
+
+# S.M.A.R.T. SSD
+# Power_On_Hours   Power_On_Hours
+# Power_Cycle      Power_Cycle_Count
+# Power_Off_Ret    Power_Off_Retract_Count
+# Temperature      Temperature_Celsius
+# Spin_Up_Time     Spin_Up_Time
+# Throughput_Perf  Throughput_Performance
+# Raw_Read_Error   Raw_Read_Error_Rate
+# Reallocated_Sec  Reallocated_Sector_Ct
+# Program_Fail_Ct  Program_Fail_Count_Chip
+# Current_Pending  Current_Pending_Sector
 
 db_file=/home/mc/xdg-user-dirs/media/bin/rrd/smart.rrd
 rrdtool create $db_file \
---start 1383231600 \
+--start $start_date \
 --step 86400 \
 DS:HD1_Raw_Read_Error:GAUGE:172800:0:U \
 DS:HD1_Spin_Up_Time:GAUGE:172800:0:U \
@@ -169,5 +164,5 @@ DS:SSD_Program_Fail_Ct:GAUGE:172800:0:U \
 DS:SSD_Power_Off_Ret:GAUGE:172800:0:U \
 DS:SSD_Temperature:GAUGE:172800:0:U \
 DS:SSD_Current_Pending:GAUGE:172800:0:U \
-RRA:LAST:0.5:1:30 \
-RRA:MAX:0.5:30:1
+RRA:LAST:0.5:1:35 \
+RRA:MAX:0.5:35:1
