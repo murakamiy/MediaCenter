@@ -40,7 +40,7 @@ function smb_update() {
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d\n", systime() - 60 * 60 * 24)) }')
 smb_update $prefix daily 56
 
-prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%V\n", systime() - 60 * 60 * 24)) }')
+prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%mw%V\n", systime() - 60 * 60 * 24)) }')
 smb_update $prefix weekly 35
 
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m\n", systime() - 60 * 60 * 24)) }')

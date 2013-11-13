@@ -4,8 +4,8 @@ rrd_dir=/home/mc/xdg-user-dirs/media/bin/rrd
 png_dir=${rrd_dir}/png
 db_file=${rrd_dir}/smart.rrd
 
-start_date=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m01", systime())) }')
-start_date_str=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 * 60 * 24)) }')
+start_date_str=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m", systime() - 60 * 60 * 24)) }')
+start_date=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m01", systime() - 60 * 60 * 24)) }')
 
 # ssd  ata-TOSHIBA_THNSNH256GCST_73IS101WTPHY
 # hd_1 ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397

@@ -4,21 +4,16 @@ rrd_dir=/home/mc/xdg-user-dirs/media/bin/rrd
 png_dir=${rrd_dir}/png
 db_file=${rrd_dir}/stat.rrd
 
-start_date=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 24)) }')
-start_date_str=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 * 60 * 24)) }')
-start_date_13=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 13:00", systime() - 60 * 60 * 24)) }')
 
-ignore_begin=$(date --date "$start_date 13:00:00" +%s)
-ignore_end=$(date --date "$start_date 14:00:00" +%s)
-
+function create_graph_cpu() {
 
 LANG=C rrdtool graph ${png_dir}/daily/cpu.png \
---title "CPU usage $start_date_str" \
+--title "CPU usage $start_string" \
 --vertical-label "Percent" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
 --upper-limit 100 \
 --width 700 \
 --height 300 \
@@ -53,13 +48,16 @@ GPRINT:NICE_MAX:"NICE maximum\: %2.2lf%%" \
 GPRINT:IOWAIT_MAX:"IO wait maximum\: %2.2lf%%" \
 COMMENT:" \j"
 
+}
+
+function create_graph_io_raid_13() {
 
 LANG=C rrdtool graph ${png_dir}/daily/io_raid_13.png \
---title "IO HD raid $start_date_str" \
+--title "IO HD raid $start_string" \
 --vertical-label "MB per second" \
 --imgformat PNG \
---start "$start_date_13" \
---end start+1h \
+--start "$start_param" \
+--end "$end_param" \
 --width 700 \
 --height 300 \
 DEF:HD_1_W=$db_file:HD_ARRAY_1_WRITE:AVERAGE \
@@ -133,14 +131,18 @@ GPRINT:HD_2_R_TOTAL:"HD2 \: %3.2lf" \
 GPRINT:HD_3_R_TOTAL:"HD3 \: %3.2lf" \
 COMMENT:" \j"
 
+}
+
+
+function create_graph_io_raid() {
 
 LANG=C rrdtool graph ${png_dir}/daily/io_raid.png \
---title "IO HD raid $start_date_str" \
+--title "IO HD raid $start_string" \
 --vertical-label "per second" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
 --width 700 \
 --height 300 \
 DEF:HD_1_W_IN=$db_file:HD_ARRAY_1_WRITE:AVERAGE \
@@ -222,12 +224,16 @@ GPRINT:HD_2_R_TOTAL:"HD2 \: %3.2lf" \
 GPRINT:HD_3_R_TOTAL:"HD3 \: %3.2lf" \
 COMMENT:" \j"
 
+}
+
+
+function create_graph_io_13() {
 
 LANG=C rrdtool graph ${png_dir}/daily/io_13.png \
---title "IO SSD HD $start_date_str" \
+--title "IO SSD HD $start_string" \
 --imgformat PNG \
---start "$start_date_13" \
---end start+1h \
+--start "$start_param" \
+--end "$end_param" \
 --width 700 \
 --height 300 \
 DEF:SSD_R=$db_file:SSD_READ:AVERAGE \
@@ -273,13 +279,17 @@ GPRINT:SSD_R_TOTAL:"SSD \: %3.2lf" \
 GPRINT:HD_R_TOTAL:"HD \: %3.2lf" \
 COMMENT:" \j"
 
+}
+
+
+function create_graph_io() {
 
 LANG=C rrdtool graph ${png_dir}/daily/io.png \
---title "IO SSD HD $start_date_str" \
+--title "IO SSD HD $start_string" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
 --width 700 \
 --height 300 \
 DEF:SSD_R_IN=$db_file:SSD_READ:AVERAGE \
@@ -329,13 +339,16 @@ GPRINT:SSD_R_TOTAL:"SSD \: %3.2lf" \
 GPRINT:HD_R_TOTAL:"HD \: %3.2lf" \
 COMMENT:" \j"
 
+}
+
+function create_graph_temp() {
 
 LANG=C rrdtool graph ${png_dir}/daily/temp.png \
---title "Temparature $start_date_str" \
+--title "Temparature $start_string" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
 --upper-limit 100 \
 --lower-limit -100 \
 --width 700 \
@@ -420,13 +433,17 @@ GPRINT:FAN1_MAX:"fan1 \: %4.0lf RPM" \
 GPRINT:FAN2_MAX:"fan2 \: %4.0lf RPM" \
 COMMENT:" \j"
 
+}
+
+
+function create_graph_mem() {
 
 LANG=C rrdtool graph ${png_dir}/daily/mem.png \
---title "Memory usage $start_date_str" \
+--title "Memory usage $start_string" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
 --upper-limit 8000 \
 --width 700 \
 --height 300 \
@@ -469,13 +486,17 @@ GPRINT:BUFFERS_MAX:"buffers \: %4.0lf" \
 GPRINT:FREE_MAX:"free \: %4.0lf" \
 COMMENT:" \j"
 
+}
+
+
+function create_graph_du() {
 
 LANG=C rrdtool graph ${png_dir}/daily/du.png \
---title "Disk usage $start_date_str" \
+--title "Disk usage $start_string" \
 --imgformat PNG \
---start $start_date \
---end start+24h \
---x-grid HOUR:1:HOUR:1:HOUR:1:0:%H \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
 --upper-limit 100  \
 --width 700 \
 --height 300 \
@@ -487,3 +508,60 @@ COMMENT:" \j" \
 COMMENT:" " \
 GPRINT:DISK_USAGE_MAX:"disk usage max \: %3.0lf" \
 COMMENT:" \j"
+
+}
+
+
+yesterday=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 24)) }')
+ignore_begin=$(date --date "$yesterday 13:00:00" +%s)
+ignore_end=$(date --date "$yesterday 14:00:00" +%s)
+
+
+cycle=daily
+start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 * 60 * 24)) }')
+start_param=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 13:00", systime() - 60 * 60 * 24)) }')
+end_param='start+1h'
+x_grid=
+create_graph_io_raid_13
+create_graph_io_13
+
+cycle=daily
+start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 * 60 * 24)) }')
+start_param=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 00:00", systime() - 60 * 60 * 24)) }')
+end_param='start+24h'
+x_grid='HOUR:1:HOUR:1:HOUR:1:0:%H'
+create_graph_cpu
+create_graph_io_raid
+create_graph_io
+create_graph_temp
+create_graph_mem
+create_graph_du
+
+cycle=weekly
+start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y%mw%V\n", systime() - 60 * 60 * 24)) }')
+start_param=$(awk '
+BEGIN {
+    yesterday = systime() - (60 * 60 * 24)
+    offset = (strtonum(strftime("%u", yesterday)) - 1) * 60 * 60 * 24
+    printf("%s\n", strftime("%m/%d/%Y 00:00", yesterday - offset))
+}')
+end_param='start+1WEEK'
+x_grid='HOUR:12:HOUR:12:DAY:1:0:%d'
+create_graph_cpu
+create_graph_io_raid
+create_graph_io
+create_graph_temp
+create_graph_mem
+create_graph_du
+
+cycle=monthly
+start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m", systime() - 60 * 60 * 24)) }')
+start_param=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m01", systime() - 60 * 60 * 24)) }')
+end_param='start+1MONTH'
+x_grid='DAY:1:DAY:1:DAY:1:0:%d'
+create_graph_cpu
+create_graph_io_raid
+create_graph_io
+create_graph_temp
+create_graph_mem
+create_graph_du
