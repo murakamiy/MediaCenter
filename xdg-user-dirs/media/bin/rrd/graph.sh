@@ -7,7 +7,7 @@ db_file=${rrd_dir}/stat.rrd
 
 function create_graph_cpu() {
 
-LANG=C rrdtool graph ${png_dir}/daily/cpu.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/cpu.png \
 --title "CPU usage $start_string" \
 --vertical-label "Percent" \
 --imgformat PNG \
@@ -52,7 +52,7 @@ COMMENT:" \j"
 
 function create_graph_io_raid_13() {
 
-LANG=C rrdtool graph ${png_dir}/daily/io_raid_13.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/io_raid_13.png \
 --title "IO HD raid $start_string" \
 --vertical-label "MB per second" \
 --imgformat PNG \
@@ -136,7 +136,7 @@ COMMENT:" \j"
 
 function create_graph_io_raid() {
 
-LANG=C rrdtool graph ${png_dir}/daily/io_raid.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/io_raid.png \
 --title "IO HD raid $start_string" \
 --vertical-label "per second" \
 --imgformat PNG \
@@ -229,7 +229,7 @@ COMMENT:" \j"
 
 function create_graph_io_13() {
 
-LANG=C rrdtool graph ${png_dir}/daily/io_13.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/io_13.png \
 --title "IO SSD HD $start_string" \
 --imgformat PNG \
 --start "$start_param" \
@@ -284,7 +284,7 @@ COMMENT:" \j"
 
 function create_graph_io() {
 
-LANG=C rrdtool graph ${png_dir}/daily/io.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/io.png \
 --title "IO SSD HD $start_string" \
 --imgformat PNG \
 --start "$start_param" \
@@ -343,7 +343,7 @@ COMMENT:" \j"
 
 function create_graph_temp() {
 
-LANG=C rrdtool graph ${png_dir}/daily/temp.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/temp.png \
 --title "Temparature $start_string" \
 --imgformat PNG \
 --start "$start_param" \
@@ -438,7 +438,7 @@ COMMENT:" \j"
 
 function create_graph_mem() {
 
-LANG=C rrdtool graph ${png_dir}/daily/mem.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/mem.png \
 --title "Memory usage $start_string" \
 --imgformat PNG \
 --start "$start_param" \
@@ -491,7 +491,7 @@ COMMENT:" \j"
 
 function create_graph_du() {
 
-LANG=C rrdtool graph ${png_dir}/daily/du.png \
+LANG=C rrdtool graph ${png_dir}/${cycle}/du.png \
 --title "Disk usage $start_string" \
 --imgformat PNG \
 --start "$start_param" \
