@@ -1,7 +1,7 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/home/mc/xdg-user-dirs/media/bin/mount-sudo.sh
+Exec=/home/mc/xdg-user-dirs/media/bin/startup.sh
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

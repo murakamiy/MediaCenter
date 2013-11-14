@@ -1,6 +1,8 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
+mode=$1
+
 function has_free_space() {
 
     used=$(df -Ph --sync | awk -v dev=$MC_DEVICE_USB_DISK_TS '{ if ($1 == dev) printf("%d\n", $5) }')
@@ -20,13 +22,7 @@ function move_to_hd() {
     file=$1
     dir=$2
 
-    title=
-    if [ $dir = $MC_DIR_TS_HD ];then
-        title=$(print_title $MC_DIR_JOB_FINISHED/$(basename $file | awk -F . '{ print $1 }').xml)
-    elif [ $dir = $MC_DIR_ENCODE_HD ];then
-        title=$(print_title ${MC_DIR_ENCODE_FINISHED}/$(basename $file | awk -F . '{ print $1 }').xml)
-    fi
-
+    title=$(print_title ${dir}/$(basename $file | awk -F . '{ print $1 }').xml)
     size=$(stat --format=%s $file)
     start=$(date +%s.%N)
     /bin/mv $file $dir
@@ -70,6 +66,11 @@ fi
 
 has_free_space print
 for ts in $(find $MC_DIR_TS -type f);do
+
+    df=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
+    if [ "$mode" = "lazy" -a $df -lt 50 ];then
+        break
+    fi
 
     fuser $ts
     if [ $? -eq 0 ];then

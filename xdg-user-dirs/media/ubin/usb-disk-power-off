@@ -18,13 +18,12 @@ function do_usb_disk_opration() {
     elif [ $prog_name = "usb-disk-mount" ];then
 
         mount_point_count=$(mount | grep ^/ | wc -l)
-        if [ $mount_point_count -ge 6 ];then
+        if [ $mount_point_count -ge 5 ];then
             # 1 root
             # 2 usb_disk_array
             # 3 usb_disk_array bind
             # 4 usb_disk 1
             # 5 usb_disk 1 bind
-            # 6 usb_disk 2
             echo "USB disk is all ready mounted"
             return 1
         fi

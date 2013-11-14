@@ -1,9 +1,31 @@
 #!/bin/bash
 
-usb_disk_power_on=/home/mc/xdg-user-dirs/media/job/state/usb_disk/power_on
-usb_disk_mount=/home/mc/xdg-user-dirs/media/job/state/usb_disk/mount
-mount_sh=/home/mc/xdg-user-dirs/media/bin/mount.sh
 realpath=/home/mc/xdg-user-dirs/media/ubin/realpath
+
+function print_usb_device_list() {
+
+    device_list=(
+        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164
+        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397
+        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0680500
+        ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
+    )
+
+    for i in ${device_list[@]};do
+        if [ -h /dev/disk/by-id/${i} ];then
+            $realpath /dev/disk/by-id/${i}
+        fi
+    done
+}
+function mount_usb_disk() {
+
+    arr=($(print_usb_device_list))
+
+    mount -o noatime,stripe=768 /dev/md0 /mnt/hd_array
+    mount -o noatime ${arr[3]}1 /mnt/hd
+    mount --bind /mnt/hd_array/ts_hd /home/mc/xdg-user-dirs/media/video/ts_hd
+    mount --bind /mnt/hd/encode_hd   /home/mc/xdg-user-dirs/media/video/encode_hd
+}
 
 function usage() {
 cat << EOF
@@ -63,21 +85,6 @@ function unmount_partition() {
         do_unmount_partition /dev/$array_name
         raid_stop $array_name
     fi
-}
-function print_usb_device_list() {
-
-    device_list=(
-        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164
-        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397
-        ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0680500
-        ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078
-    )
-
-    for i in ${device_list[@]};do
-        if [ -h /dev/disk/by-id/${i} ];then
-            $realpath /dev/disk/by-id/${i}
-        fi
-    done
 }
 function wait_for_usb_disk_device() {
     for i in $(seq 30);do
@@ -223,16 +230,11 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
 
     raid_start
 
-    touch $usb_disk_power_on
     if [ "$control" = "mount" ];then
-        touch $usb_disk_mount
+        mount_usb_disk
     fi
-    bash $mount_sh
-    rm -f $usb_disk_power_on $usb_disk_mount
 
 elif [ "$control" = "off" ];then
-
-    rm -f $usb_disk_power_on $usb_disk_mount
 
     wait_for_usb_disk_device
     if [ $? -ne 0 ];then
