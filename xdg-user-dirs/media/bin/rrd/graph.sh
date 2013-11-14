@@ -565,3 +565,20 @@ create_graph_io
 create_graph_temp
 create_graph_mem
 create_graph_du
+
+
+
+# week debug
+# awk '
+# BEGIN {
+#     for (i = 0; i < 100; i++) {
+#         today = systime() + (60 * 60 * 24 * i)
+#         yesterday = today - (60 * 60 * 24)
+# 
+#         week_start_offset = (strtonum(strftime("%u", yesterday)) - 1) * 60 * 60 * 24
+#         week_span = yesterday - week_start_offset
+# 
+# 
+#         printf("%s %s %s %s\n", strftime("%Y%m%d", today), strftime("%u", today), strftime("%Y%mw%V", today), strftime("%Y%m%d", week_span))
+#     }
+# }'
