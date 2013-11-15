@@ -119,7 +119,6 @@ class TitleFinder(Finder):
         u'はじめの一歩',
         u'青の祓魔師',
         u'NARUTO',
-        u'猫物語',
         u'ベストヒットUSA',
         u'セカンドシーズン',
         u'魔法少女まどか☆マギカ',
