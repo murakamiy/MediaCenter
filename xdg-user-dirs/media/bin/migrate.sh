@@ -22,7 +22,12 @@ function move_to_hd() {
     file=$1
     dir=$2
 
-    title=$(print_title ${dir}/$(basename $file | awk -F . '{ print $1 }').xml)
+    title=
+    if [ $dir = $MC_DIR_TS_HD ];then
+        title=$(print_title $MC_DIR_JOB_FINISHED/$(basename $file | awk -F . '{ print $1 }').xml)
+    elif [ $dir = $MC_DIR_ENCODE_HD ];then
+        title=$(print_title ${MC_DIR_ENCODE_FINISHED}/$(basename $file | awk -F . '{ print $1 }').xml)
+    fi
     size=$(stat --format=%s $file)
     start=$(date +%s.%N)
     /bin/mv $file $dir
