@@ -97,23 +97,7 @@ class ReserveMaker:
         self.finder = finder
         self.now = datetime.today()
         self.logfd = open(LOG_FILE, "a")
-        self.title_sub_list = self.create_title_sub_list()
         self.include_channel = None
-    def create_title_sub_list(self):
-        str_list = [
-            u'「.+」',
-            u'（.+）',
-            u'＜.+＞',
-            u'【.+】',
-            u'\[.+\]',
-            u'\(.+\)',
-            u'<.+>',
-            u'#[0-9]+',
-            ]
-        pattern_list = []
-        for s in str_list:
-            pattern_list.append(re.compile(s))
-        return pattern_list
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
