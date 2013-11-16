@@ -232,6 +232,7 @@ if [ "$control" = "on" -o "$control" = "mount" ];then
 
     if [ "$control" = "mount" ];then
         mount_usb_disk
+        /etc/init.d/mediatomb restart
     fi
 
 elif [ "$control" = "off" ];then
