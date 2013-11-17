@@ -5,8 +5,42 @@ log "start: $(hard_ware_info)"
 
 touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
-
 sudo $MC_BIN_MOUNT_TMP mount
+
+rec_time=60
+log 'starting epgdump_py digital'
+array=($(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL))
+for ((i = 0; i < ${#array[@]}; i++));do
+    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${array[$i]}.ts
+    (
+        python $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${array[$i]}.ts -o ${MC_DIR_EPG}/${array[$i]}.xml
+        /bin/rm ${MC_DIR_TMP}/${array[$i]}.ts
+    ) &
+    pid_epg_digital_dump=$!
+    if [ $i -eq $((${#array[@]} -1)) ];then
+        echo wait epg dump digital
+        wait $pid_epg_digital_dump
+    fi
+done &
+pid_epg_digital=$!
+
+log 'starting epgdump_py bs cs'
+array=(BS15_0 CS2 CS4)
+for ((i = 0; i < ${#array[@]}; i++));do
+    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/bs_cs_${array[$i]}.ts
+    (
+        python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_TMP}/bs_cs_${array[$i]}.ts -o ${MC_DIR_EPG}/bs_cs_${array[$i]}.xml
+        /bin/rm ${MC_DIR_TMP}/bs_cs_${array[$i]}.ts
+    ) &
+    pid_epg_bs_cs_dump=$!
+    if [ $i -eq $((${#array[@]} -1)) ];then
+        echo wait epg dump bs cs
+        wait $pid_epg_bs_cs_dump
+    fi
+done &
+pid_epg_bs_cs=$!
+
+
 $MC_BIN_USB_MOUNT
 bash $MC_BIN_MIGRATE &
 pid_mig_array=$!
@@ -19,26 +53,10 @@ bash $MC_BIN_RRD
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
-log 'starting epgdump_py digital'
-for c in $(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL);do
-    $MC_BIN_REC $c 60 ${MC_DIR_TMP}/${c}.ts
-    python $MC_BIN_EPGDUMP -e -c $c -i ${MC_DIR_TMP}/${c}.ts -o ${MC_DIR_EPG}/${c}.xml
-    /bin/rm ${MC_DIR_TMP}/${c}.ts
-done
-
-log 'starting epgdump_py bs cs'
-$MC_BIN_REC BS15_0 60 ${MC_DIR_TMP}/bs_cs_0.ts
-python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_TMP}/bs_cs_0.ts -o ${MC_DIR_EPG}/bs_cs_0.xml
-/bin/rm ${MC_DIR_TMP}/bs_cs_0.ts
-$MC_BIN_REC CS2    60 ${MC_DIR_TMP}/bs_cs_2.ts
-python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_TMP}/bs_cs_2.ts -o ${MC_DIR_EPG}/bs_cs_2.xml
-/bin/rm ${MC_DIR_TMP}/bs_cs_2.ts
-$MC_BIN_REC CS4    60 ${MC_DIR_TMP}/bs_cs_4.ts
-python $MC_BIN_EPGDUMP -e -d -s -i ${MC_DIR_TMP}/bs_cs_4.ts -o ${MC_DIR_EPG}/bs_cs_4.xml
-/bin/rm ${MC_DIR_TMP}/bs_cs_4.ts
-
+wait $pid_epg_bs_cs
+wait $pid_epg_digital
 log 'starting find program'
-python $MC_BIN_RESERVER '[0-9]*.xml' 'bs_cs_[0-9]*.xml'
+python $MC_BIN_RESERVER '[0-9]*.xml' 'bs_cs_*.xml'
 
 log 'starting xml format'
 for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
