@@ -101,19 +101,19 @@ class ReserveMaker:
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
-    def reserve(self, *xml_glob_list):
-        rinfo_list = []
+    def reserve(self, xml_glob_list):
         for xml_glob in xml_glob_list:
+            rinfo_list = []
             for xml_file in glob(DIR_EPG + '/' + xml_glob):
                 tree = self.parse_xml(xml_file)
                 if tree == None:
                     continue
                 rinfo_list.extend(self.find(tree))
-        rinfo_list.sort(cmp=timeline_sort, reverse=False)
-        rinfo_list = self.apply_rating(rinfo_list)
-        rinfo_list = self.apply_priority(rinfo_list)
-        rinfo_list = self.create_reserve(rinfo_list)
-        self.do_reserve(rinfo_list)
+            rinfo_list.sort(cmp=timeline_sort, reverse=False)
+            rinfo_list = self.apply_rating(rinfo_list)
+            rinfo_list = self.apply_priority(rinfo_list)
+            rinfo_list = self.create_reserve(rinfo_list)
+            self.do_reserve(rinfo_list)
     def apply_rating(self, rinfo_list):
         provider = rating.Provider()
         for rinfo in rinfo_list:

@@ -15,5 +15,4 @@ cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif)
 
 xml_globs = sys.argv[1:]
-for xml_glob in xml_globs:
-    r.reserve(xml_glob)
+r.reserve(xml_globs)
