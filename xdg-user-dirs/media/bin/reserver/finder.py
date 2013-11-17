@@ -87,20 +87,6 @@ class AnimeFinder(Finder):
                     return True
         return False
 
-class BaseBallFinder(Finder):
-    priority = 1
-    next_flag = False
-    def allow(self, pinfo):
-        if self.next_flag:
-            self.next_flag = False
-            if pinfo.channel != '22' and pinfo.start.hour >= 17:
-                return True
-            else:
-                return False
-        if pinfo.channel != '22' and pinfo.start.hour >= 17 and pinfo.category_2 == '野球':
-            self.next_flag = True
-        return False
-
 class BoxingFinder(Finder):
     priority = 1
     allow_list = [
@@ -156,20 +142,6 @@ class CreditFinder(Finder):
             return True
         return False
 
-class SportFinder(Finder):
-    priority = 40
-    def allow(self, pinfo):
-        if pinfo.category_2 == 'サッカー' and int(pinfo.channel) > 100:
-            return True
-        return False
-
-class NewsFinder(Finder):
-    priority = 40
-    def allow(self, pinfo):
-        if pinfo.title == 'ニュースウオッチ9':
-            return True
-        return False
-
 class F1Finder(Finder):
     priority = 40
     allow_list = [
@@ -178,16 +150,6 @@ class F1Finder(Finder):
     ]
     def allow(self, pinfo):
         if pinfo.category_2 == 'モータースポーツ' and re.search(self.allow_pattern, pinfo.title):
-            return True
-        return False
-
-class DarwinFinder(Finder):
-    priority = 30
-    allow_list = [
-        u'ダーウィンが来た',
-    ]
-    def allow(self, pinfo):
-        if pinfo.start.hour == 19 and re.search(self.allow_pattern, pinfo.title):
             return True
         return False
 
@@ -206,28 +168,6 @@ class VarietyFinder(Finder):
             if re.search(self.allow_pattern, pinfo.desc):
                 return True
         return False
-
-class EnglishFinder(Finder):
-    priority = 40
-    allow_list = [
-        u'英語',
-    ]
-    deny_list = [
-        u'リトル・チャロ',
-        u'高校講座',
-        u'トラッドジャパン',
-    ]
-    def allow(self, pinfo):
-        if pinfo.start.hour < 18:
-            return False
-        if re.search(self.deny_pattern, pinfo.title):
-            return False
-        if re.search(self.allow_pattern, pinfo.title):
-            return True
-        if re.search(self.allow_pattern, pinfo.desc):
-            return True
-        return False
-
 
 class RandomGenerator:
     def getRandomChannel():
@@ -250,27 +190,6 @@ class RandomFinder(Finder):
            (pinfo.start.hour == self.random_hour or pinfo.start.hour == self.random_hour + 1):
             self.reserved = True
             return True 
-        return False
-
-####################################################################################################
-####################################################################################################
-
-class TestTimeFinder(Finder):
-    priority = 50
-    def allow(self, pinfo):
-        if (pinfo.epoch_start - pinfo.epoch_now) < (60 * 60):
-            return True
-        return False
-
-class TestAllFinder(Finder):
-    priority = 1
-    def allow(self, pinfo):
-        return True
-class TestChannelFinder(Finder):
-    priority = 1
-    def allow(self, pinfo):
-        if pinfo.channel == '13' or pinfo.channel == '14' or pinfo.channel == '15':
-            return True
         return False
 
 ####################################################################################################
