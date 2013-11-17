@@ -103,6 +103,7 @@ class ReserveMaker:
         print "%s" % (message)
     def reserve(self, xml_glob_list):
         bcas_list = []
+        remove_list = []
         for xml_glob in xml_glob_list:
             rinfo_list = []
             for xml_file in glob(DIR_EPG + '/' + xml_glob):
@@ -112,19 +113,19 @@ class ReserveMaker:
                 rinfo_list.extend(self.find(tree))
             rinfo_list.sort(cmp=timeline_sort, reverse=False)
             rinfo_list = self.apply_rating(rinfo_list)
-            rinfo_list = self.apply_priority(rinfo_list)
-            bcas_list.append(rinfo_list)
+            remove_list.extend(self.get_lower_priority_list(rinfo_list))
+            bcas_list.extend(rinfo_list)
 
-        for rinfo_list in bcas_list:
-            rinfo_list = self.create_reserve(rinfo_list)
-            self.do_reserve(rinfo_list)
+        bcas_list = self.apply_priority(bcas_list, remove_list)
+        bcas_list = self.create_reserve(bcas_list)
+        self.do_reserve(bcas_list)
     def apply_rating(self, rinfo_list):
         provider = rating.Provider()
         for rinfo in rinfo_list:
             rating_v = provider.get_rating_element(rinfo.pinfo.element)
             rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
         return rinfo_list
-    def apply_priority(self, rinfo_list):
+    def get_lower_priority_list(self, rinfo_list):
         timer_list = self.create_timer(rinfo_list)
         job_list = []
         remove_list = []
@@ -135,6 +136,8 @@ class ReserveMaker:
                 job_list.sort(cmp=priority_sort, reverse=False)
                 remove_list.extend(job_list[2:len(job_list)])
                 job_list = job_list[0:2]
+        return remove_list
+    def apply_priority(self, rinfo_list, remove_list):
         self.log("removed: ")
         for r in remove_list:
             self.log(" %s %3d %s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
