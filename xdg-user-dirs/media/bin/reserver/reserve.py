@@ -39,7 +39,7 @@ class ProgramInfo:
         self.epoch_end = int(time.mktime(self.end.timetuple()))
         self.title = self.get_text(el.find('title').text)
         self.desc = self.get_text(el.find('desc').text)
-        self.rectime = self.epoch_end - self.epoch_start - 10
+        self.rectime = self.epoch_end - self.epoch_start
         self.category_1 = ''
         self.category_2 = ''
         i = 0
@@ -142,9 +142,9 @@ class ReserveMaker:
     def apply_priority(self, rinfo_list, remove_list):
         self.log("removed: ")
         for r in remove_list:
-            self.log(" %s %3d %s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
             fd = open(DIR_REMOVED + '/' + re.sub('[\'"#$%&()!/*=~<>]', '_', r.pinfo.title) + '.txt', "w")
-            print >> fd, "%s %s %3d %s %6.2f %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title)
+            print >> fd, "%s %s %3d %7s %6.2f %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title)
             fd.close()
             try:
                 rinfo_list.remove(r)
@@ -202,7 +202,7 @@ class ReserveMaker:
             fd = open(r.pinfo.file_reserved, "w")
             ElementTree(r.element).write(fd, 'utf-8')
             fd.close()
-            self.log(" %s %3d %s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
     def parse_xml(self, xml_file):
         tree = ElementTree()
         try:
@@ -217,7 +217,7 @@ class ReserveMaker:
             new_list.append(self.do_create_reserve(r.pinfo, r.element))
         return new_list
     def do_create_reserve(self, pinfo, el):
-        rec_command = "rec %s %d %s" % (pinfo.channel, pinfo.rectime, pinfo.file_ts)
+        rec_command = "rec %s %d %s" % (pinfo.channel, pinfo.rectime - 10, pinfo.file_ts)
         do_job_command = "exec bash %s %s" % (BIN_DO_JOB, pinfo.file_base)
         at_command = "at -t %s > /dev/null 2>&1" % (pinfo.start.strftime("%Y%m%d%H%M"))
 
@@ -249,7 +249,7 @@ class ReserveMaker:
         rec_channel_element = Element("rec-channel")
         rec_channel_element.text = pinfo.channel
         rec_time_element = Element("rec-time")
-        rec_time_element.text = str(pinfo.rectime)
+        rec_time_element.text = str(pinfo.rectime - 10)
 
         command_element = Element("command")
         command_element.append(do_job_element)

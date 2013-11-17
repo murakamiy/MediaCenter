@@ -45,7 +45,9 @@ class Finder:
         buf = '(' + buf + re.escape(plist[-1].encode('utf-8')) + ')'
         return re.compile(buf)
     def like(self, pinfo):
-        if (pinfo.epoch_end - pinfo.epoch_start) > (60 * 60 * 6):
+        if pinfo.rectime > (60 * 60 * 6):
+            return False
+        if pinfo.rectime < (60 * 20):
             return False
         if (
                 (cron_time.hour == pinfo.start.hour and pinfo.start.minute <= cron_time.minute + 30) or 
