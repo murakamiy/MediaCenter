@@ -102,6 +102,7 @@ class ReserveMaker:
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
     def reserve(self, xml_glob_list):
+        bcas_list = []
         for xml_glob in xml_glob_list:
             rinfo_list = []
             for xml_file in glob(DIR_EPG + '/' + xml_glob):
@@ -112,6 +113,9 @@ class ReserveMaker:
             rinfo_list.sort(cmp=timeline_sort, reverse=False)
             rinfo_list = self.apply_rating(rinfo_list)
             rinfo_list = self.apply_priority(rinfo_list)
+            bcas_list.append(rinfo_list)
+
+        for rinfo_list in bcas_list:
             rinfo_list = self.create_reserve(rinfo_list)
             self.do_reserve(rinfo_list)
     def apply_rating(self, rinfo_list):
