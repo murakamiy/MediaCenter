@@ -169,19 +169,11 @@ class VarietyFinder(Finder):
                 return True
         return False
 
-class RandomGenerator:
-    def getRandomChannel():
-        return random.choice(('BS_200','BS_193','CS_227','CS_240'))
-    def getRandomHour():
-        return random.choice((20,21))
-    getRandomChannel = staticmethod(getRandomChannel)
-    getRandomHour = staticmethod(getRandomHour)
-
-class RandomFinder(Finder):
+class MovieFinder(Finder):
     priority = 70
-    random_channel = RandomGenerator.getRandomChannel()
-    random_hour = RandomGenerator.getRandomHour()
-    rectime = 29 * 60
+    random_channel = random.choice(('BS_200','BS_193','CS_227','CS_240'))
+    random_hour = random.choice((20,21))
+    rectime = 60 * 90
     reserved = False
     def allow(self, pinfo):
         if self.reserved == False and \

@@ -7,7 +7,7 @@ finders_list.append(finder.AnimeFinder())
 finders_list.append(finder.TitleFinder())
 finders_list.append(finder.F1Finder())
 finders_list.append(finder.CreditFinder())
-finders_list.append(finder.RandomFinder())
+finders_list.append(finder.MovieFinder())
 finders_list.append(finder.BoxingFinder())
 finders_list.append(finder.CreditFinderHigh())
 
