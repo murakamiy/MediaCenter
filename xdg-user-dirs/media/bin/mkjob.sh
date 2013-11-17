@@ -8,17 +8,20 @@ trash-empty
 sudo $MC_BIN_MOUNT_TMP mount
 
 rec_time=60
+prefix_digital=digital
+prefix_bs_cs=bs_cs
+
 log 'starting epgdump_py digital'
 array=($(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL))
+prefix=$prefix_digital
 for ((i = 0; i < ${#array[@]}; i++));do
-    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${array[$i]}.ts
+    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     (
-        python $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${array[$i]}.ts -o ${MC_DIR_EPG}/${array[$i]}.xml
-        /bin/rm ${MC_DIR_TMP}/${array[$i]}.ts
+        python $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_digital_dump=$!
     if [ $i -eq $((${#array[@]} -1)) ];then
-        echo wait epg dump digital
         wait $pid_epg_digital_dump
     fi
 done &
@@ -26,15 +29,15 @@ pid_epg_digital=$!
 
 log 'starting epgdump_py bs cs'
 array=(BS15_0 CS2 CS4)
+prefix=$prefix_bs_cs
 for ((i = 0; i < ${#array[@]}; i++));do
-    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/bs_cs_${array[$i]}.ts
+    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     (
-        python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_TMP}/bs_cs_${array[$i]}.ts -o ${MC_DIR_EPG}/bs_cs_${array[$i]}.xml
-        /bin/rm ${MC_DIR_TMP}/bs_cs_${array[$i]}.ts
+        python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_bs_cs_dump=$!
     if [ $i -eq $((${#array[@]} -1)) ];then
-        echo wait epg dump bs cs
         wait $pid_epg_bs_cs_dump
     fi
 done &
@@ -56,7 +59,7 @@ python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 wait $pid_epg_bs_cs
 wait $pid_epg_digital
 log 'starting find program'
-python $MC_BIN_RESERVER '[0-9]*.xml' 'bs_cs_*.xml'
+python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
 
 log 'starting xml format'
 for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
