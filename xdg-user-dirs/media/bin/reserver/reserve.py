@@ -116,11 +116,9 @@ class ReserveMaker:
         self.do_reserve(rinfo_list)
     def apply_rating(self, rinfo_list):
         provider = rating.Provider()
-        self.log("rating: ")
         for rinfo in rinfo_list:
             rating_v = provider.get_rating_element(rinfo.pinfo.element)
             rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
-            self.log(" %s %3d %s %.2f %s" % (rinfo.pinfo.start, rinfo.pinfo.rectime / 60, rinfo.pinfo.channel, rinfo.pinfo.priority, rinfo.pinfo.title))
         return rinfo_list
     def apply_priority(self, rinfo_list):
         timer_list = self.create_timer(rinfo_list)
@@ -135,9 +133,9 @@ class ReserveMaker:
                 job_list = job_list[0:2]
         self.log("removed: ")
         for r in remove_list:
-            self.log(" %s %3d %s %d %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %3d %s %.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
             fd = open(DIR_REMOVED + '/' + re.sub('[\'"#$%&()!/*=~<>]', '_', r.pinfo.title) + '.txt', "w")
-            print >> fd, "%s %s %3d %s %d %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title)
+            print >> fd, "%s %s %3d %s %.2f %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title)
             fd.close()
             try:
                 rinfo_list.remove(r)
@@ -195,7 +193,7 @@ class ReserveMaker:
             fd = open(r.pinfo.file_reserved, "w")
             ElementTree(r.element).write(fd, 'utf-8')
             fd.close()
-            self.log(" %s %3d %s %d %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %3d %s %.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
     def parse_xml(self, xml_file):
         tree = ElementTree()
         try:
