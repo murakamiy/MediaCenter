@@ -33,7 +33,7 @@ function move_to_hd() {
     /bin/mv $file $dir
     end=$(date +%s.%N)
     speed=$(echo "scale=3; r = $size / ($end - $start); scale=0; r / 1024 / 1024" | bc)
-    log "move to hard disk : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"
+    log "move to HD $mode : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"
 }
 
 log "start ts_hd"
@@ -75,7 +75,6 @@ for ts in $(find $MC_DIR_TS -type f);do
 
     if [ "$mode" = "lazy" ];then
         df=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
-        log "lazy $df"
         if [ $df -lt $pct ];then
             break
         fi
