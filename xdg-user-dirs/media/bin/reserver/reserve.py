@@ -116,7 +116,9 @@ class ReserveMaker:
             remove_list.extend(self.get_lower_priority_list(rinfo_list))
             bcas_list.extend(rinfo_list)
 
+        remove_list.sort(cmp=timeline_sort, reverse=False)
         bcas_list = self.apply_priority(bcas_list, remove_list)
+        bcas_list.sort(cmp=timeline_sort, reverse=False)
         bcas_list = self.create_reserve(bcas_list)
         self.do_reserve(bcas_list)
     def apply_rating(self, rinfo_list):
