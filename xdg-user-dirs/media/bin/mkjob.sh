@@ -32,8 +32,13 @@ array=(BS15_0 CS2 CS4)
 prefix=$prefix_bs_cs
 for ((i = 0; i < ${#array[@]}; i++));do
     $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
+    if [ "${array[$i]:0:2}" = "BS" ];then
+        epg_param=" -b "
+    elif [ "${array[$i]:0:2}" = "CS" ];then
+        epg_param=" -s "
+    fi
     (
-        python $MC_BIN_EPGDUMP -e -d -b -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        python $MC_BIN_EPGDUMP -e -d $epg_param -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
         /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_bs_cs_dump=$!
