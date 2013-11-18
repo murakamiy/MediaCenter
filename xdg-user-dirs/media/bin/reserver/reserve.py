@@ -142,9 +142,9 @@ class ReserveMaker:
     def apply_priority(self, rinfo_list, remove_list):
         self.log("removed: ")
         for r in remove_list:
-            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
             fd = open(DIR_REMOVED + '/' + re.sub('[\'"#$%&()!/*=~<>]', '_', r.pinfo.title) + '.txt', "w")
-            print >> fd, "%s %s %3d %7s %6.2f %s" % (time.strftime("%H:%M:%S"), r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title)
+            print >> fd, "%s %s %3d %7s %6.2f %s" % (time.strftime("%H:%M:%S"), r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title)
             fd.close()
             try:
                 rinfo_list.remove(r)
@@ -202,7 +202,7 @@ class ReserveMaker:
             fd = open(r.pinfo.file_reserved, "w")
             ElementTree(r.element).write(fd, 'utf-8')
             fd.close()
-            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start, r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
     def parse_xml(self, xml_file):
         tree = ElementTree()
         try:
