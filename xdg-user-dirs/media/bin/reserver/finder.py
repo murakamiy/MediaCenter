@@ -90,7 +90,7 @@ class AnimeFinder(Finder):
         return False
 
 class BoxingFinder(Finder):
-    priority = 1
+    priority = 10
     allow_list = [
         u'ボクシング',
         u'エキサイトマッチ',
