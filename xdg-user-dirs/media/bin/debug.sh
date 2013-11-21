@@ -150,8 +150,7 @@ case $command in
         if [ -n "$2" ];then
             day=$2
         fi
-        for f in $(ls $MC_DIR_LOG | sort | tail -n $day);do
-            log_file=$MC_DIR_LOG/$f
+        for log_file in $(find $MC_DIR_LOG -type f -not -name '*.log' | sort | tail -n $day);do
             echo $log_file
             egrep '\+[0-9.]+°C [0-9]+RPM [0-9.]+V lavg=[0-9.]+' $log_file |
             awk '
@@ -172,8 +171,7 @@ case $command in
         if [ -n "$2" ];then
             day=$2
         fi
-        for f in $(ls $MC_DIR_LOG | sort | tail -n $day);do
-            log_file=$MC_DIR_LOG/$f
+        for log_file in $(find $MC_DIR_LOG -type f -not -name '*.log' | sort | tail -n $day);do
             echo $log_file
             grep 'disk used' $log_file
         done
