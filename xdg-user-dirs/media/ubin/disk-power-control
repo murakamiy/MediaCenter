@@ -34,6 +34,7 @@ USAGE : $(basename $0) -l OUTPUT_FILE_NAME -z
         $(basename $0) -m USB_ROOT_ID
         $(basename $0) [-f|-d|-r|-e]
         $(basename $0) -s ARRAY_NAME
+        $(basename $0) -w
         -h print help
         -l output USB_ROOT_ID to specified file
         -m usb disk mount
@@ -44,6 +45,7 @@ USAGE : $(basename $0) -l OUTPUT_FILE_NAME -z
         -r start raid
         -s stop  raid ARRAY_NAME
         -e remove module for shutdown
+        -w wait for usb device file
 EOF
 exit 1
 }
@@ -164,7 +166,7 @@ EOF
 
 control=
 output_file=
-while getopts 'defhl:m:p:rs:z' opt;do
+while getopts 'defhl:m:p:rs:wz' opt;do
     case $opt in
         d)
             print_usb_device_list
@@ -198,6 +200,10 @@ while getopts 'defhl:m:p:rs:z' opt;do
             ;;
         s)
             raid_stop $OPTARG
+            exit
+            ;;
+        w)
+            wait_for_usb_disk_device
             exit
             ;;
         z)
