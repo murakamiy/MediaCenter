@@ -7,7 +7,6 @@ usb_disk_id=/home/mc/xdg-user-dirs/media/job/state/usb_disk/id
 
 function do_usb_disk_opration() {
 
-    $power_control -w
     count=$($power_control -d | wc -l)
 
     if [ $prog_name = "usb-disk-power-off" -a $count -eq 0 ];then
