@@ -22,6 +22,7 @@ avconv_rec_time_max=9000
 
 bash $MC_BIN_SMB_JOB &
 bash $MC_BIN_ENCODE $channel &
+bash $MC_BIN_MIGRATE_JOB &
 
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
 if [ $running -ge 4 ];then

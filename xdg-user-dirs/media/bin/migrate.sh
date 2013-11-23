@@ -2,6 +2,9 @@
 source $(dirname $0)/00.conf
 
 mode=$1
+if [ "$mode" = "" ];then
+    mode=all
+fi
 
 function has_free_space() {
 
@@ -36,7 +39,7 @@ function move_to_hd() {
     log "move to HD $mode : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"
 }
 
-log "start ts_hd"
+function do_migrate() {
 
 total_size=0
 total_count=0
@@ -71,7 +74,7 @@ fi
 
 pct=$(($MC_SSD_THRESHOLD - 10))
 has_free_space print
-for ts in $(find $MC_DIR_TS -type f);do
+for ts in $(find $MC_DIR_TS -type f | sort);do
 
     if [ "$mode" = "lazy" ];then
         df=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
@@ -89,4 +92,9 @@ for ts in $(find $MC_DIR_TS -type f);do
 done
 
 has_free_space print
-log "end ts_hd"
+
+}
+
+log "migrate start"
+do_migrate
+log "migrate end"
