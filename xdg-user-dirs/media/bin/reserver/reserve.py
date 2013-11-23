@@ -19,7 +19,7 @@ DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
 DIR_REMOVED = os.environ["MC_DIR_REMOVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
-RESERVE_SPAN = 60 * 60 * 30 #30hours
+RESERVE_SPAN = 60 * 60 * 24 # 24hours
 
 class ProgramInfo:
     def __init__(self, el, now):
