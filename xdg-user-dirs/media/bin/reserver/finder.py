@@ -49,10 +49,7 @@ class Finder:
             return False
         if pinfo.rectime < (60 * 20):
             return False
-        if (
-                (cron_time.hour == pinfo.start.hour and pinfo.start.minute <= cron_time.minute + 30) or 
-                (cron_time.hour == pinfo.end.hour and cron_time.minute + 30 <= pinfo.end.minute)
-           ):
+        if pinfo.start.hour < cron_time.hour and cron_time.hour < pinfo.end.hour:
             return False
         return self.allow(pinfo)
     def allow(self, pinfo):
