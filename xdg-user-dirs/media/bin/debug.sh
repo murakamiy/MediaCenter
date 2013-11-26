@@ -59,24 +59,26 @@ case $command in
         done
         ;;
     rec)
-        echo MC_DIR_RECORDING
+        (
+        echo RECORDING
         for f in $(find $MC_DIR_RECORDING -type f -not -name mkjob.xml);do
             title=$(print_title $f)
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
             ts_file=$(ls -sh ${MC_DIR_TS}/$(basename $f .xml).ts)
-            echo "$ts_file $time $title"
+            echo "$time $title"
         done
-        echo MC_DIR_ENCODING
+        echo ENCODING
         for f in $(find $MC_DIR_ENCODING -type f -not -name mkjob.xml);do
             title=$(print_title $f)
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
             ts_file=$(ls -sh ${MC_DIR_ENCODE_HD}/$(basename $f .xml).mp4)
-            echo "$ts_file $time $title"
+            echo "$time $title"
         done
+        ) | column -t
         ;;
     mk_title_encode)
         shift
