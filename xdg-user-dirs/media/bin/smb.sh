@@ -21,7 +21,7 @@ for f in $(smbclient -A ~/.smbauth -D $smb_dir -c "ls" $MC_SMB_SERVER |
     {
         "date +%Y%m%d%H%M%S -d \""$2"\"" | getline time
         printf("%d\t%s\n", time, $1)
-    }' | sort -k 1 -n -r | sed -n -e '501,$p' | awk '{ print $2 }');do
+    }' | sort -k 1 -n -r | sed -n -e '301,$p' | awk '{ print $2 }');do
 
     size=$(smbclient -A ~/.smbauth -D $smb_dir -c "ls \"$f\"" $MC_SMB_SERVER |
     head -n 1 | awk -F ' A ' '{ print $2 }' | awk '{ print $1}')
