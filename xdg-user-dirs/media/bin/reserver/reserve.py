@@ -135,7 +135,7 @@ class ReserveMaker:
 
 #         self.log("reserved:")
 #         for r in bcas_list:
-#             self.log(" %s %s %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime(' %H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+#             self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
 
         bcas_list = self.create_reserve(bcas_list)
         self.do_reserve(bcas_list)
@@ -178,7 +178,7 @@ class ReserveMaker:
         remove_list.sort(cmp=timeline_sort, reverse=False)
         self.log("removed: ")
         for r in remove_list:
-            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
             try:
                 rinfo_list.remove(r)
             except ValueError:
@@ -269,6 +269,7 @@ class ReserveMaker:
                             pinfo.set_reserve_info()
                             found.append(ReserveInfo(pinfo, el))
 
+        self.log("random:")
         for f in find_list:
             found = f[1]
 
@@ -276,12 +277,12 @@ class ReserveMaker:
                 r = random.choice(found)
                 found.remove(r)
                 found_list.append(r)
-                self.log("random %s %3d %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
             if len(found) > 0:
                 r = random.choice(found)
                 found.remove(r)
                 found_list.append(r)
-                self.log("random %s %3d %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
 
         return found_list
     def do_reserve(self, rinfo_list):
@@ -292,7 +293,7 @@ class ReserveMaker:
             fd = open(r.pinfo.file_reserved, "w")
             ElementTree(r.element).write(fd, 'utf-8')
             fd.close()
-            self.log(" %s %3d %7s %6.2f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.rectime / 60, r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
     def parse_xml(self, xml_file):
         tree = ElementTree()
         try:
