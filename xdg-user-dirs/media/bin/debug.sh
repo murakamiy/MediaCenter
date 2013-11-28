@@ -59,6 +59,8 @@ case $command in
         done
         ;;
     rec)
+        date +"%Y/%m/%d %H:%M:%S"
+        echo
         (
         echo RECORDING
         for f in $(find $MC_DIR_RECORDING -type f -not -name mkjob.xml);do
@@ -66,8 +68,9 @@ case $command in
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
-            ts_file=$(ls -sh ${MC_DIR_TS}/$(basename $f .xml).ts)
-            echo "$time $title"
+            start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
+            channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
+            echo -e "$start\t$time\t$channel\t$title"
         done
         echo ENCODING
         for f in $(find $MC_DIR_ENCODING -type f -not -name mkjob.xml);do
@@ -75,10 +78,10 @@ case $command in
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
-            ts_file=$(ls -sh ${MC_DIR_ENCODE_HD}/$(basename $f .xml).mp4)
-            echo "$time $title"
+            start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
+            channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
         done
-        ) | column -t
+        ) | column -t -s '	'
         ;;
     mk_title_encode)
         shift
