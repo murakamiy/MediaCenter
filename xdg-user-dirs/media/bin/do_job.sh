@@ -18,7 +18,7 @@ channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
-avconv_rec_time_max=9000
+avconv_rec_time_max=10800
 
 bash $MC_BIN_SMB_JOB &
 bash $MC_BIN_ENCODE $channel &
@@ -47,9 +47,11 @@ else
                 -loglevel quiet \
                 -threads 1 \
                 -vsync 1 \
+                -r 30000/1001 \
+                -filter:v yadif=0 \
                 -vcodec libx264 -acodec libvo_aacenc \
                 -preset:v ultrafast \
-                -maxrate:v 500k -r:a 44100 -b:a 64k \
+                -b:v 1500k -r:a 44100 -b:a 64k \
                 "${MC_DIR_MP4}/${title}_${today}.mp4" &
             pid_avconv=$!
 
