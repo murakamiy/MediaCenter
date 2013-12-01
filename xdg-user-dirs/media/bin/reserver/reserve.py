@@ -83,6 +83,20 @@ def timeline_sort(x, y):
     elif ret > 0:
         ret = 1
     return ret
+def timeline_channel_sort(x, y):
+    ret = x.pinfo.epoch_start - y.pinfo.epoch_start
+    if ret == 0:
+        if x.pinfo.channel == y.pinfo.channel:
+            ret = x.pinfo.epoch_end - y.pinfo.epoch_end
+        elif x.pinfo.channel < y.pinfo.channel:
+            ret = 1
+        else:
+            ret = -1
+    if ret < 0:
+        ret = -1
+    elif ret > 0:
+        ret = 1
+    return ret
 def priority_sort(x, y):
     ret = y.pinfo.priority - x.pinfo.priority
     if ret == 0:
@@ -117,7 +131,7 @@ class ReserveMaker:
                 tree_list.append(tree)
             rinfo_list.sort(cmp=timeline_sort, reverse=False)
             rinfo_list = self.apply_rating(rinfo_list)
-            rinfo_list = self.apply_priority(rinfo_list)
+            rinfo_list = self.apply_priority(rinfo_list, True)
             rinfo_set.append([tree_list, rinfo_list])
 
         span_list = self.create_span(rinfo_set)
@@ -126,16 +140,17 @@ class ReserveMaker:
         for rset in rinfo_set:
             tree_list = rset[0]
             rinfo_list = rset[1]
-            find_list = self.create_find(rinfo_list, span_list)
-            rinfo_list.extend(self.find_random(rinfo_list, find_list, tree_list))
-            rinfo_list = self.apply_priority(rinfo_list)
+            rinfo_list.extend(self.find_span(rinfo_list, span_list, tree_list))
+            rinfo_list = self.apply_priority(rinfo_list, False)
             bcas_list.extend(rinfo_list)
 
-        bcas_list.sort(cmp=timeline_sort, reverse=False)
+        bcas_list.sort(cmp=timeline_channel_sort, reverse=False)
+
 
 #         self.log("reserved:")
 #         for r in bcas_list:
 #             self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+
 
         bcas_list = self.create_reserve(bcas_list)
         self.do_reserve(bcas_list)
@@ -146,21 +161,6 @@ class ReserveMaker:
             rating_v = provider.get_rating_element(rinfo.pinfo.element)
             rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
         return rinfo_list
-    def create_find(self, rinfo_list, span_list):
-        find_list = []
-        for span in span_list:
-            job_list = []
-            for rinfo in rinfo_list:
-                if (
-                        (rinfo.pinfo.start >= span[0] and rinfo.pinfo.start < span[1])
-                        or
-                        (rinfo.pinfo.end > span[0] and rinfo.pinfo.end <= span[1])
-                   ):
-                    job_list.append(rinfo)
-
-            if len(job_list) < 2:
-                find_list.append([span,[]])
-        return find_list
     def get_lower_priority_list(self, rinfo_list):
         timer_list = self.create_timer(rinfo_list)
         job_list = []
@@ -173,12 +173,14 @@ class ReserveMaker:
                 remove_list.extend(job_list[2:len(job_list)])
                 job_list = job_list[0:2]
         return remove_list
-    def apply_priority(self, rinfo_list):
+    def apply_priority(self, rinfo_list, do_print):
         remove_list = self.get_lower_priority_list(rinfo_list)
         remove_list.sort(cmp=timeline_sort, reverse=False)
-        self.log("removed: ")
+        if do_print:
+            self.log("removed: ")
         for r in remove_list:
-            self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            if do_print:
+                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
             try:
                 rinfo_list.remove(r)
             except ValueError:
@@ -211,21 +213,40 @@ class ReserveMaker:
         for rset in rinfo_set:
             rinfo_list = rset[1]
             buf_1 = []
-
             for rinfo in rinfo_list:
                 buf_1.append((rinfo.pinfo.start, rinfo.pinfo.end))
-            buf_1.sort()
-            buf_2 = []
-            for b in buf_1:
-                if len(buf_2) == 0 or buf_2[-1] != b:
-                    buf_2.append(b)
-            span_list.extend(buf_2)
+            span_list.extend(buf_1)
         span_list.sort()
         span_list_2 = []
         for s in span_list:
             if len(span_list_2) == 0 or span_list_2[-1] != s:
                 span_list_2.append(s)
-        return span_list_2
+        span_list_m = []
+        cur = None
+        prev = None
+        merge = None
+        for cur in span_list_2:
+            if merge != None:
+                if merge[1] >= cur[0]:
+                    merge = (merge[0], max(merge[1], cur[1]))
+                else:
+                    span_list_m.append(merge)
+                    merge = None
+            else:
+                if prev != None:
+                    if prev[1] >= cur[0]:
+                        merge = (prev[0], max(prev[1], cur[1]))
+                    else:
+                        span_list_m.append(prev)
+            prev = cur
+        if merge != None:
+            span_list_m.append(merge)
+        if span_list_m[-1][1] < cur[1]:
+            span_list_m.append(cur)
+        self.log("span_list:")
+        for s in span_list_m:
+            self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
+        return span_list_m
     def set_include_channel(self, channel):
         self.include_channel = channel
     def is_include_channel(self, pinfo):
@@ -247,7 +268,7 @@ class ReserveMaker:
             pinfo.set_reserve_info()
             rinfo_list.append(ReserveInfo(pinfo, el))
         return rinfo_list
-    def find_random(self, rinfo_list, find_list, tree_list):
+    def find_span(self, rinfo_list, span_list, tree_list):
         found_list = []
         for tree in tree_list:
             for el in tree.findall("programme"):
@@ -257,9 +278,8 @@ class ReserveMaker:
                 if not self.is_include_channel(pinfo):
                     continue
                 pinfo.set_program_info(el)
-                for f in find_list:
-                    span = f[0]
-                    found = f[1]
+
+                for span in span_list:
                     if span[0] <= pinfo.start and pinfo.end <= span[1]:
                         allready_reserved = False
                         for rinfo in rinfo_list:
@@ -267,23 +287,10 @@ class ReserveMaker:
                                 allready_reserved = True
                         if allready_reserved == False and pinfo.rectime > (60 * 20) and pinfo.title != "放送休止":
                             pinfo.set_reserve_info()
-                            found.append(ReserveInfo(pinfo, el))
-
-        self.log("random:")
-        for f in find_list:
-            found = f[1]
-
-            if len(found) > 0:
-                r = random.choice(found)
-                found.remove(r)
-                found_list.append(r)
-                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
-            if len(found) > 0:
-                r = random.choice(found)
-                found.remove(r)
-                found_list.append(r)
-                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
-
+                            found_list.append(ReserveInfo(pinfo, el))
+#         self.log("find_span:")
+#         for r in found_list:
+#             self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
         return found_list
     def do_reserve(self, rinfo_list):
         self.log("reserved:")
