@@ -2,8 +2,11 @@
 source $(dirname $0)/00.conf
 
 smb_dir=contents
-avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
-log "smb migrate start $avail"
+
+disk_size=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk '{ print $1 }')
+disk_avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk '{ print $6 }')
+disk_avail_gb=$(echo "$MC_SMB_DISK_SIZE_GB * $disk_avail / $disk_size" | bc)
+log "smb migrate start avail:${disk_avail_gb}GB"
 
 for f in $(smbclient -A ~/.smbauth -D $smb_dir -c "ls" $MC_SMB_SERVER |
     egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
@@ -46,7 +49,9 @@ for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -size +10M -printf '%f\n');do
     fi
 done
 
-avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk -F . '{ print $2 }')
-log "smb migrate end $avail"
+disk_size=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk '{ print $1 }')
+disk_avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk '{ print $6 }')
+disk_avail_gb=$(echo "$MC_SMB_DISK_SIZE_GB * $disk_avail / $disk_size" | bc)
+log "smb migrate end   avail:${disk_avail_gb}GB"
 
 find $MC_DIR_MP4 -ctime +5 -delete
