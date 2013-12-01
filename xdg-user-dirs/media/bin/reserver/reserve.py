@@ -28,7 +28,7 @@ class ProgramInfo:
         self.now = now
         self.epoch_now = int(time.mktime(self.now.timetuple()))
         self.channel = self.get_text(el.get('channel'))
-        self.priority = 1
+        self.priority = random.choice((1, 2, 3))
         self.found_by = "Random"
     def is_past_program(self):
         return self.epoch_start < self.epoch_now 
