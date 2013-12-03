@@ -31,11 +31,10 @@ if [ $running -ge 4 ];then
     mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_FAILED
 else
     if [ $now -lt $start ];then
-        log "start : $title $(hard_ware_info)"
+        log "rec start: $title $(hard_ware_info)"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
         if (($rec_time < $avconv_rec_time_max));then
-            log "start mp4 : $title"
             fifo_dir=/tmp/pt3/fifo
             mkdir -p $fifo_dir
             fifo_b25=${fifo_dir}/b25_$$
@@ -74,7 +73,6 @@ else
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         if (($rec_time < $avconv_rec_time_max));then
-            log "end mp4 : $title"
             sync
             kill -TERM $pid_tail
             ( sleep 60; kill -KILL $pid_avconv ) &
@@ -102,7 +100,7 @@ else
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
-        log "end : $title $(hard_ware_info)"
+        log "rec end: $title $(hard_ware_info)"
 
         bash $MC_BIN_SAFE_SHUTDOWN
     else
