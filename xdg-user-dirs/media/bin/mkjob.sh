@@ -15,7 +15,34 @@ log 'starting epgdump_py digital'
 array=($(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL))
 prefix=$prefix_digital
 for ((i = 0; i < ${#array[@]}; i++));do
-    $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
+    if [ $i -eq 0 ];then
+        fifo_dir=/tmp/pt3/fifo
+        mkdir -p $fifo_dir
+        fifo_epg=${fifo_dir}/epg_$$
+        mkfifo -m 644 $fifo_epg
+
+        touch ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
+        tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts > $fifo_epg &
+        pid_tail=$!
+        $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts &
+        pid_rec=$!
+
+        arr=($(python $MC_BIN_EPGTIME $fifo_epg))
+        update=${arr[0]}
+        update_time=${arr[1]}
+        sys_time=${arr[2]}
+        epg_time=${arr[3]}
+
+        if [ "$update" = "true" ];then
+            sudo /bin/date $update_time
+        fi
+        log "time: update=$update sys=$sys_time epg=$epg_time"
+        kill -TERM $pid_tail
+        rm -f $fifo_epg
+        wait $pid_rec
+    else
+        $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
+    fi
     (
         python $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
         /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
