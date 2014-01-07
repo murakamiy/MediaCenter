@@ -50,7 +50,7 @@ else
                 -filter:v yadif=0 \
                 -vcodec libx264 -acodec libvo_aacenc \
                 -preset:v ultrafast \
-                -b:v 1500k -r:a 44100 -b:a 64k \
+                -b:v 2000k -r:a 44100 -b:a 64k \
                 "${MC_DIR_MP4}/${title}_${today}.mp4" &
             pid_avconv=$!
 
