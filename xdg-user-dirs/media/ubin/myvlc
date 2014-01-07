@@ -16,7 +16,7 @@ LANG=C vlc \
 --global-key-quit=Esc \
 --global-key-vol-up=0 \
 --global-key-vol-down=9 \
---short-jump-size  50   \
+--short-jump-size  20   \
 --medium-jump-size 100  \
 --long-jump-size   1000 \
 $@
