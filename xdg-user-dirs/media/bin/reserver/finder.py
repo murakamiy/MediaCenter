@@ -49,7 +49,7 @@ class Finder:
             return False
         if pinfo.rectime < (60 * 20):
             return False
-        if pinfo.start.hour < cron_time.hour and cron_time.hour < pinfo.end.hour:
+        if pinfo.start.hour <= cron_time.hour and cron_time.hour <= pinfo.end.hour:
             return False
         return self.allow(pinfo)
     def allow(self, pinfo):
@@ -130,7 +130,6 @@ class CreditFinder(Finder):
     priority = 40
     allow_list = [
         u'YUI',
-        u'ユイ',
         u'麻枝准',
     ]
     deny_list = [
