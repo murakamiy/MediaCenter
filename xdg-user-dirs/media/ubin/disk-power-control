@@ -102,15 +102,28 @@ function wait_for_usb_disk_device() {
     return 1
 }
 function flush_disk_cache() {
-    echo -e "\nusb disk flush start"
+    flush_disk_cache_soft
+    flush_disk_cache_hard $@
+}
+function flush_disk_cache_soft() {
+    echo -e "\nsoft cache flush start"
+    echo sync
+    sync
+    echo drop_caches
+    echo 3 > /proc/sys/vm/drop_caches
+    echo sync
+    sync
+    echo -e "\nsoft cache flush end"
+}
+function flush_disk_cache_hard() {
+    echo -e "\nhard cache flush start"
+
     if [ $# -eq 0 ];then
         device_list=$(print_usb_device_list)
     else
         device_list=$@
     fi
 
-    echo sync
-    sync
     for device in $device_list;do
         echo blockdev --flushbufs $device
         blockdev --flushbufs $device
@@ -118,13 +131,10 @@ function flush_disk_cache() {
         hdparm -F $device
     done
     sleep 3
-    echo -e "usb disk flush end\n"
+    echo -e "\nhard cache flush end"
 }
-function do_stop() {
+function unbind_device() {
     device_file=$1
-
-    unmount_partition $device_file
-    flush_disk_cache $device_file
 
     usb_hub_path=$(udevadm info --query=path --name=$device_file | sed -r -e 's@(/[^/]+){6}$@@')
     if [ ! -e /sys/${usb_hub_path}/power/autosuspend ];then
@@ -276,9 +286,13 @@ elif [ "$control" = "off" ];then
         fi
     fi
 
-    sync
+    flush_disk_cache_soft
     for device in $device_list;do
-        do_stop $device
+        unmount_partition $device
+    done
+    flush_disk_cache_hard $device_list
+    for device in $device_list;do
+        unbind_device $device
         if [ $? -ne 0 ];then
             exit 1
         fi
