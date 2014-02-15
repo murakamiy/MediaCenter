@@ -1,19 +1,53 @@
 #!/bin/bash
 
+type=$1
 log_file=/tmp/play-station-controller
 
-if [ ! -e $log_file ];then
-    date +"%Y/%m/%d %H:%M:%S.%N START" >> $log_file
-
-    sixpair >> $log_file 2>&1
-    su mc -c \
-    "zenity --info --timeout=5 --display=:0.0 --text=\"<span font_desc='40'>Play Station 3 Controller Pairing finished</span>\"" \
-            >> $log_file 2>&1
-
-    date +"%Y/%m/%d %H:%M:%S.%N END" >> $log_file
-
-    sleep 60
-    /bin/rm -f $log_file
-else
-    date +"%Y/%m/%d %H:%M:%S.%N paring is all ready finished" >> $log_file
+event_handle=not_yet
+if [ -e $log_file ];then
+    event_handle=finished
 fi
+
+date +"%Y/%m/%d %H:%M:%S.%N $type START" >> $log_file
+
+if [ "$event_handle" = "not_yet" ];then
+
+    if [ "$type" = "pairing" ];then
+
+        sixpair >> $log_file 2>&1
+
+        date +"%Y/%m/%d %H:%M:%S.%N pairing finished" >> $log_file
+        su mc -c \
+        "zenity --info --timeout=10 --display=:0.0 --text=\"<span font_desc='40'>Play Station 3 Controller Pairing finished</span>\"" \
+                >> $log_file 2>&1 &
+
+    elif [ "$type" = "battery" ];then
+
+        battery_level=$(tac /var/log/sixad | grep -o 'Battery ..' | head -n 1 |
+        awk '
+        {
+            plus = strtonum($2)
+            minus = 5 - plus
+            level = ""
+            for (i = 0; i < plus; i++) {
+                level = sprintf("%s+", level)
+            }
+            for (i = 0; i < minus; i++) {
+                level = sprintf("%s-", level)
+            }
+            print level
+        }')
+
+        su mc -c \
+        "zenity --info --timeout=10 --display=:0.0 --text=\"<span font_desc='40'>Battery Level $battery_level</span>\"" \
+                >> $log_file 2>&1 &
+        date +"%Y/%m/%d %H:%M:%S.%N battery level $battery_level" >> $log_file
+    fi
+
+    (sleep 5; /bin/rm -f $log_file;) &
+
+else
+    date +"%Y/%m/%d %H:%M:%S.%N event hendler already finished" >> $log_file
+fi
+
+date +"%Y/%m/%d %H:%M:%S.%N $type END" >> $log_file
