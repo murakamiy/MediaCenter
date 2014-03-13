@@ -100,13 +100,13 @@ class BoxingFinder(Finder):
 class TitleFinder(Finder):
     priority = 100
     allow_list = [
-        u'Kanon',
-        u'はじめの一歩',
-        u'青の祓魔師',
         u'NARUTO',
+        u'はじめの一歩',
         u'ベストヒットUSA',
-        u'セカンドシーズン',
-        u'魔法少女まどか☆マギカ',
+        u'夏目友人帳',
+        u'Kanon',
+        u'ジョジョの奇妙な冒険',
+        u'頭文字D',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
