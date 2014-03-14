@@ -95,6 +95,6 @@ has_free_space print
 
 }
 
-log "migrate start"
+log "hd migrate start"
 do_migrate
-log "migrate end"
+log "hd migrate end"
