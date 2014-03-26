@@ -8,27 +8,26 @@ function smb_get_disk_usage() {
     echo "$MC_SMB_DISK_SIZE_GB * $disk_avail / $disk_size" | bc
 }
 
-function smb_print_disk_usage() {
-    message=$1
-    disk_avail_gb=$(smb_get_disk_usage)
-
-    log "$message avail:${disk_avail_gb}GB"
-}
-
 function smb_bufferd_copy_mp4() {
 
-    cd $MC_DIR_TMP
-    for f in $(cd $MC_DIR_MP4; find . -name '*.mp4' -size +10M -printf '%f\n');do
-        fuser "${MC_DIR_MP4}/$f"
-        if [ $? -ne 0 ];then
-            cp "${MC_DIR_MP4}/$f" $MC_DIR_TMP
-            log "smb migrate put $(ls -sh $f)"
-            smbclient -A ~/.smbauth -D $smb_dir -c "put \"$f\"" $MC_SMB_SERVER
-            /bin/rm "${MC_DIR_MP4}/$f"
-            /bin/rm "${MC_DIR_TMP}/$f"
-        fi
-    done
+    cd $MC_DIR_MP4
+    for mp4 in $(find . -name '*.mp4' -size +10M -printf '%f\n');do
 
+        fuser "$mp4"
+        if [ $? -ne 0 ];then
+            smb_delete_old_file $(($MC_SMB_DISK_SIZE_GB * 1 / 8))
+            mp4_size=$(ls -sh "$mp4")
+            log "smb migrate put $mp4_size"
+            cp "$mp4" $MC_DIR_TMP
+            /bin/rm "$mp4"
+            (
+                cd $MC_DIR_TMP
+                smbclient -A ~/.smbauth -D $smb_dir -c "put \"$mp4\"" $MC_SMB_SERVER
+                /bin/rm "$mp4"
+            )
+        fi
+
+    done
 }
 
 function smb_copy_mp4() {
@@ -39,14 +38,11 @@ function smb_copy_mp4() {
     if [ -n "$mp4" ];then
         fuser "$mp4"
         if [ $? -ne 0 ];then
-
-            smb_print_disk_usage "smb job put"
-
+            smb_delete_old_file $(($MC_SMB_DISK_SIZE_GB * 1 / 8))
+            mp4_size=$(ls -sh "$mp4")
+            log "smb job put $mp4_size"
             smbclient -A ~/.smbauth -D $smb_dir -c "put \"$mp4\"" $MC_SMB_SERVER
-            smbclient -A ~/.smbauth -D $smb_dir -c "ls \"$mp4\"" $MC_SMB_SERVER
-            if [ $? -eq 0 ];then
-                /bin/rm "$mp4"
-            fi
+            /bin/rm "$mp4"
         fi
     fi
 }
@@ -91,5 +87,8 @@ function smb_delete_old_file() {
 
     done
 
-    log "smb delete $total_count files $(($total_size / 1024 / 1024))MB"
+    if [ $total_count -gt 0 ];then
+        avail=$(smb_get_disk_usage)
+        log "smb delete $total_count files $(($total_size / 1024 / 1024))MB avail:${avail}GB"
+    fi
 }

@@ -8,7 +8,6 @@ lockfile-create $lock_file
 lockfile-touch $lock_file &
 pid_lock=$!
 
-smb_delete_old_file $(($MC_SMB_DISK_SIZE_GB * 1 / 8))
 smb_copy_mp4
 
 kill -TERM $pid_lock
