@@ -14,6 +14,9 @@ x=220
 
 xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s $job_file
 
+find $run_dir -type f -delete
+touch ${run_dir}/{01,02}
+
 while [ true ];do
 
     run_file=$(ls -t $run_dir | tail -n 1)
