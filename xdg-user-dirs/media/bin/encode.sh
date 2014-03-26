@@ -6,9 +6,10 @@ function do_encode_ffmpeg() {
     local input=${MC_DIR_TS_HD}/${base}.ts
     local output=${MC_DIR_ENCODE_HD}/${base}.mp4
 
+    nice -n 10 \
     avconv -y -i $input \
         -loglevel quiet \
-        -threads 2 \
+        -threads 1 \
         -f mp4 \
         -s 1280x720 \
         -vsync 1 \
@@ -20,7 +21,6 @@ function do_encode_ffmpeg() {
 function is_encoding_job_running() {
     local running=$(find $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f')
     if [ -n "$running" ];then
-        log "encoding job: $running"
         ret=0
     else
         ret=1
@@ -43,7 +43,7 @@ if [ -n "$xml" ];then
     base=$(basename $xml .xml)
     title=$(print_title $xml)
     title=${title}_$(echo $base | awk -F '-' '{ printf("%s_%s", $1, $2) }')
-    log "start: $title $(hard_ware_info)"
+    log "encode start: $title $(hard_ware_info)"
     mv $xml $MC_DIR_ENCODING
 
     $MC_BIN_USB_MOUNT
@@ -52,7 +52,6 @@ if [ -n "$xml" ];then
     if [ $? -eq 0 ];then
         time_end=$(awk 'BEGIN { print systime() }')
         (( took = (time_end - time_start) / 60 ))
-        log "encode time $took min $title"
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_ENCODE_FINISHED
 
         thumb_file=${MC_DIR_THUMB}/${base}.mp4
@@ -69,11 +68,13 @@ if [ -n "$xml" ];then
 
         ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
         touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
+
+        log "encode end: $took min $title $(hard_ware_info)"
     else
+        log "encode failed: $title $(hard_ware_info)"
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_FAILED
     fi
 
-    log "end: $title $(hard_ware_info)"
 
     bash $MC_BIN_SAFE_SHUTDOWN
 fi

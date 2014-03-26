@@ -41,6 +41,7 @@ else
             mkfifo -m 644 $fifo_b25
 
             today=$(date +%d)
+            nice -n 5 \
             avconv -y -i $fifo_b25 -f mp4 \
                 -s 640x360 \
                 -loglevel quiet \
@@ -49,8 +50,7 @@ else
                 -r 30000/1001 \
                 -filter:v yadif=0 \
                 -vcodec libx264 -acodec libvo_aacenc \
-                -preset:v ultrafast \
-                -b:v 2000k -r:a 44100 -b:a 64k \
+                -preset:v superfast \
                 "${MC_DIR_MP4}/${title}_${today}.mp4" &
             pid_avconv=$!
 
