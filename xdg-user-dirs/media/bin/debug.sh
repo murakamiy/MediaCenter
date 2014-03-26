@@ -78,8 +78,9 @@ case $command in
             start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
             end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
             ((time = (end - start) / 60))
-            start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
+            start=$(stat --format=%Z $f | awk '{ print strftime("%Y/%m/%d %H:%M:%S", $1) }')
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
+            echo -e "$start\t$time\t$channel\t$title"
         done
         ) | column -t -s '	'
         ;;
