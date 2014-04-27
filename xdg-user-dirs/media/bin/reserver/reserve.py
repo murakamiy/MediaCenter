@@ -6,6 +6,8 @@ import string
 import re
 from glob import glob
 from datetime import datetime
+from datetime import timedelta
+from dateutil import rrule
 import time
 import random
 from xml.etree.cElementTree import ElementTree
@@ -19,23 +21,21 @@ DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
 DIR_REMOVED = os.environ["MC_DIR_REMOVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
-RESERVE_SPAN = 60 * 60 * 24 # 24hours
+CRON_TIME = os.environ["MC_CRON_TIME"]
 
 class ProgramInfo:
-    def __init__(self, el, now):
+    def __init__(self, el, now, next_cron):
+        self.now = now
+        self.next_cron = next_cron
         self.start = datetime.strptime(string.split(el.get('start'))[0], '%Y%m%d%H%M%S')
         self.epoch_start = int(time.mktime(self.start.timetuple()))
-        self.now = now
-        self.epoch_now = int(time.mktime(self.now.timetuple()))
         self.channel = self.get_text(el.get('channel'))
         self.priority = random.choice((1, 2, 3))
         self.found_by = "Random"
-    def is_past_program(self):
-        return self.epoch_start < self.epoch_now 
     def is_in_reserve_span(self):
-        if self.is_past_program():
-            return False
-        return (self.epoch_start - self.epoch_now) <= RESERVE_SPAN
+        if self.now < self.start and self.start < self.next_cron:
+            return True
+        return False
     def set_program_info(self, el):
         self.element = el
         self.end   = datetime.strptime(string.split(el.get('stop'))[0],  '%Y%m%d%H%M%S')
@@ -112,9 +112,15 @@ def priority_sort(x, y):
 class ReserveMaker:
     def __init__(self, finder):
         self.finder = finder
-        self.now = datetime.today()
+        self.now = datetime.now()
+        one_minute = timedelta(0, 60, 0)
+        self.now += one_minute
         self.logfd = open(LOG_FILE, "a")
         self.include_channel = None
+        cron = map(int, CRON_TIME.split(":"))
+        rule = rrule.rrule(rrule.DAILY,
+                dtstart=datetime(self.now.year, self.now.month, self.now.day, cron[0], cron[1], cron[2]))
+        self.next_cron = rule.after(self.now)
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
@@ -256,7 +262,7 @@ class ReserveMaker:
     def find(self, tree):
         rinfo_list = []
         for el in tree.findall("programme"):
-            pinfo = ProgramInfo(el, self.now)
+            pinfo = ProgramInfo(el, self.now, self.next_cron)
             if not pinfo.is_in_reserve_span():
                 continue
             if not self.is_include_channel(pinfo):
@@ -272,7 +278,7 @@ class ReserveMaker:
         found_list = []
         for tree in tree_list:
             for el in tree.findall("programme"):
-                pinfo = ProgramInfo(el, self.now)
+                pinfo = ProgramInfo(el, self.now, self.next_cron)
                 if not pinfo.is_in_reserve_span():
                     continue
                 if not self.is_include_channel(pinfo):
