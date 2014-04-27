@@ -10,6 +10,7 @@ finders_list.append(finder.CreditFinder())
 finders_list.append(finder.MovieFinder())
 finders_list.append(finder.BoxingFinder())
 finders_list.append(finder.CreditFinderHigh())
+finders_list.append(finder.NewsFinder())
 
 cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif)

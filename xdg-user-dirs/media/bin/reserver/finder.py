@@ -60,6 +60,13 @@ class Finder:
 ####################################################################################################
 ####################################################################################################
 
+class NewsFinder(Finder):
+    priority = 1
+    def allow(self, pinfo):
+        if pinfo.category_1 == 'ニュース／報道':
+            return True
+        return False
+
 class AnimeFinder(Finder):
     priority = 50
     deny_list = [
@@ -107,6 +114,7 @@ class TitleFinder(Finder):
         u'Kanon',
         u'ジョジョの奇妙な冒険',
         u'頭文字D',
+        u'花咲舞が黙ってない',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
