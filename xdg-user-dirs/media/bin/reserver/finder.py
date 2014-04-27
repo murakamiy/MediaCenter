@@ -70,21 +70,7 @@ class NewsFinder(Finder):
 class AnimeFinder(Finder):
     priority = 50
     deny_list = [
-        u'アスタロッテのおもちゃ',
-        u'オー!マイキー',
-        u'蒼天航路',
-        u'タイムボカン',
-        u'世界一初恋',
-        u'日常',
-        u'TIGER&BUNNY',
-        u'戦国乙女',
-        u'DOG　DAYS',
-        u'ワンピース',
         u'デジタルリマスターHD版',
-        u'銀魂',
-        u'ベルサイユのばら',
-        u'コレクター・ユイ',
-        u'トリコ',
     ]
     def allow(self, pinfo):
         if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
