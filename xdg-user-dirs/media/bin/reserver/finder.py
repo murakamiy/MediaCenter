@@ -101,6 +101,7 @@ class TitleFinder(Finder):
         u'ジョジョの奇妙な冒険',
         u'頭文字D',
         u'花咲舞が黙ってない',
+        u'ニセコイ',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
