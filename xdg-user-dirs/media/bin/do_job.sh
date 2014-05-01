@@ -4,6 +4,7 @@ source $(dirname $0)/00.conf
 job_file_base=$1
 job_file_xml=${job_file_base}.xml
 job_file_ts=${job_file_base}.ts
+job_file_mp4=${job_file_base}.mp4
 
 title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
 category=$(print_category ${MC_DIR_RESERVED}/${job_file_xml})
@@ -40,7 +41,6 @@ else
             fifo_b25=${fifo_dir}/b25_$$
             mkfifo -m 644 $fifo_b25
 
-            today=$(date +%d)
             nice -n 5 \
             avconv -y -i $fifo_b25 -f mp4 \
                 -s 640x360 \
@@ -51,7 +51,8 @@ else
                 -filter:v yadif=0 \
                 -vcodec libx264 -acodec libvo_aacenc \
                 -preset:v superfast \
-                "${MC_DIR_MP4}/${title}_${today}.mp4" &
+                ${MC_DIR_MP4}/${job_file_mp4} &
+
             pid_avconv=$!
 
             touch ${MC_DIR_TS}/${job_file_ts}

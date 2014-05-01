@@ -8,7 +8,7 @@ lockfile-create $lock_file
 lockfile-touch $lock_file &
 pid_lock=$!
 
-smb_copy_mp4
+smb_copy_mp4 one
 
 kill -TERM $pid_lock
 lockfile-remove $lock_file
