@@ -18,7 +18,6 @@ from rating import rating
 DIR_EPG = os.environ["MC_DIR_EPG"]
 DIR_TS = os.environ["MC_DIR_TS"]
 DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
-DIR_REMOVED = os.environ["MC_DIR_REMOVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
@@ -148,19 +147,29 @@ class ReserveMaker:
             rinfo_list = rset[1]
             rinfo_list.extend(self.find_span(rinfo_list, span_list, tree_list))
             rinfo_list = self.apply_priority(rinfo_list, False)
+            rinfo_list = self.remove_cron_span(rinfo_list)
             bcas_list.extend(rinfo_list)
 
         bcas_list.sort(cmp=timeline_channel_sort, reverse=False)
-
-
-#         self.log("reserved:")
-#         for r in bcas_list:
-#             self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
-
-
         bcas_list = self.create_reserve(bcas_list)
         self.do_reserve(bcas_list)
 
+    def remove_cron_span(self, rinfo_list):
+        remove_list = []
+        new_list = []
+        for rinfo in rinfo_list:
+            if self.next_cron <= rinfo.pinfo.end:
+                remove_list.append(rinfo)
+            else:
+                new_list.append(rinfo)
+        if 0 < len(remove_list):
+            remove_list.sort(cmp=priority_sort, reverse=False)
+            new_list.append(remove_list[0])
+        if 1 < len(remove_list):
+            self.log("removed_cron: ")
+            for r in remove_list[1:]:
+                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+        return new_list
     def apply_rating(self, rinfo_list):
         provider = rating.Provider()
         for rinfo in rinfo_list:

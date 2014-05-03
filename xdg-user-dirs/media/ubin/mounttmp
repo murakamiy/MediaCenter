@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [ "$1" = "mount" ];then
-    mount -t tmpfs -o size=6144m tmpfs /home/mc/xdg-user-dirs/media/job/tmpfs
-elif [ "$1" = "unmount" ];then
-    umount /home/mc/xdg-user-dirs/media/job/tmpfs
-fi

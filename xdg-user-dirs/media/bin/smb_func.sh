@@ -54,13 +54,9 @@ function smb_copy_mp4() {
         mp4_size=$(ls -sh "$mp4")
         log "smb put $title"
 
-        /bin/mv "$mp4" $MC_DIR_TMP
-        (
-            cd $MC_DIR_TMP
             smbclient -A ~/.smbauth -D $smb_dir -c "mkdir $foundby" $MC_SMB_SERVER
             smbclient -A ~/.smbauth -D ${smb_dir}/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
             /bin/rm "$mp4"
-        )
 
         if [ "$1" = "one" ];then
             break

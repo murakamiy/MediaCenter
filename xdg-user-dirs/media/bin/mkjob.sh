@@ -5,7 +5,6 @@ log "start: $(hard_ware_info)"
 
 touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
-sudo $MC_BIN_MOUNT_TMP mount
 
 rec_time=60
 prefix_digital=digital
@@ -102,7 +101,6 @@ done
 
 wait $pid_smb
 wait $pid_mig_array
-sudo $MC_BIN_MOUNT_TMP unmount
 
 running=$(find $MC_DIR_PLAY $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
 if [ -z "$running" ];then

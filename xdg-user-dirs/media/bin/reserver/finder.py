@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
 import random
-import os
-from datetime import datetime
-from datetime import time
-
-CRON_TIME = os.environ["MC_CRON_TIME"]
-cron_arr = map(int, CRON_TIME.split(":"))
-cron_time = time(cron_arr[0], cron_arr[1], cron_arr[2])
-
 
 class FindresCheif:
     finders = []
@@ -48,8 +40,6 @@ class Finder:
         if pinfo.rectime > (60 * 60 * 6):
             return False
         if pinfo.rectime < (60 * 20):
-            return False
-        if pinfo.start.hour <= cron_time.hour and cron_time.hour <= pinfo.end.hour:
             return False
         return self.allow(pinfo)
     def allow(self, pinfo):
