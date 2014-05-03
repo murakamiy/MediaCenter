@@ -50,10 +50,50 @@ class Finder:
 ####################################################################################################
 ####################################################################################################
 
-class NewsFinder(Finder):
-    priority = 1
+class TitleFinder(Finder):
+    priority = 100
+    allow_list = [
+        u'NARUTO',
+        u'はじめの一歩',
+        u'夏目友人帳',
+        u'Kanon',
+        u'ジョジョの奇妙な冒険',
+        u'頭文字D',
+        u'花咲舞が黙ってない',
+        u'ニセコイ',
+        u'ソウルイーターノット',
+        u'それでも世界は美しい',
+    ]
     def allow(self, pinfo):
-        if pinfo.category_1 == 'ニュース／報道':
+        if re.search(self.allow_pattern, pinfo.title):
+            return True
+        return False
+
+class CreditHighFinder(Finder):
+    priority = 100
+    allow_list = [
+        u'西尾維新',
+    ]
+    deny_list = [
+        u'BSプレマップ',
+    ]
+    def allow(self, pinfo):
+        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
+            return True
+        return False
+
+class MovieFinder(Finder):
+    priority = 70
+    random_channel = random.choice(('BS_200','BS_193','CS_227','CS_240'))
+    random_hour = random.choice((20,21))
+    rectime = 60 * 90
+    reserved = False
+    def allow(self, pinfo):
+        if self.reserved == False and \
+           pinfo.channel == self.random_channel and \
+           self.rectime < pinfo.rectime and \
+           (pinfo.start.hour == self.random_hour or pinfo.start.hour == self.random_hour + 1):
+            self.reserved = True
             return True
         return False
 
@@ -70,7 +110,7 @@ class AnimeFinder(Finder):
         return False
 
 class BoxingFinder(Finder):
-    priority = 10
+    priority = 40
     allow_list = [
         u'ボクシング',
         u'エキサイトマッチ',
@@ -80,53 +120,29 @@ class BoxingFinder(Finder):
             return True
         return False
 
-class TitleFinder(Finder):
-    priority = 100
+class CarInfomationFinder(Finder):
+    priority = 40
     allow_list = [
-        u'NARUTO',
-        u'はじめの一歩',
-        u'ベストヒットUSA',
-        u'夏目友人帳',
-        u'Kanon',
-        u'ジョジョの奇妙な冒険',
-        u'頭文字D',
-        u'花咲舞が黙ってない',
-        u'ニセコイ',
+        u'カーグラフィックTV',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
             return True
         return False
 
-class CreditFinderHigh(Finder):
-    priority = 100
+class CultureFinder(Finder):
+    priority = 30
     allow_list = [
-        u'西尾維新',
-    ]
-    deny_list = [
-        u'BSプレマップ',
+        u'スーパープレゼンテーション',
+        u'THE世界遺産',
     ]
     def allow(self, pinfo):
-        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
+        if re.search(self.allow_pattern, pinfo.title):
             return True
         return False
 
-class CreditFinder(Finder):
-    priority = 40
-    allow_list = [
-        u'YUI',
-        u'麻枝准',
-    ]
-    deny_list = [
-        u'BSプレマップ',
-    ]
-    def allow(self, pinfo):
-        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
-            return True
-        return False
-
-class F1Finder(Finder):
-    priority = 40
+class MoterSportsFinder(Finder):
+    priority = 30
     allow_list = [
         u'F1',
         u'WRC',
@@ -136,13 +152,33 @@ class F1Finder(Finder):
             return True
         return False
 
-class VarietyFinder(Finder):
-    priority = 40
+class MusicFinder(Finder):
+    priority = 30
     allow_list = [
-        u'リンカーン',
-        u'ダウンタウンのガキの使いやあらへんで',
+        u'ベストヒットUSA',
+    ]
+    def allow(self, pinfo):
+        if re.search(self.allow_pattern, pinfo.title):
+            return True
+        return False
+
+class CreditFinder(Finder):
+    priority = 30
+    allow_list = [
+        u'YUI',
+    ]
+    deny_list = [
+        u'BSプレマップ',
+    ]
+    def allow(self, pinfo):
+        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
+            return True
+        return False
+
+class VarietyFinder(Finder):
+    priority = 30
+    allow_list = [
         u'とんねるずのみなさんのおかげでした',
-        u'さんまのスーパーからくりTV',
     ]
     def allow(self, pinfo):
         if pinfo.category_1 == 'バラエティ':
@@ -152,19 +188,11 @@ class VarietyFinder(Finder):
                 return True
         return False
 
-class MovieFinder(Finder):
-    priority = 70
-    random_channel = random.choice(('BS_200','BS_193','CS_227','CS_240'))
-    random_hour = random.choice((20,21))
-    rectime = 60 * 90
-    reserved = False
+class NewsFinder(Finder):
+    priority = 1
     def allow(self, pinfo):
-        if self.reserved == False and \
-           pinfo.channel == self.random_channel and \
-           self.rectime < pinfo.rectime and \
-           (pinfo.start.hour == self.random_hour or pinfo.start.hour == self.random_hour + 1):
-            self.reserved = True
-            return True 
+        if pinfo.category_1 == 'ニュース／報道':
+            return True
         return False
 
 ####################################################################################################
