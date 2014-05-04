@@ -112,12 +112,18 @@ for line in sys.stdin:
 function selanime() {
     xmlstarlet sel --encode utf-8 -t -m "//programme" \
         -m "category[contains(., 'アニメ')]" \
-        -v 'normalize-space(../title)' -o '  ' -v '../@start' -n $@
-}
-function selactor() {
-    xmlstarlet sel --encode utf-8 -t -m "//programme" \
-        -m "desc[contains(., '$1')]" \
-        -v 'normalize-space(../title)' -o '  ' -v '../@start' -n $2
+        -v 'normalize-space(../title)' -o '	' -v '../@start' -n $@ |
+    python -c '
+import datetime
+import sys
+for line in sys.stdin:
+    arr = line.split("\t")
+    if arr:
+        d_arr = arr[1].split()
+        d = datetime.datetime.strptime(d_arr[0], "%Y%m%d%H%M%S")
+        t = arr[0]
+        print d,t
+' | sort -u
 }
 function smbaterm() {
     smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1'
