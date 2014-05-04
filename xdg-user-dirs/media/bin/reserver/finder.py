@@ -103,7 +103,8 @@ class AnimeFinder(Finder):
         u'デジタルリマスターHD版',
     ]
     def allow(self, pinfo):
-        if pinfo.category_1 == 'アニメ／特撮' and pinfo.category_2 == '国内アニメ' and (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
+        if 'アニメ／特撮' in pinfo.category_list and '国内アニメ' in pinfo.category_list and \
+           (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
             if not re.search(self.deny_pattern, pinfo.title):
                 if pinfo.channel != 'CS_331':
                     return True
@@ -148,7 +149,7 @@ class MoterSportsFinder(Finder):
         u'WRC',
     ]
     def allow(self, pinfo):
-        if pinfo.category_2 == 'モータースポーツ' and re.search(self.allow_pattern, pinfo.title):
+        if 'モータースポーツ' in pinfo.category_list and re.search(self.allow_pattern, pinfo.title):
             return True
         return False
 
@@ -181,7 +182,7 @@ class VarietyFinder(Finder):
         u'とんねるずのみなさんのおかげでした',
     ]
     def allow(self, pinfo):
-        if pinfo.category_1 == 'バラエティ':
+        if 'バラエティ' in pinfo.category_list:
             if re.search(self.allow_pattern, pinfo.title):
                 return True
             if re.search(self.allow_pattern, pinfo.desc):
@@ -191,7 +192,7 @@ class VarietyFinder(Finder):
 class NewsFinder(Finder):
     priority = 1
     def allow(self, pinfo):
-        if pinfo.category_1 == 'ニュース／報道':
+        if 'ニュース／報道' in pinfo.category_list:
             return True
         return False
 
@@ -206,8 +207,7 @@ class NewsFinder(Finder):
 # epoch_end    =  int(time.mktime(self.end.timetuple()))
 # title        =  self.get_text(el.find('title').text)
 # desc         =  self.get_text(el.find('desc').text)
-# category_1   =  i = 0 for c in el.findall('category'): if i == 0: self.category_1 = self.get_text(c.text)
-# category_2   =  i = 0 for c in el.findall('category'): elif i == 1: self.category_2 = self.get_text(c.text)
+# category_list = for c in el.findall('category'): self.category_list.append(self.get_text(c.text))
 # priority     = found_by.how_much_like()
 # found_by     = found_by.__class__.__name__
 # rectime      = self.epoch_end - self.epoch_start - 10

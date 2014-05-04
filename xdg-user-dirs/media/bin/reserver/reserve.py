@@ -42,15 +42,9 @@ class ProgramInfo:
         self.title = self.get_text(el.find('title').text)
         self.desc = self.get_text(el.find('desc').text)
         self.rectime = self.epoch_end - self.epoch_start
-        self.category_1 = ''
-        self.category_2 = ''
-        i = 0
+        self.category_list = []
         for c in el.findall('category'):
-            if i == 0:
-                self.category_1 = self.get_text(c.text)
-            elif i == 1:
-                self.category_2 = self.get_text(c.text)
-            i += 1
+            self.category_list.append(self.get_text(c.text))
     def set_reserve_info(self):
         self.time_start = self.start.strftime("%Y/%m/%d %H:%M:%S")
         self.time_end = self.end.strftime("%Y/%m/%d %H:%M:%S")
