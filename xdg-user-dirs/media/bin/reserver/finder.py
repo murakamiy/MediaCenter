@@ -142,6 +142,13 @@ class CultureFinder(Finder):
             return True
         return False
 
+class NatureFinder(Finder):
+    priority = 30
+    def allow(self, pinfo):
+        if '自然・動物・環境' in pinfo.category_list:
+            return True
+        return False
+
 class MoterSportsFinder(Finder):
     priority = 30
     allow_list = [

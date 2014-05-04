@@ -15,6 +15,7 @@ finders_list.append(finder.NewsFinder())
 finders_list.append(finder.MusicFinder())
 finders_list.append(finder.CultureFinder())
 finders_list.append(finder.VarietyFinder())
+finders_list.append(finder.NatureFinder())
 
 cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif)
