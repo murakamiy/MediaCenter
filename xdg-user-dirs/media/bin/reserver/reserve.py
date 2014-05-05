@@ -24,13 +24,14 @@ CRON_TIME = os.environ["MC_CRON_TIME"]
 
 class ProgramInfo:
     def __init__(self, el, now, next_cron):
+        self.is_reserved = False
         self.now = now
         self.next_cron = next_cron
         self.start = datetime.strptime(string.split(el.get('start'))[0], '%Y%m%d%H%M%S')
         self.epoch_start = int(time.mktime(self.start.timetuple()))
         self.channel = self.get_text(el.get('channel'))
-        self.priority = random.choice((1, 2, 3))
-        self.found_by = "Random"
+        self.priority = 0
+        self.found_by = "CatchAll"
     def is_in_reserve_span(self):
         if self.now < self.start and self.start < self.next_cron:
             return True
@@ -46,6 +47,7 @@ class ProgramInfo:
         for c in el.findall('category'):
             self.category_list.append(self.get_text(c.text))
     def set_reserve_info(self):
+        self.is_reserved = True
         self.time_start = self.start.strftime("%Y/%m/%d %H:%M:%S")
         self.time_end = self.end.strftime("%Y/%m/%d %H:%M:%S")
         self.file_base = self.start.strftime("%Y%m%d-%H%M-") + self.channel
@@ -103,8 +105,9 @@ def priority_sort(x, y):
     return ret
 
 class ReserveMaker:
-    def __init__(self, finder):
+    def __init__(self, finder, random_finder):
         self.finder = finder
+        self.random_finder = random_finder
         self.now = datetime.now()
         one_minute = timedelta(0, 60, 0)
         self.now += one_minute
@@ -118,35 +121,40 @@ class ReserveMaker:
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
     def reserve(self, xml_glob_list):
-        rinfo_set = []
+        isdb_prog_list = [] # [isdb-t-program, isdb-s-program]
         for xml_glob in xml_glob_list:
-            rinfo_list = []
-            tree_list = []
+            prog_list = []
             for xml_file in glob(DIR_EPG + '/' + xml_glob):
                 tree = self.parse_xml(xml_file)
                 if tree == None:
                     continue
-                rinfo_list.extend(self.find(tree))
-                tree_list.append(tree)
+                prog_list.extend(self.create_program_list(tree))
+            isdb_prog_list.append(prog_list)
+
+        isdb_set = [] # [(isdb-t-program, isdb-t-reserve), (isdb-s-program, isdb-s-reserve)]
+        for prog_list in isdb_prog_list:
+            rinfo_list = self.find(prog_list)
             rinfo_list.sort(cmp=timeline_sort, reverse=False)
             rinfo_list = self.apply_rating(rinfo_list)
             rinfo_list = self.apply_priority(rinfo_list, True)
-            rinfo_set.append([tree_list, rinfo_list])
-
-        span_list = self.create_span(rinfo_set)
-
-        bcas_list = []
-        for rset in rinfo_set:
-            tree_list = rset[0]
-            rinfo_list = rset[1]
-            rinfo_list.extend(self.find_span(rinfo_list, span_list, tree_list))
-            rinfo_list = self.apply_priority(rinfo_list, False)
             rinfo_list = self.remove_cron_span(rinfo_list)
-            bcas_list.extend(rinfo_list)
+            isdb_set.append((prog_list, rinfo_list))
 
-        bcas_list.sort(cmp=timeline_channel_sort, reverse=False)
-        bcas_list = self.create_reserve(bcas_list)
-        self.do_reserve(bcas_list)
+        span_list = self.create_span(isdb_set)
+
+        all_rinfo_list = []
+        for isdb in isdb_set:
+            prog_list = isdb[0]
+            rinfo_list = isdb[1]
+            if self.random_finder != None:
+                rinfo_list.extend(self.find_random(span_list, prog_list))
+                rinfo_list = self.apply_priority(rinfo_list, False)
+            rinfo_list = self.remove_cron_span(rinfo_list)
+            all_rinfo_list.extend(rinfo_list)
+
+        all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)
+        all_rinfo_list = self.create_reserve(all_rinfo_list)
+        self.do_reserve(all_rinfo_list)
 
     def remove_cron_span(self, rinfo_list):
         remove_list = []
@@ -262,8 +270,8 @@ class ReserveMaker:
         if self.include_channel == None:
             return True
         return pinfo.channel in self.include_channel
-    def find(self, tree):
-        rinfo_list = []
+    def create_program_list(self, tree):
+        prog_list = []
         for el in tree.findall("programme"):
             pinfo = ProgramInfo(el, self.now, self.next_cron)
             if not pinfo.is_in_reserve_span():
@@ -271,36 +279,37 @@ class ReserveMaker:
             if not self.is_include_channel(pinfo):
                 continue
             pinfo.set_program_info(el)
+            prog_list.append(pinfo)
+        return prog_list
+    def find(self, prog_list):
+        rinfo_list = []
+        for pinfo in prog_list:
             pinfo = self.finder.like(pinfo)
             if pinfo == None:
                 continue
             pinfo.set_reserve_info()
-            rinfo_list.append(ReserveInfo(pinfo, el))
+            rinfo_list.append(ReserveInfo(pinfo, pinfo.element))
         return rinfo_list
-    def find_span(self, rinfo_list, span_list, tree_list):
+    def find_random(self, span_list, prog_list):
         found_list = []
-        for tree in tree_list:
-            for el in tree.findall("programme"):
-                pinfo = ProgramInfo(el, self.now, self.next_cron)
-                if not pinfo.is_in_reserve_span():
-                    continue
-                if not self.is_include_channel(pinfo):
-                    continue
-                pinfo.set_program_info(el)
-
-                for span in span_list:
-                    if span[0] <= pinfo.start and pinfo.end <= span[1]:
-                        allready_reserved = False
-                        for rinfo in rinfo_list:
-                            if rinfo.pinfo.channel == pinfo.channel and rinfo.pinfo.start == pinfo.start:
-                                allready_reserved = True
-                        if allready_reserved == False and pinfo.rectime > (60 * 20) and pinfo.title != "放送休止":
-                            pinfo.set_reserve_info()
-                            found_list.append(ReserveInfo(pinfo, el))
-#         self.log("find_span:")
-#         for r in found_list:
-#             self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+        for pinfo in prog_list:
+            if pinfo.is_reserved == True:
+                continue
+            if self.is_in_span(span_list, pinfo) == False:
+                continue
+            pinfo = self.random_finder.like(pinfo)
+            if not pinfo:
+                continue
+            pinfo.set_reserve_info()
+            found_list.append(ReserveInfo(pinfo, pinfo.element))
         return found_list
+    def is_in_span(self, span_list, pinfo):
+        is_in = False
+        for span in span_list:
+            if span[0] <= pinfo.start and pinfo.end <= span[1]:
+                is_in = True
+                break
+        return is_in
     def do_reserve(self, rinfo_list):
         self.log("reserved:")
         for r in rinfo_list:

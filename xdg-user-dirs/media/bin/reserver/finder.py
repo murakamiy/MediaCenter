@@ -21,6 +21,8 @@ class FindresCheif:
 
 class Finder:
     priority = 50
+    rectime_max = 60 * 60 * 6
+    rectime_min = 60 * 20
     allow_list = None
     deny_list = None
     allow_pattern = None
@@ -37,9 +39,9 @@ class Finder:
         buf = '(' + buf + re.escape(plist[-1].encode('utf-8')) + ')'
         return re.compile(buf)
     def like(self, pinfo):
-        if pinfo.rectime > (60 * 60 * 6):
+        if pinfo.rectime > self.rectime_max:
             return False
-        if pinfo.rectime < (60 * 20):
+        if pinfo.rectime < self.rectime_min:
             return False
         return self.allow(pinfo)
     def allow(self, pinfo):
@@ -197,11 +199,23 @@ class VarietyFinder(Finder):
         return False
 
 class NewsFinder(Finder):
-    priority = 1
+    priority = 20
     def allow(self, pinfo):
         if 'ニュース／報道' in pinfo.category_list:
             return True
         return False
+
+class RandomFinder(Finder):
+    priority = 10
+    def allow(self, pinfo):
+        if pinfo.title == '放送休止' or pinfo.title == '文字放送':
+            return None
+        if 'ショッピング・通販' in pinfo.category_list:
+            return None
+
+        pinfo.found_by = self.__class__.__name__
+        pinfo.priority = float(self.priority) * pinfo.rectime / self.rectime_max
+        return pinfo
 
 ####################################################################################################
 # ProgramInfo

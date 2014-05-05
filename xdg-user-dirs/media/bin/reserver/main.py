@@ -18,7 +18,7 @@ finders_list.append(finder.VarietyFinder())
 finders_list.append(finder.NatureFinder())
 
 cheif = finder.FindresCheif(finders_list)
-r = reserve.ReserveMaker(cheif)
+r = reserve.ReserveMaker(cheif, finder.RandomFinder())
 
 xml_globs = sys.argv[1:]
 r.reserve(xml_globs)
