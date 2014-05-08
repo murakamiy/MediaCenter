@@ -178,20 +178,8 @@ class ReserveMaker:
             rating_v = provider.get_rating_element(rinfo.pinfo.element)
             rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
         return rinfo_list
-    def get_lower_priority_list(self, rinfo_list):
-        timer_list = self.create_timer(rinfo_list)
-        job_list = []
-        remove_list = []
-        for time in timer_list:
-            job_list = self.remove_end_job(job_list, time)
-            job_list = self.append_start_job(rinfo_list, job_list, time)
-            if len(job_list) > 2:
-                job_list.sort(cmp=priority_sort, reverse=False)
-                remove_list.extend(job_list[2:len(job_list)])
-                job_list = job_list[0:2]
-        return remove_list
     def apply_priority(self, rinfo_list, do_print):
-        remove_list = self.get_lower_priority_list(rinfo_list)
+        remove_list = self.simulate_recording(rinfo_list)
         remove_list.sort(cmp=timeline_sort, reverse=False)
         if do_print:
             self.log("removed: ")
@@ -203,18 +191,30 @@ class ReserveMaker:
             except ValueError:
                 pass
         return rinfo_list
-    def remove_end_job(self, job_list, time):
+    def simulate_recording(self, rinfo_list):
+        timeline = self.create_timeline(rinfo_list)
+        recordings = []
+        remove_list = []
+        for now in timeline:
+            recordings = self.stop_recording(recordings, now)
+            recordings = self.start_recording(rinfo_list, recordings, now)
+            if len(recordings) > 2:
+                recordings.sort(cmp=priority_sort, reverse=False)
+                remove_list.extend(recordings[2:])
+                recordings = recordings[0:2]
+        return remove_list
+    def stop_recording(self, recordings, now):
         work_list = []
-        for job in job_list:
-            if job.pinfo.end != time:
+        for job in recordings:
+            if job.pinfo.end != now:
                 work_list.append(job)
         return work_list
-    def append_start_job(self, rinfo_list, job_list, time):
+    def start_recording(self, rinfo_list, recordings, now):
         for rinfo in rinfo_list:
-            if rinfo.pinfo.start == time:
-                job_list.append(rinfo)
-        return job_list
-    def create_timer(self, rinfo_list):
+            if rinfo.pinfo.start == now:
+                recordings.append(rinfo)
+        return recordings
+    def create_timeline(self, rinfo_list):
         buf_1 = []
         for rinfo in rinfo_list:
             buf_1.append(rinfo.pinfo.start)
