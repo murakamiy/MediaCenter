@@ -9,6 +9,7 @@ USAGE: $(basename $0) command
        command:
                 atrm
                 mk_title_encode [FILE]...
+                mk_title_encode_mt
                 mk_title_ts [FILE]...
                 ts
                 encode
@@ -111,6 +112,26 @@ case $command in
             fi
             ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
             touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
+        done
+        ;;
+    mk_title_encode_mt)
+        shift
+        for f in $(find /mnt/hd/encode_hd/ -type f);do
+            base=$(basename $f | awk -F . '{ print $1 }')
+            ext=$(basename $f | awk -F . '{ print $2 }')
+            if [ "$ext" = "mp4" ];then
+                tag=
+                tag=$(mp4info $f | grep Comments: | awk -F ': ' '{ print $2 }')
+                if [ -n "$tag" ];then
+                    link_name=${tag}.${ext}
+                else
+                    link_name=${base}.${ext}
+                fi
+            else
+                link_name=${base}.${ext}
+            fi
+            echo ${base}.${ext} $link_name
+            ln $f /mnt/hd/title_encode_mt/${link_name}
         done
         ;;
     mk_title_ts)
