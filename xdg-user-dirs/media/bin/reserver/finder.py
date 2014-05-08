@@ -206,7 +206,6 @@ class NewsFinder(Finder):
         return False
 
 class RandomFinder(Finder):
-    priority = 10
     def allow(self, pinfo):
         if pinfo.title == '放送休止' or pinfo.title == '文字放送':
             return None
@@ -214,7 +213,7 @@ class RandomFinder(Finder):
             return None
 
         pinfo.found_by = self.__class__.__name__
-        pinfo.priority = float(self.priority) * pinfo.rectime / self.rectime_max
+        pinfo.priority = random.choice((1,2,3,4,5)) + 10.0 * pinfo.rectime / self.rectime_max
         return pinfo
 
 ####################################################################################################

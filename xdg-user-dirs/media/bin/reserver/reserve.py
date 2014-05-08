@@ -9,7 +9,6 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil import rrule
 import time
-import random
 from xml.etree.cElementTree import ElementTree
 from xml.etree.cElementTree import Element
 import unicodedata
