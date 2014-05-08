@@ -199,7 +199,7 @@ class VarietyFinder(Finder):
         return False
 
 class NewsFinder(Finder):
-    priority = 20
+    priority = 0
     def allow(self, pinfo):
         if 'ニュース／報道' in pinfo.category_list:
             return True
