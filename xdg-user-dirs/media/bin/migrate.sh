@@ -39,13 +39,30 @@ function move_to_hd() {
     log "move to HD $mode : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"
 }
 
+function order_of_deletion() {
+
+    older_pos=$(($(ls $MC_DIR_TS_HD | wc -l) * 1 / 2))
+    older_ref=$MC_DIR_TS_HD/$(ls $MC_DIR_TS_HD | sort | sed -n ${older_pos}p)
+    for ts in $(find $MC_DIR_TS_HD -type f -not -newer $older_ref | sort);do
+
+        xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
+        foundby=$(xmlsel -t -m //foundby -v . $xml | sed -e 's/Finder//')
+        if [ "$foundby" = "Random" ];then
+            echo $ts
+        fi
+
+    done
+
+    find $MC_DIR_TS_HD -type f | sort
+}
+
 function do_migrate() {
 
 total_size=0
 total_count=0
 last_date=
 has_free_space print
-for ts in $(find $MC_DIR_TS_HD -type f | sort);do
+for ts in $(order_of_deletion);do
 
     has_free_space
     if [ $? -eq 0 ];then
@@ -60,7 +77,10 @@ for ts in $(find $MC_DIR_TS_HD -type f | sort);do
         find $MC_DIR_TITLE_TS -inum $inode -delete
     fi
 
-    last_date=$(basename $ts | awk -F - '{ print $1 }')
+    foundby=$(xmlsel -t -m //foundby -v . $xml | sed -e 's/Finder//')
+    if [ "$foundby" != "Random" ];then
+        last_date=$(basename $ts | awk -F - '{ print $1 }')
+    fi
     size=$(stat --format=%s $ts)
     total_size=$(($total_size + $size))
     total_count=$(($total_count + 1))
