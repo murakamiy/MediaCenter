@@ -7,7 +7,6 @@ job_file_ts=${job_file_base}.ts
 job_file_mp4=${job_file_base}.mp4
 
 title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
-category=$(print_category ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 rec_channel=$(xmlsel -t -m //rec-channel -v . ${MC_DIR_RESERVED}/${job_file_xml})
@@ -17,6 +16,7 @@ service_id=$(xmlsel -t -m //service-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 event_id=$(xmlsel -t -m //event-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
+foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 avconv_rec_time_max=10800
@@ -89,14 +89,14 @@ else
         else
             cp $MC_FILE_THUMB $thumb_file
         fi
-        category_dir="${MC_DIR_TITLE_TS}/${broadcasting}/${category}"
-        mkdir -p "$category_dir"
+        foundby_dir="${MC_DIR_TITLE_TS}/${foundby}"
+        mkdir -p "$foundby_dir"
         for i in $(seq -w 1 99);do
-            if [ ! -e "${category_dir}/${title}_${i}.png" ];then
+            if [ ! -e "${foundby_dir}/${title}_${i}.png" ];then
                 break
             fi
         done
-        ln $thumb_file "${category_dir}/${title}_${i}.png"
+        ln $thumb_file "${foundby_dir}/${title}_${i}.png"
 
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 

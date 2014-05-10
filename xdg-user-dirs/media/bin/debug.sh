@@ -141,8 +141,8 @@ case $command in
             job_file_xml=${job_file_base}.xml
             job_file_ts=${job_file_base}.ts
             title=$(print_title ${MC_DIR_JOB_FINISHED}/${job_file_xml})
-            category=$(print_category ${MC_DIR_JOB_FINISHED}/${job_file_xml})
-            broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_JOB_FINISHED}/${job_file_xml})
+            foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_JOB_FINISHED}/${job_file_xml} | sed -e 's/Finder//')
+            echo $job_file_base $title $foundby
 
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
             echo "ffmpeg -y -i ${MC_DIR_TS_HD}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
@@ -152,15 +152,14 @@ case $command in
             else
                 cp $MC_FILE_THUMB $thumb_file
             fi
-            category_dir="${MC_DIR_TITLE_TS}/${category}"
-            category_dir="${MC_DIR_TITLE_TS}/${broadcasting}/${category}"
-            mkdir -p "$category_dir"
+            foundby_dir="${MC_DIR_TITLE_TS}/${foundby}"
+            mkdir -p "$foundby_dir"
             for i in $(seq -w 1 99);do
-                if [ ! -e "${category_dir}/${title}${i}.png" ];then
+                if [ ! -e "${foundby_dir}/${title}_${i}.png" ];then
                     break
                 fi
             done
-            ln $thumb_file "${category_dir}/${title}${i}.png"
+            ln $thumb_file "${foundby_dir}/${title}_${i}.png"
 
         done
         ;;
