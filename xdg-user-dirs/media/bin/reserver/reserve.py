@@ -22,17 +22,17 @@ LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
 
 class ProgramInfo:
-    def __init__(self, el, now, next_cron):
+    def __init__(self, el, now, border_time):
         self.is_reserved = False
         self.now = now
-        self.next_cron = next_cron
+        self.border_time = border_time
         self.start = datetime.strptime(string.split(el.get('start'))[0], '%Y%m%d%H%M%S')
         self.epoch_start = int(time.mktime(self.start.timetuple()))
         self.channel = self.get_text(el.get('channel'))
         self.priority = 0
         self.found_by = "CatchAll"
     def is_in_reserve_span(self):
-        if self.now < self.start and self.start < self.next_cron:
+        if self.now < self.start and self.start < self.border_time:
             return True
         return False
     def set_program_info(self, el):
@@ -116,6 +116,7 @@ class ReserveMaker:
         rule = rrule.rrule(rrule.DAILY,
                 dtstart=datetime(self.now.year, self.now.month, self.now.day, cron[0], cron[1], cron[2]))
         self.next_cron = rule.after(self.now)
+        self.border_time = self.next_cron + timedelta(0, finder.finders[0].rectime_max, 0)
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
@@ -136,7 +137,6 @@ class ReserveMaker:
             rinfo_list.sort(cmp=timeline_sort, reverse=False)
             rinfo_list = self.apply_rating(rinfo_list)
             rinfo_list = self.apply_priority(rinfo_list, True)
-            rinfo_list = self.remove_cron_span(rinfo_list)
             isdb_set.append((prog_list, rinfo_list))
 
         span_list = self.create_span(isdb_set)
@@ -148,6 +148,7 @@ class ReserveMaker:
             if self.random_finder != None:
                 rinfo_list.extend(self.find_random(span_list, prog_list))
                 rinfo_list = self.apply_priority(rinfo_list, False)
+            rinfo_list = self.remove_border_strech(rinfo_list)
             rinfo_list = self.remove_cron_span(rinfo_list)
             all_rinfo_list.extend(rinfo_list)
 
@@ -155,6 +156,12 @@ class ReserveMaker:
         all_rinfo_list = self.create_reserve(all_rinfo_list)
         self.do_reserve(all_rinfo_list)
 
+    def remove_border_strech(self, rinfo_list):
+        new_list = []
+        for rinfo in rinfo_list:
+            if rinfo.pinfo.start < self.next_cron:
+                new_list.append(rinfo)
+        return new_list
     def remove_cron_span(self, rinfo_list):
         remove_list = []
         new_list = []
@@ -272,7 +279,7 @@ class ReserveMaker:
     def create_program_list(self, tree):
         prog_list = []
         for el in tree.findall("programme"):
-            pinfo = ProgramInfo(el, self.now, self.next_cron)
+            pinfo = ProgramInfo(el, self.now, self.border_time)
             if not pinfo.is_in_reserve_span():
                 continue
             if not self.is_include_channel(pinfo):
