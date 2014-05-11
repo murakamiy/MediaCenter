@@ -81,6 +81,9 @@ pid_mig_array=$!
 bash $MC_BIN_SMB &
 pid_smb=$!
 
+log 'starting title'
+find $MC_DIR_TITLE_TS_NEW -type f -ctime +7 -delete
+
 log 'starting rrd'
 bash $MC_BIN_RRD
 

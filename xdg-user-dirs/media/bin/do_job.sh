@@ -89,6 +89,7 @@ else
         else
             cp $MC_FILE_THUMB $thumb_file
         fi
+
         foundby_dir="${MC_DIR_TITLE_TS}/${foundby}"
         mkdir -p "$foundby_dir"
         for i in $(seq -w 1 99);do
@@ -97,6 +98,16 @@ else
             fi
         done
         ln $thumb_file "${foundby_dir}/${title}_${i}.png"
+
+        today=$(date +%Y%m%d)
+        foundby_dir="${MC_DIR_TITLE_TS_NEW}/${foundby}"
+        mkdir -p "$foundby_dir"
+        for i in $(seq -w 1 99);do
+            if [ ! -e "${foundby_dir}/${today}_${title}_${i}.png" ];then
+                break
+            fi
+        done
+        ln $thumb_file "${foundby_dir}/${today}_${title}_${i}.png"
 
         python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
 
