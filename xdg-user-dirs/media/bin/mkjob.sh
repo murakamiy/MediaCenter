@@ -53,6 +53,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
 done &
 pid_epg_digital=$!
 
+if [ "$MC_RESERVE_SATELLITE" = "true" ];then
 log 'starting epgdump_py bs cs'
 array=(BS15_0 CS2 CS4)
 prefix=$prefix_bs_cs
@@ -73,6 +74,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
     fi
 done &
 pid_epg_bs_cs=$!
+fi
 
 
 $MC_BIN_USB_MOUNT
@@ -90,10 +92,16 @@ bash $MC_BIN_RRD
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
+if [ "$MC_RESERVE_SATELLITE" = "true" ];then
 wait $pid_epg_bs_cs
+fi
 wait $pid_epg_digital
 log 'starting find program'
+if [ "$MC_RESERVE_SATELLITE" = "true" ];then
 python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+else
+python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+fi
 
 log 'starting xml format'
 for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
