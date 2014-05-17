@@ -105,36 +105,43 @@ function smb_copy_mp4() {
 }
 
 function smb_move_old_files() {
-    now=$(date +%Y%m%d%H%M%S)
-    smb_print_file ${smb_dir}/__NEW | sort -k 1 -n | sed -e 's/\t/__SEPARATOR__/' |
-    while read line;do
-        past=$(awk -F '__SEPARATOR__' '{ print $1 }' <<< $line)
-        file=$(awk -F '__SEPARATOR__' '{ print $2 }' <<< $line)
-        delta=$(awk -v now=$now -v past=$past '
-            function epoch_time(datetime) {
-                year = substr(datetime, 1, 4)
-                month = substr(datetime, 5, 2)
-                day = substr(datetime, 7, 2)
-                hour = substr(datetime, 9, 2)
-                minute = substr(datetime, 11, 2)
-                second = substr(datetime, 13, 2)
-                return mktime(year" "month" "day" "hour" "minute" "second)
+
+    smb_print_file ${smb_dir}/__NEW | sort -k 1 -n |
+    awk -F '\t' '
+        function epoch_time(datetime) {
+            year = substr(datetime, 1, 4)
+            month = substr(datetime, 5, 2)
+            day = substr(datetime, 7, 2)
+            hour = substr(datetime, 9, 2)
+            minute = substr(datetime, 11, 2)
+            second = substr(datetime, 13, 2)
+            return mktime(year" "month" "day" "hour" "minute" "second)
+        }
+
+        BEGIN {
+            epoch_now = systime()
+        }
+
+        {
+            past = $1
+            file = $2
+            epoch_past = epoch_time(past)
+            format_past = strftime("%Y/%m/%d-%H:%M:%S", epoch_past)
+            period = epoch_now - epoch_past
+            format_period = sprintf("%02d:%02d", period / 3600, period % 3600 / 60)
+
+            if (period > 1) { # 1day:86400 2days:172800
+                printf("%s\t%s\t%s\t%s\n", format_period, past, format_past, file)
             }
-            BEGIN {
-                epoch_now = epoch_time(now)
-                epoch_past = epoch_time(past)
-                format_now = strftime("%Y/%m/%d-%H:%M:%S", epoch_now)
-                format_past = strftime("%Y/%m/%d-%H:%M:%S", epoch_past)
-                printf("%d %d %d %s %s\n", epoch_now - epoch_past, now, past, format_now, format_past)
-            }' | awk '{ print $1 }')
 
-        if [ "$delta" -gt 172800 ];then # 2days
-            base=$(basename $file)
-            foundby=$(basename $(dirname $file))
-            smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir $foundby" $MC_SMB_SERVER
-            smbclient -A ~/.smbauth -c "rename \"$file\" \"${smb_dir}/${foundby}/${base}\"" $MC_SMB_SERVER
-        fi
-
+        }
+    ' | awk '{ print $4 }' |
+    while read line;do
+        file=$line
+        base=$(basename $file)
+        foundby=$(basename $(dirname $file))
+        smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir $foundby" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -c "rename \"$file\" \"${smb_dir}/${foundby}/${base}\"" $MC_SMB_SERVER
     done
 }
 
