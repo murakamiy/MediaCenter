@@ -2,7 +2,24 @@
 
 smb_dir=contents
 
-function smb_print_file() {
+function smb_print_format() {
+    local type=$1
+    local dir=$2
+    local line="$3"
+    local separator='[[:space:]]A[[:space:]]+[0-9]+[[:space:]]'
+
+    if [ "$type" = "directory" ];then
+        separator='[[:space:]]DA[[:space:]]+[0-9]+[[:space:]]'
+    fi
+
+    awk -v dir=$dir -v type=$type -F $separator '
+    {
+        "date +%Y%m%d%H%M%S -d \""$2"\"" | getline time
+        printf("%s\t%d\t%s/%s\n", type, time, dir, $1)
+    }' <<< $line
+}
+
+function smb_print_base() {
 
     local dir=$1
     local dir_opt="-D $dir"
@@ -16,22 +33,42 @@ function smb_print_file() {
         type=$(awk '{ print $2 }' <<< $line)
         if [ "$type" = "DA" ];then
             if [ "$name" != "." -a "$name" != ".." ];then
-                smb_print_file ${dir}/${name}
+                smb_print_format directory $dir "$line"
+                smb_print_base ${dir}/${name}
             fi
         elif [ "$type" = "A" ];then
-            awk -v dir=$dir -F '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' '
-            {
-                "date +%Y%m%d%H%M%S -d \""$2"\"" | getline time
-                printf("%d\t%s/%s\n", time, dir, $1)
-            }' <<< $line
+            smb_print_format file $dir "$line"
         fi
     done
+}
+
+function smb_print_file() {
+    smb_print_base $1 | grep ^file | awk -F '\t' '{ printf("%s\t%s\n", $2, $3) }'
+}
+
+function smb_print_directory() {
+    smb_print_base $1 | grep ^directory | awk -F '\t' '{ printf("%s\t%s\n", $2, $3) }'
 }
 
 function smb_get_disk_usage() {
     disk_size=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk '{ print $1 }')
     disk_avail=$(smbclient -A ~/.smbauth -c ls $MC_SMB_SERVER | tail -n 1 | awk '{ print $6 }')
     echo "$MC_SMB_DISK_SIZE_GB * $disk_avail / $disk_size" | bc
+}
+
+function smb_update_wtime() {
+    empty_file_dir=/tmp
+    empty_file_base=__smb_update__
+
+    touch ${empty_file_dir}/${empty_file_base}
+    (
+        cd $empty_file_dir
+        smbclient -A ~/.smbauth -D ${smb_dir}/Favorite -c "put $empty_file_base" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D ${smb_dir}/Favorite -c "del $empty_file_base" $MC_SMB_SERVER
+        sleep 1
+        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "put $empty_file_base" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "del $empty_file_base" $MC_SMB_SERVER
+    )
 }
 
 function smb_copy_mp4() {
@@ -54,8 +91,9 @@ function smb_copy_mp4() {
         mp4_size=$(ls -sh "$mp4")
         log "smb put $title"
 
-            smbclient -A ~/.smbauth -D $smb_dir -c "mkdir $foundby" $MC_SMB_SERVER
-            smbclient -A ~/.smbauth -D ${smb_dir}/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir __NEW" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "mkdir $foundby" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
             /bin/rm "$mp4"
 
         if [ "$1" = "one" ];then
@@ -63,16 +101,54 @@ function smb_copy_mp4() {
         fi
 
     done
+    smb_update_wtime
+}
+
+function smb_move_old_files() {
+    now=$(date +%Y%m%d%H%M%S)
+    smb_print_file ${smb_dir}/__NEW | sort -k 1 -n | sed -e 's/\t/__SEPARATOR__/' |
+    while read line;do
+        past=$(awk -F '__SEPARATOR__' '{ print $1 }' <<< $line)
+        file=$(awk -F '__SEPARATOR__' '{ print $2 }' <<< $line)
+        delta=$(awk -v now=$now -v past=$past '
+            function epoch_time(datetime) {
+                year = substr(datetime, 1, 4)
+                month = substr(datetime, 5, 2)
+                day = substr(datetime, 7, 2)
+                hour = substr(datetime, 9, 2)
+                minute = substr(datetime, 11, 2)
+                second = substr(datetime, 13, 2)
+                return mktime(year" "month" "day" "hour" "minute" "second)
+            }
+            BEGIN {
+                epoch_now = epoch_time(now)
+                epoch_past = epoch_time(past)
+                format_now = strftime("%Y/%m/%d-%H:%M:%S", epoch_now)
+                format_past = strftime("%Y/%m/%d-%H:%M:%S", epoch_past)
+                printf("%d %d %d %s %s\n", epoch_now - epoch_past, now, past, format_now, format_past)
+            }' | awk '{ print $1 }')
+
+        if [ "$delta" -gt 172800 ];then # 2days
+            base=$(basename $file)
+            foundby=$(basename $(dirname $file))
+            smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir $foundby" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -c "rename \"$file\" \"${smb_dir}/${foundby}/${base}\"" $MC_SMB_SERVER
+        fi
+
+    done
+}
+
+function smb_delete_empty_dir() {
+    for d in $(smb_print_directory $smb_dir | awk -F '\t' '{ print $2 }');do
+        smbclient -A ~/.smbauth -c "rmdir $d" $MC_SMB_SERVER
+    done
 }
 
 function smb_delete_dot_file() {
-
-    for f in $(smbclient -A ~/.smbauth -D $smb_dir -c "ls" $MC_SMB_SERVER |
-        egrep '[[:space:]]A[[:space:]]+[0-9]+[[:space:]]' |
-        awk '{ print $1 }' | grep '^\.');do
-
-        smbclient -A ~/.smbauth -D $smb_dir -c "del \"$f\"" $MC_SMB_SERVER
-
+    for f in $(smb_print_file $smb_dir | awk -F '\t' '{ print $2 }' | grep '/\.');do
+        dir_name=$(dirname $f)
+        file_name=$(basename $f)
+        smbclient -A ~/.smbauth -D $dir_name -c "del \"$file_name\"" $MC_SMB_SERVER
     done
 }
 
