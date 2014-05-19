@@ -112,6 +112,7 @@ class ReserveMaker:
         self.now += one_minute
         self.logfd = open(LOG_FILE, "a")
         self.include_channel = None
+        self.exclude_channel = None
         cron = map(int, CRON_TIME.split(":"))
         rule = rrule.rrule(rrule.DAILY,
                 dtstart=datetime(self.now.year, self.now.month, self.now.day, cron[0], cron[1], cron[2]))
@@ -272,10 +273,18 @@ class ReserveMaker:
         return span_list_m
     def set_include_channel(self, channel):
         self.include_channel = channel
+    def set_exclude_channel(self, channel):
+        self.exclude_channel = channel
     def is_include_channel(self, pinfo):
         if self.include_channel == None:
-            return True
-        return pinfo.channel in self.include_channel
+            is_include = True
+        else:
+            is_include = pinfo.channel in self.include_channel
+        if self.exclude_channel == None:
+            is_exclude = False
+        else:
+            is_exclude = pinfo.channel in self.exclude_channel
+        return (is_include == True and is_exclude == False)
     def create_program_list(self, tree):
         prog_list = []
         for el in tree.findall("programme"):
