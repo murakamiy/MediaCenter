@@ -66,6 +66,7 @@ class TitleFinder(Finder):
         u'ソウルイーターノット',
         u'それでも世界は美しい',
         u'ログ・ホライズン',
+        u'好きっていいなよ',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):

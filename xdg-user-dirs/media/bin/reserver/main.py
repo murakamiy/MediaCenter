@@ -18,7 +18,7 @@ finders_list.append(finder.NatureFinder())
 
 cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif, finder.RandomFinder())
-r.set_exclude_channel(("bs_291", "bs_292", "bs_294", "bs_295", "bs_296", "bs_297", "bs_298"))
+r.set_exclude_channel(("BS_291", "BS_292", "BS_294", "BS_295", "BS_296", "BS_297", "BS_298"))
 
 xml_globs = sys.argv[1:]
 r.reserve(xml_globs)
