@@ -6,6 +6,11 @@ job_file_xml=${job_file_base}.xml
 job_file_ts=${job_file_base}.ts
 job_file_mp4=${job_file_base}.mp4
 
+if [ ! -f ${MC_DIR_RESERVED}/${job_file_xml} ];then
+    log "file not found: $job_file_xml"
+    exit
+fi
+
 title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
