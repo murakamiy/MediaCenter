@@ -45,13 +45,6 @@ class ProgramInfo:
         self.category_list = []
         for c in el.findall('category'):
             self.category_list.append(self.get_text(c.text))
-    def set_reserve_info(self):
-        self.is_reserved = True
-        self.time_start = self.start.strftime("%Y/%m/%d %H:%M:%S")
-        self.time_end = self.end.strftime("%Y/%m/%d %H:%M:%S")
-        self.file_base = self.start.strftime("%Y%m%d-%H%M-") + self.channel
-        self.file_ts = os.path.join(DIR_TS, self.file_base + ".ts")
-        self.file_reserved = os.path.join(DIR_RESERVED, self.file_base + ".xml")
         ch = self.get_text(self.element.get('channel'))
         if re.search('^BS_', ch):
             self.broadcasting = 'BS'
@@ -59,6 +52,13 @@ class ProgramInfo:
             self.broadcasting = 'CS'
         else:
             self.broadcasting = 'Digital'
+    def set_reserve_info(self):
+        self.is_reserved = True
+        self.time_start = self.start.strftime("%Y/%m/%d %H:%M:%S")
+        self.time_end = self.end.strftime("%Y/%m/%d %H:%M:%S")
+        self.file_base = self.start.strftime("%Y%m%d-%H%M-") + self.channel
+        self.file_ts = os.path.join(DIR_TS, self.file_base + ".ts")
+        self.file_reserved = os.path.join(DIR_RESERVED, self.file_base + ".xml")
     def get_text(self, text):
         return text.encode('utf-8') if text != None else ""
 

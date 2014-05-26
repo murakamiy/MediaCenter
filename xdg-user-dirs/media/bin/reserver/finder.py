@@ -57,14 +57,12 @@ class TitleFinder(Finder):
     allow_list = [
         u'NARUTO',
         u'はじめの一歩',
-        u'夏目友人帳',
         u'Kanon',
         u'ジョジョの奇妙な冒険',
         u'頭文字D',
         u'花咲舞が黙ってない',
         u'ニセコイ',
         u'ソウルイーターノット',
-        u'それでも世界は美しい',
         u'ログ・ホライズン',
         u'好きっていいなよ',
     ]
@@ -107,11 +105,10 @@ class AnimeFinder(Finder):
         u'デジタルリマスターHD版',
     ]
     def allow(self, pinfo):
-        if 'アニメ／特撮' in pinfo.category_list and '国内アニメ' in pinfo.category_list and \
+        if pinfo.broadcasting == 'Digital' and '国内アニメ' in pinfo.category_list and \
            (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
             if not re.search(self.deny_pattern, pinfo.title):
-                if pinfo.channel != 'CS_331':
-                    return True
+                return True
         return False
 
 class BoxingFinder(Finder):
@@ -149,12 +146,13 @@ class CultureFinder(Finder):
 class NatureFinder(Finder):
     priority = 30
     def allow(self, pinfo):
-        if '自然・動物・環境' in pinfo.category_list:
+        r = random.choice((1,2,3,4,5))
+        if r == 1 and '自然・動物・環境' in pinfo.category_list:
             return True
         return False
 
 class MoterSportsFinder(Finder):
-    priority = 30
+    priority = 40
     allow_list = [
         u'F1',
         u'WRC',
@@ -234,3 +232,4 @@ class RandomFinder(Finder):
 # found_by     = found_by.__class__.__name__
 # rectime      = self.epoch_end - self.epoch_start - 10
 # channel      = self.get_text(el.get('channel'))
+# broadcasting = 'BS' || 'CS' || 'Digital'
