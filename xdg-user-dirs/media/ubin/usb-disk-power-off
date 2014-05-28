@@ -47,6 +47,10 @@ function do_usb_disk_opration() {
 ####################################################################################################
 
 lockfile-create $lock_file
+if [ $? -ne 0 ];then
+    echo "lockfile-create failed: $0"
+    exit 1
+fi
 lockfile-touch $lock_file &
 pid_lock=$!
 

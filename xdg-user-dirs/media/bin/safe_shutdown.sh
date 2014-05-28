@@ -15,27 +15,25 @@ function get_next_job_time() {
     echo $next_job_time
 }
 
-timeout=60
-while getopts 't:' opt;do
-    case $opt in
-        t)
-            timeout=$OPTARG
-            ;;
-    esac
-done
+function do_shutdown() {
+
+if [ -e $MC_STAT_POWEROFF ];then
+    log "another shutdown is running"
+    return
+fi
 
 running=$(find $MC_DIR_PLAY -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo playing movie
     zenity --warning --no-wrap --timeout=3 --display=:0.0 --text="<span font_desc='40'>playing movie</span>"
-    exit
+    return
 fi
 
 running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo job is running
     zenity --warning --no-wrap --timeout=3 --display=:0.0 --text="<span font_desc='40'>job is running $running</span>"
-    exit
+    return
 fi
 
 next_job_time=$(get_next_job_time)
@@ -48,11 +46,12 @@ if [ $wakeup_time -ne -1 ];then
     log
 
     if [ -z "$SSH_CONNECTION" ];then
-        zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
+        zenity --question --no-wrap --timeout=60 --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
             log "shutdown=yes : X Server"
             $MC_BIN_USB_POWER_OFF
             sudo $MC_BIN_USB_CONTROL -e
+            touch $MC_STAT_POWEROFF
             sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
         fi
     else
@@ -61,10 +60,27 @@ if [ $wakeup_time -ne -1 ];then
         log "shutdown=yes : console"
         $MC_BIN_USB_POWER_OFF
         sudo $MC_BIN_USB_CONTROL -e
+        touch $MC_STAT_POWEROFF
         sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
     fi
 else
     log "shutdown=no"
     echo next job will be executed soon
-    zenity --warning --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next job will be executed soon</span>"
+    zenity --warning --no-wrap --timeout=3 --display=:0.0 --text="<span font_desc='40'>next job will be executed soon</span>"
 fi
+
+}
+
+lock_file=/tmp/mc_safe_shutdown
+lockfile-create $lock_file
+if [ $? -ne 0 ];then
+    echo "lockfile-create failed: $0"
+    exit 1
+fi
+lockfile-touch $lock_file &
+pid_lock=$!
+
+do_shutdown
+
+kill -TERM $pid_lock
+lockfile-remove $lock_file

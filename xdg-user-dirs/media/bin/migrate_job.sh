@@ -1,19 +1,7 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
-lock_file=/tmp/usb_migrate_job
 
-lockfile-create $lock_file
-lockfile-touch $lock_file &
-pid_lock=$!
-
-if [ -f $MC_STAT_MIGRATE ];then
-    exit
-fi
-touch $MC_STAT_MIGRATE
-
-kill -TERM $pid_lock
-lockfile-remove $lock_file
-
+function do_migrate() {
 
 df=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
 if [ $df -gt $MC_SSD_THRESHOLD ];then
@@ -26,12 +14,18 @@ if [ $df -gt $MC_SSD_THRESHOLD ];then
     fi
 fi
 
+}
 
+lock_file=/tmp/usb_migrate_job
 lockfile-create $lock_file
+if [ $? -ne 0 ];then
+    echo "lockfile-create failed: $0"
+    exit 1
+fi
 lockfile-touch $lock_file &
 pid_lock=$!
 
-/bin/rm $MC_STAT_MIGRATE
+do_migrate
 
 kill -TERM $pid_lock
 lockfile-remove $lock_file
