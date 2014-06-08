@@ -189,3 +189,64 @@ function smb_delete_old_file() {
         log "smb delete $total_count files $(($total_size / 1024 / 1024))MB avail:${avail}GB"
     fi
 }
+
+function smb_put_log() {
+
+    count_mc=0
+    count_mail=0
+    for ff in $(smb_print_file log | sort -k 1 -nr | awk -F '\t' '{ print $2 }');do
+
+        f=$(basename $ff)
+
+        grep -q ^mc_ <<< $f
+        if [ $? -eq 0 ];then
+            ((count_mc++))
+            if [ $count_mc -gt 2 ];then
+                smbclient -A ~/.smbauth -D log -c "del $f" $MC_SMB_SERVER
+            fi
+        fi
+
+        grep -q ^mail_ <<< $f
+        if [ $? -eq 0 ];then
+            ((count_mail++))
+            if [ $count_mail -gt 2 ];then
+                smbclient -A ~/.smbauth -D log -c "del $f" $MC_SMB_SERVER
+            fi
+        fi
+
+    done
+
+    yesterday=$(date --date=yesterday +%Y%m%d)
+
+    (
+        cd $MC_DIR_LOG
+        smbclient -A ~/.smbauth -D log -c "put $yesterday mc_${yesterday}.txt" $MC_SMB_SERVER
+    )
+
+    mail=mail_${yesterday}.txt
+    LC_ALL=C awk '
+    BEGIN {
+        begin = 0
+        end = 0
+        yesterday = strftime("^From .+ %a %b %d [0-9]{2}:[0-9]{2}:[0-9]{2} %Y$", systime() - 60 * 60 * 24)
+        today     = strftime("^From .+ %a %b %d [0-9]{2}:[0-9]{2}:[0-9]{2} %Y$", systime())
+    }
+
+    {
+        if (begin == 0 && match($0, yesterday)) {
+            begin = 1
+        }
+        else if (begin == 1 && end == 0 && match($0, today)) {
+            end = 1
+        }
+        if (begin == 1 && end == 0) {
+            print $0
+        }
+    }
+    ' /var/mail/mc > /tmp/$mail
+
+    (
+        cd /tmp
+        smbclient -A ~/.smbauth -D log -c "put $mail" $MC_SMB_SERVER
+    )
+}
