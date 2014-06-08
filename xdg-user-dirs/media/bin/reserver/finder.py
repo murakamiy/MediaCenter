@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import random
+from datetime import date
 
 class FindresCheif:
     finders = []
@@ -52,8 +53,45 @@ class Finder:
 ####################################################################################################
 ####################################################################################################
 
-class TitleFinder(Finder):
+class DateTimeFinder(Finder):
     priority = 100
+    def allow(self, pinfo):
+        date_list = (
+                date(2014, 6, 23),
+                date(2014, 6, 24),
+                date(2014, 6, 25),
+                date(2014, 6, 26),
+                date(2014, 6, 27),
+                date(2014, 6, 28),
+                )
+        if pinfo.channel == "CS_342" and pinfo.start.date() in date_list and re.search("知られざる第一次世界大戦", pinfo.title):
+            return True
+
+        if pinfo.channel == "CS_240" and pinfo.start.date() == date(2014, 6, 7) and re.search("PARKER", pinfo.title):
+            return True
+
+        if pinfo.channel == "BS_193" and pinfo.start.date() == date(2014, 6, 14) and re.search("パシフィック", pinfo.title):
+            return True
+
+        if pinfo.channel == "BS_103" and pinfo.start.date() == date(2014, 6, 23) and re.search("マイレージ", pinfo.title):
+            return True
+
+        date_list = (
+                date(2014, 6, 2),
+                date(2014, 6, 3),
+                date(2014, 6, 4),
+                date(2014, 6, 5),
+                )
+        if pinfo.channel == "BS_101" and pinfo.start.date() in date_list and re.search("ノルマンディー上陸", pinfo.title):
+            return True
+
+        if pinfo.channel == "BS_103" and pinfo.start.date() == date(2014, 6, 23) and re.search("マイレージ", pinfo.title):
+            return True
+
+        return False
+
+class TitleFinder(Finder):
+    priority = 90
     allow_list = [
         u'NARUTO',
         u'はじめの一歩',
@@ -68,19 +106,6 @@ class TitleFinder(Finder):
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
-            return True
-        return False
-
-class CreditHighFinder(Finder):
-    priority = 100
-    allow_list = [
-        u'西尾維新',
-    ]
-    deny_list = [
-        u'BSプレマップ',
-    ]
-    def allow(self, pinfo):
-        if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
             return True
         return False
 
@@ -122,6 +147,17 @@ class BoxingFinder(Finder):
             return True
         return False
 
+class MoterSportsFinder(Finder):
+    priority = 40
+    allow_list = [
+        u'F1',
+        u'WRC',
+    ]
+    def allow(self, pinfo):
+        if 'モータースポーツ' in pinfo.category_list and re.search(self.allow_pattern, pinfo.title):
+            return True
+        return False
+
 class CarInfomationFinder(Finder):
     priority = 40
     allow_list = [
@@ -148,17 +184,6 @@ class NatureFinder(Finder):
     def allow(self, pinfo):
         r = random.choice((1,2,3,4,5))
         if r == 1 and '自然・動物・環境' in pinfo.category_list:
-            return True
-        return False
-
-class MoterSportsFinder(Finder):
-    priority = 40
-    allow_list = [
-        u'F1',
-        u'WRC',
-    ]
-    def allow(self, pinfo):
-        if 'モータースポーツ' in pinfo.category_list and re.search(self.allow_pattern, pinfo.title):
             return True
         return False
 
@@ -198,13 +223,6 @@ class VarietyFinder(Finder):
                 return True
         return False
 
-class NewsFinder(Finder):
-    priority = 0
-    def allow(self, pinfo):
-        if 'ニュース／報道' in pinfo.category_list:
-            return True
-        return False
-
 class RandomFinder(Finder):
     def allow(self, pinfo):
         if pinfo.title == '放送休止' or pinfo.title == '文字放送':
@@ -214,6 +232,13 @@ class RandomFinder(Finder):
 
         pinfo.found_by = self.__class__.__name__
         pinfo.priority = random.choice((1,2,3,4,5)) + 10.0 * pinfo.rectime / self.rectime_max
+
+        if '映画' in pinfo.category_list:
+            pinfo.priority += 5
+
+        if '洋画' in pinfo.category_list:
+            pinfo.priority += 10
+
         return pinfo
 
 ####################################################################################################
