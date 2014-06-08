@@ -15,7 +15,7 @@
 # echo 60 > /proc/sys/kernel/panic
 # echo 1 > /proc/sys/kernel/panic_on_oops
 
-echo deadline > /sys/block/sda/queue/scheduler
+echo noop > /sys/block/sda/queue/scheduler
 ethtool -s eth0 wol d
 ethtool -s eth0 wol g
 
