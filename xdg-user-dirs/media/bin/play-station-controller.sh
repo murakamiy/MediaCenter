@@ -23,24 +23,14 @@ if [ "$event_handle" = "not_yet" ];then
 
     elif [ "$type" = "battery" ];then
 
-        battery_level=$(tac /var/log/sixad | grep -o 'Battery ..' | head -n 1 |
-        awk '
-        {
-            plus = strtonum($2)
-            minus = 5 - plus
-            level = ""
-            for (i = 0; i < plus; i++) {
-                level = sprintf("%s+", level)
-            }
-            for (i = 0; i < minus; i++) {
-                level = sprintf("%s-", level)
-            }
-            print level
-        }')
+        battery_level=$(tac /var/log/sixad | grep -o 'Battery ..' | head -n 1 | awk '{ printf("%d\n", $2) }')
 
-        su mc -c \
-        "zenity --info --timeout=10 --display=:0.0 --text=\"<span font_desc='40'>Battery Level $battery_level</span>\"" \
-                >> $log_file 2>&1 &
+        if [ $battery_level -lt 3 ];then
+            su mc -c \
+            "zenity --info --timeout=20 --display=:0.0 --text=\"<span font_desc='40'>Battery Level is low</span>\"" \
+                    >> $log_file 2>&1 &
+        fi
+
         date +"%Y/%m/%d %H:%M:%S.%N battery level $battery_level" >> $log_file
     fi
 
