@@ -128,3 +128,23 @@ for line in sys.stdin:
 function smbaterm() {
     smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1'
 }
+function pdiff() {
+    work_dir=/home/mc/xdg-user-dirs/media/dpkg
+    today=$(date +%Y%m%d)
+    new=${work_dir}/${today}
+
+    dpkg -l > $new
+    old=${work_dir}/$(ls -1t $work_dir | sed -ne '2p')
+
+    old_tmp=$(mktemp)
+    new_tmp=$(mktemp)
+    grep ^ii $old | awk '{ print $2 }' > $old_tmp
+    grep ^ii $new | awk '{ print $2 }' > $new_tmp
+cat << EOF
+
+old : $(basename $old)
+new : $(basename $new)
+
+EOF
+    diff -s $old_tmp $new_tmp
+}
