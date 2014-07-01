@@ -58,6 +58,14 @@ function order_of_deletion() {
 
 function do_migrate() {
 
+$MC_BIN_USB_MOUNT >> ${MC_DIR_LOG}/usb-disk.log 2>&1
+mount | grep -q '^/dev/md0 on /home/mc/xdg-user-dirs/media/video/ts_hd'
+if [ $? -ne 0 ];then
+    log "ERROR: usb disk mount failed"
+    /bin/cp ${MC_DIR_LOG}/usb-disk.log ${MC_DIR_LOG}/usb-disk.log.error
+    return
+fi
+
 total_size=0
 total_count=0
 last_date=

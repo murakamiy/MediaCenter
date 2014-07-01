@@ -77,7 +77,6 @@ pid_epg_bs_cs=$!
 fi
 
 
-$MC_BIN_USB_MOUNT
 bash $MC_BIN_MIGRATE &
 pid_mig_array=$!
 bash $MC_BIN_SMB &
