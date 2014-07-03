@@ -111,6 +111,7 @@ class ReserveMaker:
         one_minute = timedelta(0, 60, 0)
         self.now += one_minute
         self.logfd = open(LOG_FILE, "a")
+        self.dry_run = False
         self.include_channel = None
         self.exclude_channel = None
         cron = map(int, CRON_TIME.split(":"))
@@ -271,6 +272,8 @@ class ReserveMaker:
         for s in span_list_m:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m
+    def set_dry_run(self, dry_run):
+        self.dry_run = dry_run
     def set_include_channel(self, channel):
         self.include_channel = channel
     def set_exclude_channel(self, channel):
@@ -328,11 +331,12 @@ class ReserveMaker:
     def do_reserve(self, rinfo_list):
         self.log("reserved:")
         for r in rinfo_list:
-            if not os.path.exists(r.pinfo.file_reserved):
-                os.system(r.at_command)
-            fd = open(r.pinfo.file_reserved, "w")
-            ElementTree(r.element).write(fd, 'utf-8')
-            fd.close()
+            if not self.dry_run:
+                if not os.path.exists(r.pinfo.file_reserved):
+                    os.system(r.at_command)
+                fd = open(r.pinfo.file_reserved, "w")
+                ElementTree(r.element).write(fd, 'utf-8')
+                fd.close()
             self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
     def parse_xml(self, xml_file):
         tree = ElementTree()

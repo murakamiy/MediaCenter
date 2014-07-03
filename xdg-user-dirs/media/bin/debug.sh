@@ -17,6 +17,7 @@ USAGE: $(basename $0) command
                 rsv
                 cpu [DAYS]
                 du  [DAYS]
+                find
 EOF
 exit
 fi
@@ -201,5 +202,14 @@ case $command in
             echo $log_file
             grep 'disk used' $log_file
         done
+        ;;
+    find)
+        prefix_digital=digital
+        prefix_bs_cs=bs_cs
+        if [ "$MC_RESERVE_SATELLITE" = "true" ];then
+            python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml" DRY_RUN
+        else
+            python $MC_BIN_RESERVER "${prefix_digital}_*.xml" DRY_RUN
+        fi
         ;;
 esac

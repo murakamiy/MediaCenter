@@ -1,4 +1,5 @@
 import sys
+import re
 import reserve
 import finder
 
@@ -20,5 +21,14 @@ cheif = finder.FindresCheif(finders_list)
 r = reserve.ReserveMaker(cheif, finder.RandomFinder())
 r.set_exclude_channel(("BS_291", "BS_292", "BS_294", "BS_295", "BS_296", "BS_297", "BS_298"))
 
-xml_globs = sys.argv[1:]
+args = sys.argv[1:]
+xml_globs = []
+dry_run = False
+for a in args:
+    if re.search('^DRY_RUN$', a):
+        dry_run = True
+    else:
+        xml_globs.append(a)
+
+r.set_dry_run(dry_run)
 r.reserve(xml_globs)
