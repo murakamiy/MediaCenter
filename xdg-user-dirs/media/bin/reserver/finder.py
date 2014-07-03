@@ -57,35 +57,14 @@ class DateTimeFinder(Finder):
     priority = 100
     def allow(self, pinfo):
         date_list = (
-                date(2014, 6, 23),
-                date(2014, 6, 24),
-                date(2014, 6, 25),
-                date(2014, 6, 26),
-                date(2014, 6, 27),
-                date(2014, 6, 28),
+                date(2014, 7, 21),
+                date(2014, 7, 22),
+                date(2014, 7, 23),
                 )
-        if pinfo.channel == "CS_342" and pinfo.start.date() in date_list and re.search("知られざる第一次世界大戦", pinfo.title):
+        if pinfo.channel == "CS_340" and pinfo.start.date() in date_list and re.search("宇宙スペシャル", pinfo.title):
             return True
 
-        if pinfo.channel == "CS_240" and pinfo.start.date() == date(2014, 6, 7) and re.search("PARKER", pinfo.title):
-            return True
-
-        if pinfo.channel == "BS_193" and pinfo.start.date() == date(2014, 6, 14) and re.search("パシフィック", pinfo.title):
-            return True
-
-        if pinfo.channel == "BS_103" and pinfo.start.date() == date(2014, 6, 23) and re.search("マイレージ", pinfo.title):
-            return True
-
-        date_list = (
-                date(2014, 6, 2),
-                date(2014, 6, 3),
-                date(2014, 6, 4),
-                date(2014, 6, 5),
-                )
-        if pinfo.channel == "BS_101" and pinfo.start.date() in date_list and re.search("ノルマンディー上陸", pinfo.title):
-            return True
-
-        if pinfo.channel == "BS_103" and pinfo.start.date() == date(2014, 6, 23) and re.search("マイレージ", pinfo.title):
+        if pinfo.channel == "BS_103" and pinfo.start.date() == date(2014, 7, 19) and re.search("クジラ親子に出会う旅", pinfo.title):
             return True
 
         return False
@@ -97,11 +76,6 @@ class TitleFinder(Finder):
         u'はじめの一歩',
         u'Kanon',
         u'ジョジョの奇妙な冒険',
-        u'頭文字D',
-        u'花咲舞が黙ってない',
-        u'ニセコイ',
-        u'ソウルイーターノット',
-        u'ログ・ホライズン',
         u'好きっていいなよ',
     ]
     def allow(self, pinfo):
@@ -111,16 +85,11 @@ class TitleFinder(Finder):
 
 class MovieFinder(Finder):
     priority = 70
-    random_channel = random.choice(('BS_200','BS_193','CS_227','CS_240'))
-    random_hour = random.choice((20,21))
     rectime = 60 * 90
-    reserved = False
     def allow(self, pinfo):
-        if self.reserved == False and \
-           pinfo.channel == self.random_channel and \
+        if pinfo.channel == 'BS_200' and \
            self.rectime < pinfo.rectime and \
-           (pinfo.start.hour == self.random_hour or pinfo.start.hour == self.random_hour + 1):
-            self.reserved = True
+           pinfo.start.hour == 21:
             return True
         return False
 
