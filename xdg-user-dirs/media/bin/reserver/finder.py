@@ -118,13 +118,12 @@ class BoxingFinder(Finder):
 
 class MoterSportsFinder(Finder):
     priority = 40
-    allow_list = [
-        u'F1',
-        u'WRC',
-    ]
     def allow(self, pinfo):
-        if 'モータースポーツ' in pinfo.category_list and re.search(self.allow_pattern, pinfo.title):
-            return True
+        if 'モータースポーツ' in pinfo.category_list:
+            if re.search('F1', pinfo.title) and re.search('決勝', pinfo.title):
+                return True
+            if re.search('WRC', pinfo.title):
+                return True
         return False
 
 class CarInfomationFinder(Finder):
