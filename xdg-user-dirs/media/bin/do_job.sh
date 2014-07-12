@@ -55,6 +55,7 @@ else
                 -r 30000/1001 \
                 -filter:v yadif=0 \
                 -vcodec libx264 -acodec libvo_aacenc \
+                -ac 2 \
                 -preset:v superfast \
                 ${MC_DIR_MP4}/${job_file_mp4} &
 
