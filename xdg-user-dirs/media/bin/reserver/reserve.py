@@ -123,7 +123,8 @@ class ReserveMaker:
         else:
             self.border_time = self.next_cron + timedelta(0, finder.finders[0].rectime_max, 0)
     def log(self, message):
-        print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
+        if self.dry_run == False:
+            print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
     def reserve_log(self, r):
         self.log(" %s %s %6s %3d %s %s" %
