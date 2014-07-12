@@ -125,6 +125,17 @@ class ReserveMaker:
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
+    def reserve_log(self, r):
+        self.log(" %s %s %6s %3d %s %s" %
+                    (
+                        r.pinfo.start.strftime('%d %H:%M'),
+                        r.pinfo.end.strftime('%H:%M'),
+                        r.pinfo.channel,
+                        r.pinfo.priority,
+                        r.pinfo.found_by[0:3],
+                        r.pinfo.title
+                    )
+                )
     def reserve(self, xml_glob_list):
         isdb_prog_list = [] # [isdb-t-program, isdb-s-program]
         for xml_glob in xml_glob_list:
@@ -182,7 +193,7 @@ class ReserveMaker:
         if 1 < len(remove_list):
             self.log("removed_cron: ")
             for r in remove_list[1:]:
-                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+                self.reserve_log(r)
         return new_list
     def apply_rating(self, rinfo_list):
         provider = rating.Provider()
@@ -197,7 +208,7 @@ class ReserveMaker:
             self.log("removed: ")
         for r in remove_list:
             if do_print:
-                self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+                self.reserve_log
             try:
                 rinfo_list.remove(r)
             except ValueError:
@@ -341,7 +352,7 @@ class ReserveMaker:
                 fd = open(r.pinfo.file_reserved, "w")
                 ElementTree(r.element).write(fd, 'utf-8')
                 fd.close()
-            self.log(" %s %s %6s %5.1f %s" % (r.pinfo.start.strftime('%d %H:%M'), r.pinfo.end.strftime('%H:%M'), r.pinfo.channel, r.pinfo.priority, r.pinfo.title))
+            self.reserve_log(r)
     def parse_xml(self, xml_file):
         tree = ElementTree()
         try:
@@ -378,7 +389,7 @@ class ReserveMaker:
         found_by_element = Element("foundby")
         found_by_element.text = pinfo.found_by
         priority_element = Element("priority")
-        priority_element.text = str(pinfo.priority)
+        priority_element.text = "%.1f" % (pinfo.priority)
         do_job_element = Element("dojob")
         do_job_element.text = do_job_command
         at_element = Element("at")
