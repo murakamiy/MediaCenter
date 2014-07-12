@@ -104,21 +104,24 @@ def priority_sort(x, y):
     return ret
 
 class ReserveMaker:
-    def __init__(self, finder, random_finder):
+    def __init__(self, finder, random_finder, dry_run):
         self.finder = finder
         self.random_finder = random_finder
         self.now = datetime.now()
-        one_minute = timedelta(0, 60, 0)
-        self.now += one_minute
+        five_minute = timedelta(0, 60 * 5, 0)
+        self.now += five_minute
         self.logfd = open(LOG_FILE, "a")
-        self.dry_run = False
+        self.dry_run = dry_run
         self.include_channel = None
         self.exclude_channel = None
         cron = map(int, CRON_TIME.split(":"))
         rule = rrule.rrule(rrule.DAILY,
                 dtstart=datetime(self.now.year, self.now.month, self.now.day, cron[0], cron[1], cron[2]))
         self.next_cron = rule.after(self.now)
-        self.border_time = self.next_cron + timedelta(0, finder.finders[0].rectime_max, 0)
+        if self.dry_run == True:
+            self.border_time = self.now + timedelta(1, 0, 0)
+        else:
+            self.border_time = self.next_cron + timedelta(0, finder.finders[0].rectime_max, 0)
     def log(self, message):
         print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
@@ -150,8 +153,9 @@ class ReserveMaker:
             if self.random_finder != None:
                 rinfo_list.extend(self.find_random(span_list, prog_list))
                 rinfo_list = self.apply_priority(rinfo_list, False)
-            rinfo_list = self.remove_border_strech(rinfo_list)
-            rinfo_list = self.remove_cron_span(rinfo_list)
+            if self.dry_run == False:
+                rinfo_list = self.remove_border_strech(rinfo_list)
+                rinfo_list = self.remove_cron_span(rinfo_list)
             all_rinfo_list.extend(rinfo_list)
 
         all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)

@@ -3,6 +3,16 @@ import re
 import reserve
 import finder
 
+args = sys.argv[1:]
+xml_globs = []
+dry_run = False
+for a in args:
+    if re.search('^DRY_RUN$', a):
+        dry_run = True
+    else:
+        xml_globs.append(a)
+
+
 finders_list = []
 finders_list.append(finder.AnimeFinder())
 finders_list.append(finder.TitleFinder())
@@ -18,17 +28,6 @@ finders_list.append(finder.NatureFinder())
 finders_list.append(finder.DateTimeFinder())
 
 cheif = finder.FindresCheif(finders_list)
-r = reserve.ReserveMaker(cheif, finder.RandomFinder())
+r = reserve.ReserveMaker(cheif, finder.RandomFinder(), dry_run)
 r.set_exclude_channel(("BS_291", "BS_292", "BS_294", "BS_295", "BS_296", "BS_297", "BS_298"))
-
-args = sys.argv[1:]
-xml_globs = []
-dry_run = False
-for a in args:
-    if re.search('^DRY_RUN$', a):
-        dry_run = True
-    else:
-        xml_globs.append(a)
-
-r.set_dry_run(dry_run)
 r.reserve(xml_globs)
