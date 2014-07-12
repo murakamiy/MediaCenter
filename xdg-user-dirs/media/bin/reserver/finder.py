@@ -95,14 +95,11 @@ class MovieFinder(Finder):
 
 class AnimeFinder(Finder):
     priority = 50
-    deny_list = [
-        u'デジタルリマスターHD版',
-    ]
+    channel_list = ("14", "15", "16", "17", "18", "26")
     def allow(self, pinfo):
-        if pinfo.broadcasting == 'Digital' and '国内アニメ' in pinfo.category_list and \
+        if pinfo.channel in self.channel_list and '国内アニメ' in pinfo.category_list and \
            (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
-            if not re.search(self.deny_pattern, pinfo.title):
-                return True
+            return True
         return False
 
 class BoxingFinder(Finder):
