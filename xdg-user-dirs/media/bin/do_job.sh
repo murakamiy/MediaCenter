@@ -75,7 +75,10 @@ else
         fi
         ch_array=($(awk -F '\t' -v channel=$rec_channel '{ if ($1 == channel) printf("%s %s", $2, $4) }' $channel_file))
 
-        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time ${MC_DIR_TS}/${job_file_ts}
+        now=$(awk 'BEGIN { print systime() }')
+        rec_time_adjust=$(($end - $now - 10))
+
+        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust ${MC_DIR_TS}/${job_file_ts}
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
@@ -115,7 +118,13 @@ else
         done
         ln $thumb_file "${foundby_dir}/${today}_${title}_${i}.png"
 
-        python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
+        duration=$(ffprobe -show_format ${MC_DIR_TS}/${job_file_ts} | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
+        integrity=$(($rec_time - $duration))
+        if [ "$integrity" -lt 60 ];then
+            python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
+        else
+            log "failed: $title ts_duration=$duration rec_time=$rec_time"
+        fi
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         log "rec end: $title $(hard_ware_info)"
