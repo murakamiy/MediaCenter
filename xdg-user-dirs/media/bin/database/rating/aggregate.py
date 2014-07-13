@@ -168,6 +168,14 @@ where transport_stream_id = ?
 and service_id = ?
 and event_id = ?
 """
+
+sql_19 = u"""
+delete from play            where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from programme       where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from rating_category where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from rating_series   where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+vacuum;
+"""
 ####################################################################################################
 
 back_date = 0
@@ -177,6 +185,8 @@ if 1 < len(sys.argv):
 con = sqlite3.connect(DB_FILE)
 con.row_factory = sqlite3.Row
 
+con.executescript(sql_19)
+con.commit()
 con.execute(sql_1)
 con.commit()
 csr = con.cursor()
