@@ -63,20 +63,28 @@ stop = int(tree.find("epoch[@type='stop']").text)
 length = stop - start
 
 con = sqlite3.connect(DB_FILE, isolation_level=None)
-con.execute(sql,
-        (
-            transport_stream_id,
-            service_id,
-            event_id,
-            channel,
-            title,
-            desc,
-            category_1,
-            category_2,
-            start,
-            stop,
-            priority,
-            foundby,
-            length
-        ))
+
+try:
+    con.execute(sql,
+            (
+                transport_stream_id,
+                service_id,
+                event_id,
+                channel,
+                title,
+                desc,
+                category_1,
+                category_2,
+                start,
+                stop,
+                priority,
+                foundby,
+                length
+            ))
+except Exception, e:
+    print e.__class__.__name__, ":", e
+    print title
+    print start, stop
+    print transport_stream_id, service_id, event_id
+
 con.close()
