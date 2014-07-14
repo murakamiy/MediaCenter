@@ -18,11 +18,15 @@ USAGE: $(basename $0) command
                 cpu [DAYS]
                 du  [DAYS]
                 find
+                inv
 EOF
 exit
 fi
 
 case $command in
+    inv)
+        bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) invoke
+        ;;
     atrm)
         for i in $(atq | grep -v ' = ' | awk '{ print $1 }');do
             atrm $i
