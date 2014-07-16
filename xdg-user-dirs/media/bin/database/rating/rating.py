@@ -21,6 +21,27 @@ and B.category_1 = ?
 and B.category_2 = ?
 and A.title like ?
 """
+
+sql_2 = u"""
+select
+count(*) as count
+from programme
+where title = ?
+and
+(
+    (
+        channel != ?
+        and
+        start > ? - 60 * 60 * 24 * 14
+    )
+    or
+    (
+        channel = ?
+        and
+        start > ? - 60 * 60 * 24 * 6
+    )
+)
+"""
 ####################################################################################################
 
 class Provider:
@@ -70,6 +91,17 @@ class Provider:
                 ret = row["rating"]
                 break
         csr.close()
+        return ret
+    def has_same_record(self, title, channel, start):
+        csr = self.con.cursor()
+        csr.execute(sql_2, (title, channel, start, channel, start))
+        row = csr.fetchone()
+        count = row["count"]
+        csr.close()
+        if count > 0:
+            ret = True
+        else:
+            ret = False
         return ret
 
 

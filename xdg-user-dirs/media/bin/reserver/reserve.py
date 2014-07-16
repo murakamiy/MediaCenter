@@ -122,19 +122,20 @@ class ReserveMaker:
             self.border_time = self.now + timedelta(1, 0, 0)
         else:
             self.border_time = self.next_cron + timedelta(0, finder.finders[0].rectime_max, 0)
+        self.provider = rating.Provider()
     def log(self, message):
         if self.dry_run == False:
             print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
-    def reserve_log(self, r):
+    def reserve_log(self, pinfo):
         self.log(" %s %s %6s %3d %s %s" %
                     (
-                        r.pinfo.start.strftime('%d %H:%M'),
-                        r.pinfo.end.strftime('%H:%M'),
-                        r.pinfo.channel,
-                        r.pinfo.priority,
-                        r.pinfo.found_by[0:3],
-                        r.pinfo.title
+                        pinfo.start.strftime('%d %H:%M'),
+                        pinfo.end.strftime('%H:%M'),
+                        pinfo.channel,
+                        pinfo.priority,
+                        pinfo.found_by[0:3],
+                        pinfo.title
                     )
                 )
     def reserve(self, xml_glob_list):
@@ -146,6 +147,7 @@ class ReserveMaker:
                 if tree == None:
                     continue
                 prog_list.extend(self.create_program_list(tree))
+            prog_list = self.remove_duplication(prog_list)
             isdb_prog_list.append(prog_list)
 
         isdb_set = [] # [(isdb-t-program, isdb-t-reserve), (isdb-s-program, isdb-s-reserve)]
@@ -194,12 +196,11 @@ class ReserveMaker:
         if 1 < len(remove_list):
             self.log("removed_cron: ")
             for r in remove_list[1:]:
-                self.reserve_log(r)
+                self.reserve_log(r.pinfo)
         return new_list
     def apply_rating(self, rinfo_list):
-        provider = rating.Provider()
         for rinfo in rinfo_list:
-            rating_v = provider.get_rating_element(rinfo.pinfo.element)
+            rating_v = self.provider.get_rating_element(rinfo.pinfo.element)
             rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
         return rinfo_list
     def apply_priority(self, rinfo_list, do_print):
@@ -209,7 +210,7 @@ class ReserveMaker:
             self.log("removed: ")
         for r in remove_list:
             if do_print:
-                self.reserve_log
+                self.reserve_log(r.pinfo)
             try:
                 rinfo_list.remove(r)
             except ValueError:
@@ -315,6 +316,16 @@ class ReserveMaker:
             pinfo.set_program_info(el)
             prog_list.append(pinfo)
         return prog_list
+    def remove_duplication(self, prog_list):
+        new_prog_list = []
+        self.log("duplicated: ")
+        for pinfo in prog_list:
+            ret = self.provider.has_same_record(pinfo.title.decode("utf-8"), pinfo.channel.decode("utf-8"), pinfo.epoch_start)
+            if ret == True:
+                self.reserve_log(pinfo)
+            else:
+                new_prog_list.append(pinfo)
+        return new_prog_list
     def find(self, prog_list):
         rinfo_list = []
         for pinfo in prog_list:
@@ -353,7 +364,7 @@ class ReserveMaker:
                 fd = open(r.pinfo.file_reserved, "w")
                 ElementTree(r.element).write(fd, 'utf-8')
                 fd.close()
-            self.reserve_log(r)
+            self.reserve_log(r.pinfo)
     def parse_xml(self, xml_file):
         tree = ElementTree()
         try:
