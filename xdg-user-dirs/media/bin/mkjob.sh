@@ -76,6 +76,7 @@ done &
 pid_epg_bs_cs=$!
 fi
 
+$MC_BIN_USB_MOUNT >> ${MC_DIR_LOG}/usb-disk.log 2>&1
 
 bash $MC_BIN_MIGRATE &
 pid_mig_array=$!
