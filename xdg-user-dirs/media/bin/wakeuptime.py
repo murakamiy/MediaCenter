@@ -21,7 +21,6 @@ def epoch2str(epoch):
 
 LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
-log = open(LOG_FILE, "a")
 next_job_epoch = int(sys.argv[1])
 current_epoch = int(mktime(localtime()))
 
@@ -38,6 +37,7 @@ elif next_job_epoch <= current_epoch:
 else:
     wakeup = ensure_wakeup(current_epoch, min(next_job_epoch, cron_job_epoch))
 
-print >> log, "%s\n current= %s\n next_job=%s\n cron_job=%s\n wakeup=  %s" % (os.path.basename(sys.argv[0]), epoch2str(current_epoch), epoch2str(next_job_epoch), epoch2str(cron_job_epoch), epoch2str(wakeup))
+# log = open(LOG_FILE, "a")
+# print >> log, "%s\n current= %s\n next_job=%s\n cron_job=%s\n wakeup=  %s" % (os.path.basename(sys.argv[0]), epoch2str(current_epoch), epoch2str(next_job_epoch), epoch2str(cron_job_epoch), epoch2str(wakeup))
+# log.close()
 print wakeup
-log.close()
