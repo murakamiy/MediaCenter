@@ -118,10 +118,15 @@ else
         done
         ln $thumb_file "${foundby_dir}/${today}_${title}_${i}.png"
 
-        duration=$(ffprobe -show_format ${MC_DIR_TS}/${job_file_ts} | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
-        integrity=$(($rec_time - $duration))
-        if [ "$integrity" -lt 60 ];then
-            python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
+        ffprobe -show_format ${MC_DIR_TS}/${job_file_ts}
+        if [ $? -eq 0 ];then
+            duration=$(ffprobe -show_format ${MC_DIR_TS}/${job_file_ts} | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
+            integrity=$(($rec_time - $duration))
+            if [ "$integrity" -lt 60 ];then
+                python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
+            else
+                log "failed: $title ts_duration=$duration rec_time=$rec_time"
+            fi
         else
             log "failed: $title ts_duration=$duration rec_time=$rec_time"
         fi

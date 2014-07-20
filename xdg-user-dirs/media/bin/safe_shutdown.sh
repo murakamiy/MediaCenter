@@ -31,12 +31,14 @@ wakeup_time=$(python $MC_BIN_WAKEUP_TIME $next_job_time)
 running=$(find $MC_DIR_PLAY -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo playing movie
+    echo $running
     return
 fi
 
 running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo job is running
+    echo $running
     return
 fi
 
