@@ -190,6 +190,8 @@ class VarietyFinder(Finder):
 
 class RandomFinder(Finder):
     def allow(self, pinfo):
+        if pinfo.start.hour == self.cron_hour or self.next_cron < pinfo.end:
+            return None
         if pinfo.title == '放送休止' or pinfo.title == '文字放送':
             return None
         if 'ショッピング・通販' in pinfo.category_list:

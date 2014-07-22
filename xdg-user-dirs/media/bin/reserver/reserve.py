@@ -118,6 +118,8 @@ class ReserveMaker:
         rule = rrule.rrule(rrule.DAILY,
                 dtstart=datetime(self.now.year, self.now.month, self.now.day, cron[0], cron[1], cron[2]))
         self.next_cron = rule.after(self.now)
+        self.random_finder.cron_hour = cron[0]
+        self.random_finder.next_cron = self.next_cron
         if self.dry_run == True:
             self.border_time = self.now + timedelta(1, 0, 0)
         else:
@@ -150,9 +152,10 @@ class ReserveMaker:
             prog_list = self.remove_duplication(prog_list)
             isdb_prog_list.append(prog_list)
 
+        title_list = []
         isdb_set = [] # [(isdb-t-program, isdb-t-reserve), (isdb-s-program, isdb-s-reserve)]
         for prog_list in isdb_prog_list:
-            rinfo_list = self.find(prog_list)
+            rinfo_list = self.find(prog_list, title_list)
             rinfo_list.sort(cmp=timeline_sort, reverse=False)
             rinfo_list = self.apply_rating(rinfo_list)
             rinfo_list = self.apply_priority(rinfo_list, True)
@@ -165,7 +168,7 @@ class ReserveMaker:
             prog_list = isdb[0]
             rinfo_list = isdb[1]
             if self.random_finder != None:
-                rinfo_list.extend(self.find_random(span_list, prog_list))
+                rinfo_list.extend(self.find_random(span_list, prog_list, title_list))
                 rinfo_list = self.apply_priority(rinfo_list, False)
             if self.dry_run == False:
                 rinfo_list = self.remove_border_strech(rinfo_list)
@@ -326,25 +329,35 @@ class ReserveMaker:
             else:
                 new_prog_list.append(pinfo)
         return new_prog_list
-    def find(self, prog_list):
+    def find(self, prog_list, title_list):
         rinfo_list = []
+        self.log("duplicated find: ")
         for pinfo in prog_list:
+            if pinfo.title in title_list:
+                self.reserve_log(pinfo)
+                continue
             pinfo = self.finder.like(pinfo)
             if pinfo == None:
                 continue
+            title_list.append(pinfo.title)
             pinfo.set_reserve_info()
             rinfo_list.append(ReserveInfo(pinfo, pinfo.element))
         return rinfo_list
-    def find_random(self, span_list, prog_list):
+    def find_random(self, span_list, prog_list, title_list):
         found_list = []
+        self.log("duplicated find_random: ")
         for pinfo in prog_list:
             if pinfo.is_reserved == True:
                 continue
             if self.is_in_span(span_list, pinfo) == False:
                 continue
+            if pinfo.title in title_list:
+                self.reserve_log(pinfo)
+                continue
             pinfo = self.random_finder.like(pinfo)
             if not pinfo:
                 continue
+            title_list.append(pinfo.title)
             pinfo.set_reserve_info()
             found_list.append(ReserveInfo(pinfo, pinfo.element))
         return found_list
