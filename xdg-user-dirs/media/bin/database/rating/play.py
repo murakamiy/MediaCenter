@@ -16,7 +16,7 @@ values (?, ?, ?, ?)
 """
 ####################################################################################################
 def update(signum, frame):
-    con = sqlite3.connect(DB_FILE)
+    con = sqlite3.connect(DB_FILE, isolation_level=None)
     con.execute(sql,
             (
                 transport_stream_id,
@@ -24,7 +24,6 @@ def update(signum, frame):
                 event_id,
                 play_time
             ))
-    con.commit()
     con.close()
     sys.exit()
 ####################################################################################################

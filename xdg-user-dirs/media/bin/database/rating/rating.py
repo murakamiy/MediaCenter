@@ -10,18 +10,6 @@ from xml.etree.cElementTree import ElementTree
 from xml.etree.cElementTree import Element
 
 ####################################################################################################
-sql_1 = u"""
-select
-A.title,
-A.rating
-from rating_series as A
-inner join rating_category as B on (A.category_id = B.category_id)
-where A.channel = ?
-and B.category_1 = ?
-and B.category_2 = ?
-and A.title like ?
-"""
-
 sql_2 = u"""
 select
 count(*) as count
@@ -51,47 +39,7 @@ class Provider:
     def __del__(self):
         self.con.close()
     def get_rating_element(self, element):
-        (channel, category_1, category_2, title_left, title_norm) = self.get_element_text(element)
-        return self.get_rating(channel, category_1, category_2, title_left, title_norm)
-    def is_favorite_element(self, element):
-        (channel, category_1, category_2, title_left, title_norm) = self.get_element_text(element)
-        return self.is_favorite_db(channel, category_1, category_2, title_left, title_norm)
-    def is_favorite_xml(self, xml_file):
-        tree = ElementTree()
-        tree.parse(xml_file)
-        elem = tree.find("programme")
-        (channel, category_1, category_2, title_left, title_norm) = self.get_element_text(elem)
-        return self.is_favorite_db(channel, category_1, category_2, title_left, title_norm)
-    def get_element_text(self, element):
-        title = u" " + element.find('title').text
-        title_norm = re.sub(u" ", "", unicodedata.normalize('NFKC', title))
-        title_left = title_norm[:2]
-        channel = element.get('channel')
-        category_1 = ''
-        category_2 = ''
-        i = 0
-        for c in element.findall('category'):
-            if i == 0:
-                category_1 = c.text
-            elif i == 1:
-                category_2 = c.text
-            i += 1
-        return (channel, category_1, category_2, title_left, title_norm)
-    def is_favorite_db(self, channel, category_1, category_2, title_left, title_norm):
-        ret = False
-        rating = self.get_rating(channel, category_1, category_2, title_left, title_norm)
-        if 0.5 < rating:
-            ret = True
-        return ret
-    def get_rating(self, channel, category_1, category_2, title_left, title_norm):
-        ret = 0
-        csr = self.con.cursor()
-        for row in csr.execute(sql_1, (channel, category_1, category_2, title_left + u"%")):
-            if row["title"] == title_norm[:len(row["title"])]:
-                ret = row["rating"]
-                break
-        csr.close()
-        return ret
+        return 0
     def has_same_record(self, title, channel, start):
         csr = self.con.cursor()
         csr.execute(sql_2, (title, channel, start, channel, start))
@@ -103,13 +51,3 @@ class Provider:
         else:
             ret = False
         return ret
-
-
-if __name__ == '__main__':
-    xml_file = sys.argv[1]
-    p = Provider()
-    if True == p.is_favorite_xml(xml_file):
-        ret = 0
-    else:
-        ret = 1
-    sys.exit(ret)
