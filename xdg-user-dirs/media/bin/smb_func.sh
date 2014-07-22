@@ -96,6 +96,8 @@ function smb_copy_mp4() {
             smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
             /bin/rm "$mp4"
 
+            python ${MC_DIR_DB_RATING}/smb.py $xml "$remote" >> ${MC_DIR_DB_RATING}/log 2>&1
+
         if [ "$1" = "one" ];then
             break
         fi
