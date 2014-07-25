@@ -11,17 +11,16 @@ import sqlite3
 
 ####################################################################################################
 sql = u"""
-insert into play (transport_stream_id, service_id, event_id, play_time)
-values (?, ?, ?, ?)
+insert into play (channel, start, play_time)
+values (?, ?, ?)
 """
 ####################################################################################################
 def update(signum, frame):
     con = sqlite3.connect(DB_FILE, isolation_level=None)
     con.execute(sql,
             (
-                transport_stream_id,
-                service_id,
-                event_id,
+                channel,
+                start,
                 play_time
             ))
     con.close()
@@ -33,12 +32,9 @@ tree = ElementTree()
 tree.parse(xml_file)
 
 el = tree.find("programme")
-transport_stream_id = -1
-v = el.find("transport-stream-id")
-if v != None:
-    transport_stream_id = int(v.text)
-service_id = int(el.find("service-id").text)
-event_id = int(el.find("event-id").text)
+channel = el.get("channel")
+start = int(tree.find("epoch[@type='start']").text)
+
 play_time = 0
 
 signal.signal(signal.SIGHUP, update)

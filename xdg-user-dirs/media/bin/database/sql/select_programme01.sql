@@ -1,7 +1,8 @@
 .mode column
-.width 16, 8, 15, 60
+.width 16, 2, 8, 15, 60
 select
 strftime('%Y/%m/%d %H:%M:%S', start, 'unixepoch', 'localtime'),
+period,
 channel,
 foundby,
 title

@@ -1,5 +1,4 @@
-.mode column
-.width 60, 60
+.mode line
 select
 title,
 smb_filename
