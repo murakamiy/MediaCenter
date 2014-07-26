@@ -1,6 +1,5 @@
 #!/bin/bash
 
-sqlite3 tv.db '.dump play' > sql/dump.sql
 rm -f tv.db
 sqlite3 tv.db '.read sql/create_table.sql'
 

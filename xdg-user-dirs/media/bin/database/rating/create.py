@@ -11,12 +11,24 @@ from datetime import datetime
 from datetime import timedelta
 
 ####################################################################################################
-sql = u"""
+sql_1 = u"""
+insert or ignore
+into category (category_list)
+values (?)
+"""
+
+sql_2 = u"""
+select category_id
+from category
+where category_list = ?
+"""
+
+sql_3 = u"""
 insert into
     programme (
         title,
         channel,
-        category,
+        category_id,
         period,
         start,
         stop,
@@ -48,14 +60,21 @@ period_start = datetime.fromtimestamp(start)
 period = (period_start + minute_29).hour / 3 + 1
 
 
-con = sqlite3.connect(DB_FILE, isolation_level=None)
+con = sqlite3.connect(DB_FILE)
+con.row_factory = sqlite3.Row
+csr = con.cursor();
 
 try:
-    con.execute(sql,
+    con.execute(sql_1, (category,))
+    csr.execute(sql_2, (category,))
+    row = csr.fetchone()
+    category_id = row["category_id"]
+
+    con.execute(sql_3,
             (
                 title,
                 channel,
-                category,
+                category_id,
                 period,
                 start,
                 stop,
@@ -68,4 +87,7 @@ except Exception, e:
     print start, stop, channel
     print "####################################################################################################"
 
+
+con.commit()
+csr.close()
 con.close()

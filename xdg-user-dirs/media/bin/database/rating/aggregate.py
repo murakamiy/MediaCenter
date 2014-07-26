@@ -12,6 +12,8 @@ sql_1 = u"""
 delete from play            where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 delete from programme       where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 delete from series          where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from keywords        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from category        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 vacuum;
 """
 ####################################################################################################

@@ -5,7 +5,7 @@ CREATE TABLE programme (
     series_id INTEGER DEFAULT -1,
     title TEXT,
     smb_filename TEXT DEFAULT '',
-    category TEXT,
+    category_id INTEGER,
     period INTEGER,
     foundby TEXT,
     created_at INTEGER DEFAULT (strftime('%s','now')),
@@ -15,11 +15,6 @@ CREATE TABLE programme (
 
 CREATE INDEX idx_programme_series_id ON programme (series_id);
 CREATE INDEX idx_programme_title ON programme (title);
-CREATE INDEX idx_programme_smb_filename ON programme (smb_filename);
-CREATE INDEX idx_programme_channel ON programme (channel);
-CREATE INDEX idx_programme_category ON programme (category);
-CREATE INDEX idx_programme_start ON programme (start);
-CREATE INDEX idx_programme_period ON programme (period);
 
 
 CREATE TABLE play (
@@ -32,26 +27,45 @@ CREATE TABLE play (
 );
 
 CREATE INDEX idx_play_id ON play (channel, start);
-CREATE INDEX idx_play_aggregate ON play (aggregate);
 
 
 CREATE TABLE series (
     series_id INTEGER PRIMARY KEY,
-    keyword TEXT DEFAULT '',
     rating INTEGER DEFAULT 0,
     series_count INTEGER DEFAULT 1,
     created_at INTEGER DEFAULT (strftime('%s','now')),
     updated_at INTEGER DEFAULT (strftime('%s','now'))
 );
 
-CREATE UNIQUE INDEX idx_series_keyword ON series (keyword);
-CREATE INDEX idx_series_series_count ON series (series_count);
+
+CREATE TABLE keywords (
+    series_id INTEGER,
+    keyword TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now')),
+    updated_at INTEGER DEFAULT (strftime('%s','now'))
+);
+
+CREATE INDEX idx_keywords_series_id ON keywords (series_id);
+CREATE INDEX idx_keywords_keyword ON keywords (keyword);
+
+
+CREATE TABLE category (
+    category_id INTEGER PRIMARY KEY,
+    category_list TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now')),
+    updated_at INTEGER DEFAULT (strftime('%s','now'))
+);
+
+CREATE UNIQUE INDEX idx_category_category_list ON category (category_list);
+
+
+
 
 
 CREATE TABLE tmp_group (
     count INTEGER,
     channel TEXT,
-    category TEXT,
+    category_id INTEGER,
     period INTEGER
 );
 
