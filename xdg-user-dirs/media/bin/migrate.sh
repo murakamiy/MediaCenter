@@ -100,7 +100,7 @@ if [ $total_count -ne 0 ];then
     log "hd delete $total_count files $(($total_size / 1024 / 1024 / 1024))GB $last_date"
 fi
 
-pct=$(($MC_SSD_THRESHOLD - 10))
+pct=$(($MC_SSD_THRESHOLD - 20))
 has_free_space print
 for ts in $(find $MC_DIR_TS -type f | sort);do
 
