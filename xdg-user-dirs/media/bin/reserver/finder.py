@@ -40,6 +40,8 @@ class Finder:
         buf = '(' + buf + re.escape(plist[-1].encode('utf-8')) + ')'
         return re.compile(buf)
     def like(self, pinfo):
+        if len(pinfo.category_list) == 0:
+            return False
         if pinfo.rectime > self.rectime_max:
             return False
         if pinfo.rectime < self.rectime_min:
@@ -76,7 +78,7 @@ class TitleFinder(Finder):
         u'はじめの一歩',
         u'Kanon',
         u'ジョジョの奇妙な冒険',
-        u'好きっていいなよ',
+        u'HERO　',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -127,6 +129,7 @@ class CarInfomationFinder(Finder):
     priority = 40
     allow_list = [
         u'カーグラフィックTV',
+        u'トップ・ギア　USA',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -165,7 +168,9 @@ class MusicFinder(Finder):
 class CreditFinder(Finder):
     priority = 30
     allow_list = [
-        u'YUI',
+        u'アリアナ・グランデ',
+        u'テイラー・スウィフト',
+        u'西野カナ',
     ]
     deny_list = [
         u'BSプレマップ',
@@ -173,19 +178,6 @@ class CreditFinder(Finder):
     def allow(self, pinfo):
         if not re.search(self.deny_pattern, pinfo.title) and re.search(self.allow_pattern, pinfo.desc):
             return True
-        return False
-
-class VarietyFinder(Finder):
-    priority = 30
-    allow_list = [
-        u'とんねるずのみなさんのおかげでした',
-    ]
-    def allow(self, pinfo):
-        if 'バラエティ' in pinfo.category_list:
-            if re.search(self.allow_pattern, pinfo.title):
-                return True
-            if re.search(self.allow_pattern, pinfo.desc):
-                return True
         return False
 
 class RandomFinder(Finder):

@@ -23,7 +23,6 @@ finders_list.append(finder.MovieFinder())
 finders_list.append(finder.BoxingFinder())
 finders_list.append(finder.MusicFinder())
 finders_list.append(finder.CultureFinder())
-finders_list.append(finder.VarietyFinder())
 finders_list.append(finder.NatureFinder())
 finders_list.append(finder.DateTimeFinder())
 
