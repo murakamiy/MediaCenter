@@ -252,3 +252,18 @@ function smb_put_log() {
         smbclient -A ~/.smbauth -D log -c "put $mail" $MC_SMB_SERVER
     )
 }
+
+function smb_get_play_log() {
+
+    work_dir=$1
+    (
+        cd $work_dir
+        for ff in $(smb_print_file play_time | awk -F '\t' '{ print $2 }');do
+
+            f=$(basename $ff)
+            smbclient -A ~/.smbauth -D play_time -c "get $f" $MC_SMB_SERVER
+            smbclient -A ~/.smbauth -D play_time -c "del $f" $MC_SMB_SERVER
+
+        done
+    )
+}

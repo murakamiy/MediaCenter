@@ -10,7 +10,7 @@ from play as A
 inner join programme as B on
 (
     A.channel = B.channel and
-    A.start = B.start and
+    A.start = B.start
 )
 order by B.start desc
 limit 30

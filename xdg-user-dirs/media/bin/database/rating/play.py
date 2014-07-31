@@ -16,14 +16,16 @@ values (?, ?, ?)
 """
 ####################################################################################################
 def update(signum, frame):
-    con = sqlite3.connect(DB_FILE, isolation_level=None)
-    con.execute(sql,
-            (
-                channel,
-                start,
-                play_time
-            ))
-    con.close()
+    if play_time > 60 * 5:
+        con = sqlite3.connect(DB_FILE, isolation_level=None)
+        con.execute(sql,
+                (
+                    channel,
+                    start,
+                    play_time
+                ))
+        con.close()
+
     sys.exit()
 ####################################################################################################
 

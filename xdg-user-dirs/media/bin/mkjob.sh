@@ -89,6 +89,9 @@ find $MC_DIR_TITLE_TS_NEW -type f -ctime +7 -delete
 log 'starting rrd'
 bash $MC_BIN_RRD
 
+log 'starting smb_play'
+$MC_BIN_SMB_PLAY
+
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
