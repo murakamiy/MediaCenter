@@ -75,9 +75,7 @@ class TitleFinder(Finder):
     priority = 90
     allow_list = [
         u'NARUTO',
-        u'はじめの一歩',
         u'Kanon',
-        u'ジョジョの奇妙な冒険',
         u'HERO　',
     ]
     def allow(self, pinfo):
@@ -127,12 +125,8 @@ class MoterSportsFinder(Finder):
 
 class CarInfomationFinder(Finder):
     priority = 40
-    allow_list = [
-        u'カーグラフィックTV',
-        u'トップ・ギア　USA',
-    ]
     def allow(self, pinfo):
-        if re.search(self.allow_pattern, pinfo.title):
+        if re.search('カーグラフィックTV', pinfo.title) and pinfo.channel != 'CS_299':
             return True
         return False
 
