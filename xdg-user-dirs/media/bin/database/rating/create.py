@@ -29,6 +29,7 @@ insert into
         title,
         channel,
         category_id,
+        weekday,
         period,
         start,
         stop,
@@ -36,7 +37,7 @@ insert into
     )
     values (
         ?, ?, ?, ?, ?,
-        ?, ?
+        ?, ?, ?
     )
 """
 ####################################################################################################
@@ -58,6 +59,7 @@ stop = int(tree.find("epoch[@type='stop']").text)
 minute_29 = timedelta(0, 60 * 29, 0)
 period_start = datetime.fromtimestamp(start)
 period = (period_start + minute_29).hour / 3 + 1
+weekday = period_start.isoweekday()
 
 
 con = sqlite3.connect(DB_FILE)
@@ -75,6 +77,7 @@ try:
                 title,
                 channel,
                 category_id,
+                weekday,
                 period,
                 start,
                 stop,

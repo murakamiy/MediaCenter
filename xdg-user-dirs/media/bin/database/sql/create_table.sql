@@ -6,6 +6,7 @@ CREATE TABLE programme (
     title TEXT,
     smb_filename TEXT DEFAULT '',
     category_id INTEGER,
+    weekday INTEGER,
     period INTEGER,
     foundby TEXT,
     created_at INTEGER DEFAULT (strftime('%s','now')),
@@ -66,6 +67,7 @@ CREATE TABLE tmp_group (
     count INTEGER,
     channel TEXT,
     category_id INTEGER,
+    weekday INTEGER,
     period INTEGER
 );
 
