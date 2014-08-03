@@ -163,7 +163,6 @@ con.row_factory = sqlite3.Row
 
 
 con.executescript(sql_1)
-con.commit()
 
 csr = con.cursor()
 csr.execute(u"select series_id from series order by keyword_length desc")
@@ -194,8 +193,6 @@ for k in key_list:
 #     print sql
     ret = con.execute(sql)
 
-con.commit()
-
 csr = con.cursor()
 csr.execute(u"select count(*) as count, series_id from programme where series_id != -1 group by series_id")
 count_list = csr.fetchall()
@@ -206,10 +203,7 @@ for c in count_list:
                  (c["count"], c["series_id"])
                )
 
-con.commit()
-
 con.executescript(sql_2)
-con.commit()
 
 csr = con.cursor()
 csr.execute(u"select * from tmp_group;")
@@ -230,8 +224,6 @@ for r1 in tmp_group:
     for r2 in title_list:
         title = normalize(r2["title"])
         con.execute(sql_4, (r2["channel"], r2["start"], title))
-
-    con.commit()
 
     csr = con.cursor()
     csr.execute(u"select * from tmp_title order by title_normalize, start")
@@ -274,7 +266,10 @@ for k in key_list_uniq:
 
     con.execute(u"insert into series (series_id, keyword_length) values (?, ?)", (series_id, keyword_length))
 
-    con.commit()
 
 
+
+
+
+con.commit()
 con.close()
