@@ -59,7 +59,8 @@ channel,
 start,
 title
 from programme
-where channel = ?
+where series_id = -1
+and channel = ?
 and category_id = ?
 and weekday = ?
 and period = ?
@@ -85,9 +86,12 @@ def normalize(title):
     s = ""
 
     for c in title:
+
         if bracket_s == True and bracket_e == True:
+            s += " "
             bracket_s = False
             bracket_e = False
+
         if bracket_s == False:
             if unicodedata.category(c) == "Ps":
                 bracket_s = True
@@ -97,6 +101,7 @@ def normalize(title):
                 bracket_name_e = re.sub("LEFT|RIGHT", "", unicodedata.name(c))
                 if bracket_name_s == bracket_name_e:
                     bracket_e = True
+
         if not bracket_s:
             s += c
 
@@ -137,9 +142,15 @@ def create_keyword(prev, cur):
 
 #     print p.encode("utf-8"), c.encode("utf-8"), p[i].encode("utf-8"), c[i].encode("utf-8"), k.encode("utf-8")
 
+    word_list_all = re.split("\s+", k)
+    if differ and len(word_list_all) > 1:
+        word_list = word_list_all[:len(word_list_all) -1]
+    else:
+        word_list = word_list_all
+
     key_list = []
-    for i in re.split("\s+", k):
-        if len(i) < 3:
+    for i in word_list:
+        if len(i) < 2:
             continue
         if re.match("^[0-9]+$", i):
             continue
@@ -152,6 +163,49 @@ con.row_factory = sqlite3.Row
 
 
 con.executescript(sql_1)
+con.commit()
+
+csr = con.cursor()
+csr.execute(u"select series_id from series order by keyword_length desc")
+series_list = csr.fetchall()
+csr.close()
+
+key_list = []
+for series_id in series_list:
+    csr = con.cursor()
+    csr.execute(u"select keyword from keywords where series_id = ?", series_id)
+    l = []
+    for k in csr.fetchall():
+        l.append(k[0])
+    key_list.append((series_id[0], l))
+    csr.close()
+
+for k in key_list:
+#     s = ""
+#     s += str(k[0]) + ","
+#     for kk in k[1]:
+#         s += kk + ","
+#     print s
+
+    sql = u"update programme set series_id = " + str(k[0])
+    sql += u" where series_id = -1 "
+    for kk in k[1]:
+        sql += u" and title like '%" + kk + "%'"
+#     print sql
+    ret = con.execute(sql)
+
+con.commit()
+
+csr = con.cursor()
+csr.execute(u"select count(*) as count, series_id from programme where series_id != -1 group by series_id")
+count_list = csr.fetchall()
+csr.close()
+
+for c in count_list:
+    con.execute(u"update series set series_count = ? where series_id = ?",
+                 (c["count"], c["series_id"])
+               )
+
 con.commit()
 
 con.executescript(sql_2)
@@ -207,15 +261,18 @@ for k in key_list_uniq:
     csr = con.cursor()
     csr.execute(u"select max(series_id) as series_id from series")
     row = csr.fetchone()
-    if row:
+    if row and row["series_id"]:
         series_id = row["series_id"] + 1
     else:
         series_id = 1
     csr.close()
 
-    con.execute(u"insert into series (series_id) values (?)", (series_id,))
+    keyword_length = 0
     for keyword in k:
+        keyword_length += len(keyword)
         con.execute(u"insert into keywords (series_id, keyword) values (?, ?)", (series_id, keyword))
+
+    con.execute(u"insert into series (series_id, keyword_length) values (?, ?)", (series_id, keyword_length))
 
     con.commit()
 

@@ -33,7 +33,8 @@ CREATE INDEX idx_play_id ON play (channel, start);
 CREATE TABLE series (
     series_id INTEGER PRIMARY KEY,
     rating INTEGER DEFAULT 0,
-    series_count INTEGER DEFAULT 1,
+    series_count INTEGER DEFAULT 0,
+    keyword_length INTEGER DEFAULT 0,
     created_at INTEGER DEFAULT (strftime('%s','now')),
     updated_at INTEGER DEFAULT (strftime('%s','now'))
 );
