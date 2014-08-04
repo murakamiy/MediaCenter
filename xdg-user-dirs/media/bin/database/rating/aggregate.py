@@ -97,96 +97,90 @@ insert ignore into grouping
 
 ####################################################################################################
 
-
-def normalize(title):
-    bracket_s = False
-    bracket_e = False
-    bracket_name_s = ""
-    bracket_name_e = ""
-    s = ""
-
-    for c in title:
-
-        if bracket_s == True and bracket_e == True:
-            s += " "
-            bracket_s = False
-            bracket_e = False
-
-        if bracket_s == False:
-            if unicodedata.category(c) == "Ps":
-                bracket_s = True
-                bracket_name_s = re.sub("LEFT|RIGHT", "", unicodedata.name(c))
-        elif bracket_e == False:
-            if unicodedata.category(c) == "Pe":
-                bracket_name_e = re.sub("LEFT|RIGHT", "", unicodedata.name(c))
-                if bracket_name_s == bracket_name_e:
-                    bracket_e = True
-
-        if not bracket_s:
-            s += c
-
-    ss = ""
-    for c in s:
-        cat = unicodedata.category(c)[0]
-        if cat == "P" or cat == "S" or cat == "Z":
-            ss += " "
-        else:
-            ss += c
-
-    return ss
-
-def is_series(prev, cur):
-    ret = True
-    if prev == None:
-        ret = False
-    elif prev["title_normalize"][:3] != cur["title_normalize"][:3]:
-        ret = False
-    elif abs(prev["start"] - cur["start"]) < 60 * 60 * 24 * 6:
-        ret = False
-    return ret
-
-def parse_keyword(prev, cur):
-    p = prev["title_normalize"]
-    c = cur["title_normalize"]
-
-    differ = False
-    for i in range(0, min(len(p), len(c))):
-        if p[i] != c[i]:
-            differ = True
-            break
-
-    if differ:
-        k = p[:i]
-    else:
-        k = p
-
-#     print p.encode("utf-8"), c.encode("utf-8"), p[i].encode("utf-8"), c[i].encode("utf-8"), k.encode("utf-8")
-
-    word_list_all = re.split("\s+", k)
-    if differ and len(word_list_all) > 1:
-        word_list = word_list_all[:len(word_list_all) -1]
-    else:
-        word_list = word_list_all
-
-    key_list = []
-    for i in word_list:
-        if len(i) < 2:
-            continue
-        if re.match("^[0-9]+$", i):
-            continue
-        key_list.append(i)
-    return key_list
-
-####################################################################################################
-
 class Aggregater:
     def __init__(self):
         self.con = sqlite3.connect(DB_FILE)
         self.con.row_factory = sqlite3.Row
-#         self.csr = con.cursor()
     def __del__(self):
-#         self.csr.close()
         self.con.close()
+    def normalize(self, title):
+        bracket_s = False
+        bracket_e = False
+        bracket_name_s = ""
+        bracket_name_e = ""
+        s = ""
+
+        for c in title:
+
+            if bracket_s == True and bracket_e == True:
+                s += " "
+                bracket_s = False
+                bracket_e = False
+
+            if bracket_s == False:
+                if unicodedata.category(c) == "Ps":
+                    bracket_s = True
+                    bracket_name_s = re.sub("LEFT|RIGHT", "", unicodedata.name(c))
+            elif bracket_e == False:
+                if unicodedata.category(c) == "Pe":
+                    bracket_name_e = re.sub("LEFT|RIGHT", "", unicodedata.name(c))
+                    if bracket_name_s == bracket_name_e:
+                        bracket_e = True
+
+            if not bracket_s:
+                s += c
+
+        ss = ""
+        for c in s:
+            cat = unicodedata.category(c)[0]
+            if cat == "P" or cat == "S" or cat == "Z":
+                ss += " "
+            else:
+                ss += c
+
+        return ss
+
+    def is_series(self, prev, cur):
+        ret = True
+        if prev == None:
+            ret = False
+        elif prev["title_normalize"][:3] != cur["title_normalize"][:3]:
+            ret = False
+        elif abs(prev["start"] - cur["start"]) < 60 * 60 * 24 * 6:
+            ret = False
+        return ret
+
+    def parse_keyword(self, prev, cur):
+        p = prev["title_normalize"]
+        c = cur["title_normalize"]
+
+        differ = False
+        for i in range(0, min(len(p), len(c))):
+            if p[i] != c[i]:
+                differ = True
+                break
+
+        if differ:
+            k = p[:i]
+        else:
+            k = p
+
+    #     print p.encode("utf-8"), c.encode("utf-8"), p[i].encode("utf-8"), c[i].encode("utf-8"), k.encode("utf-8")
+
+        word_list_all = re.split("\s+", k)
+        if differ and len(word_list_all) > 1:
+            word_list = word_list_all[:len(word_list_all) -1]
+        else:
+            word_list = word_list_all
+
+        key_list = []
+        for i in word_list:
+            if len(i) < 2:
+                continue
+            if re.match("^[0-9]+$", i):
+                continue
+            key_list.append(i)
+        return key_list
     def delete_old_record(self):
         self.con.executescript(sql_1)
     def create_group_for_keyword(self):
@@ -209,7 +203,7 @@ class Aggregater:
         #     print "%s %s %s %s" % (r1["channel"], r1["category_id"], r1["weekday"], r1["period"])
 
             for r2 in title_list:
-                title = normalize(r2["title"])
+                title = self.normalize(r2["title"])
                 self.con.execute(sql_4, (r2["channel"], r2["start"], title))
 
             csr = self.con.cursor()
@@ -219,11 +213,11 @@ class Aggregater:
 
             prev = None
             for cur in title_norm_list:
-                if not is_series(prev, cur):
+                if not self.is_series(prev, cur):
                     prev = cur
                     continue
         #         print cur["title_normalize"].encode("utf-8")
-                key_list_all.append(parse_keyword(prev, cur))
+                key_list_all.append(self.parse_keyword(prev, cur))
                 prev = cur
 
         key_list_uniq = []
@@ -307,7 +301,6 @@ class Aggregater:
         self.create_group_for_rating()
 
         self.con.commit()
-#         self.csr.close()
         self.con.close()
 
 ####################################################################################################
