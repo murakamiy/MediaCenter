@@ -17,16 +17,6 @@ delete from category        where created_at < strftime('%s','now') - 60 * 60 * 
 vacuum;
 """
 
-# sql_2
-# update programme
-# set series_id = -1
-# where series_id in
-# (
-# select series_id
-# from series
-# where series_count = 1
-# )
-
 sql_2 = u"""
 delete from tmp_group;
 insert into tmp_group
@@ -76,7 +66,37 @@ insert into tmp_title
 values (?, ?, ?)
 """
 
+sql_5 = u"""
+insert ignore into grouping
+(
+    channel,
+    category_id,
+    weekday,
+    period
+)
+    select
+    channel,
+    category_id,
+    weekday,
+    period
+    from
+    (
+        select
+        count(*) as count,
+        channel,
+        category_id,
+        weekday,
+        period
+        from programme
+        where series_id = -1
+        and group_id = -1
+        group by channel, category_id, weekday, period
+    )
+    where count = 1
+"""
+
 ####################################################################################################
+
 
 def normalize(title):
     bracket_s = False
@@ -125,7 +145,7 @@ def is_series(prev, cur):
         ret = False
     return ret
 
-def create_keyword(prev, cur):
+def parse_keyword(prev, cur):
     p = prev["title_normalize"]
     c = cur["title_normalize"]
 
@@ -158,118 +178,141 @@ def create_keyword(prev, cur):
     return key_list
 
 ####################################################################################################
-con = sqlite3.connect(DB_FILE)
-con.row_factory = sqlite3.Row
+
+class Aggregater:
+    def __init__(self):
+        self.con = sqlite3.connect(DB_FILE)
+        self.con.row_factory = sqlite3.Row
+#         self.csr = con.cursor()
+    def __del__(self):
+#         self.csr.close()
+        self.con.close()
+    def delete_old_record(self):
+        self.con.executescript(sql_1)
+    def create_group_for_keyword(self):
+        self.con.executescript(sql_2)
+        csr = self.con.cursor()
+        csr.execute(u"select * from tmp_group;")
+        tmp_group = csr.fetchall()
+        csr.close()
+        return tmp_group
+    def create_keyword(self, tmp_group):
+        key_list_all = []
+        for r1 in tmp_group:
+
+            self.con.execute(u"delete from tmp_title")
+            csr = self.con.cursor()
+            csr.execute(sql_3, (r1["channel"], r1["category_id"], r1["weekday"], r1["period"]))
+            title_list = csr.fetchall()
+            csr.close()
+
+        #     print "%s %s %s %s" % (r1["channel"], r1["category_id"], r1["weekday"], r1["period"])
+
+            for r2 in title_list:
+                title = normalize(r2["title"])
+                self.con.execute(sql_4, (r2["channel"], r2["start"], title))
+
+            csr = self.con.cursor()
+            csr.execute(u"select * from tmp_title order by title_normalize, start")
+            title_norm_list = csr.fetchall()
+            csr.close()
+
+            prev = None
+            for cur in title_norm_list:
+                if not is_series(prev, cur):
+                    prev = cur
+                    continue
+        #         print cur["title_normalize"].encode("utf-8")
+                key_list_all.append(parse_keyword(prev, cur))
+                prev = cur
+
+        key_list_uniq = []
+        for k in key_list_all:
+            if len(k) != 0 and not k in key_list_uniq:
+                key_list_uniq.append(k)
+
+        return key_list_uniq
+
+    def insert_keyword(self, key_list_uniq):
+        for k in key_list_uniq:
+        #     s = ""
+        #     for kk in k:
+        #         s += kk + ","
+        #     print s.encode("utf-8")
+
+            csr = self.con.cursor()
+            csr.execute(u"select max(series_id) as series_id from series")
+            row = csr.fetchone()
+            if row and row["series_id"]:
+                series_id = row["series_id"] + 1
+            else:
+                series_id = 1
+            csr.close()
+
+            keyword_length = 0
+            for keyword in k:
+                keyword_length += len(keyword)
+                self.con.execute(u"insert into keywords (series_id, keyword) values (?, ?)", (series_id, keyword))
+
+            self.con.execute(u"insert into series (series_id, keyword_length) values (?, ?)", (series_id, keyword_length))
+
+    def create_series(self):
+        csr = self.con.cursor()
+        csr.execute(u"select series_id from series order by keyword_length desc")
+        series_list = csr.fetchall()
+        csr.close()
+
+        key_list = []
+        for series_id in series_list:
+            csr = self.con.cursor()
+            csr.execute(u"select keyword from keywords where series_id = ?", series_id)
+            l = []
+            for k in csr.fetchall():
+                l.append(k[0])
+            key_list.append((series_id[0], l))
+            csr.close()
+
+        for k in key_list:
+        #     s = ""
+        #     s += str(k[0]) + ","
+        #     for kk in k[1]:
+        #         s += kk + ","
+        #     print s
+
+            sql = u"update programme set series_id = " + str(k[0])
+            sql += u" where series_id = -1 "
+            for kk in k[1]:
+                sql += u" and title like '%" + kk + "%'"
+        #     print sql
+            ret = self.con.execute(sql)
+
+        csr = self.con.cursor()
+        csr.execute(u"select count(*) as count, series_id from programme where series_id != -1 group by series_id")
+        count_list = csr.fetchall()
+        csr.close()
+
+        for c in count_list:
+            self.con.execute(u"update series set series_count = ? where series_id = ?",
+                         (c["count"], c["series_id"])
+                       )
+
+    def create_group_for_rating(self):
+        pass
+    def execute(self):
+        self.delete_old_record()
+        tmp_group = self.create_group_for_keyword()
+        key_list_uniq = self.create_keyword(tmp_group)
+        self.insert_keyword(key_list_uniq)
+        self.create_series()
+        self.create_group_for_rating()
+
+        self.con.commit()
+#         self.csr.close()
+        self.con.close()
+
+####################################################################################################
 
 
-con.executescript(sql_1)
-
-csr = con.cursor()
-csr.execute(u"select series_id from series order by keyword_length desc")
-series_list = csr.fetchall()
-csr.close()
-
-key_list = []
-for series_id in series_list:
-    csr = con.cursor()
-    csr.execute(u"select keyword from keywords where series_id = ?", series_id)
-    l = []
-    for k in csr.fetchall():
-        l.append(k[0])
-    key_list.append((series_id[0], l))
-    csr.close()
-
-for k in key_list:
-#     s = ""
-#     s += str(k[0]) + ","
-#     for kk in k[1]:
-#         s += kk + ","
-#     print s
-
-    sql = u"update programme set series_id = " + str(k[0])
-    sql += u" where series_id = -1 "
-    for kk in k[1]:
-        sql += u" and title like '%" + kk + "%'"
-#     print sql
-    ret = con.execute(sql)
-
-csr = con.cursor()
-csr.execute(u"select count(*) as count, series_id from programme where series_id != -1 group by series_id")
-count_list = csr.fetchall()
-csr.close()
-
-for c in count_list:
-    con.execute(u"update series set series_count = ? where series_id = ?",
-                 (c["count"], c["series_id"])
-               )
-
-con.executescript(sql_2)
-
-csr = con.cursor()
-csr.execute(u"select * from tmp_group;")
-tmp_group = csr.fetchall()
-csr.close()
-
-key_list_all = []
-for r1 in tmp_group:
-
-    con.execute(u"delete from tmp_title")
-    csr = con.cursor()
-    csr.execute(sql_3, (r1["channel"], r1["category_id"], r1["weekday"], r1["period"]))
-    title_list = csr.fetchall()
-    csr.close()
-
-#     print "%s %s %s %s" % (r1["channel"], r1["category_id"], r1["weekday"], r1["period"])
-
-    for r2 in title_list:
-        title = normalize(r2["title"])
-        con.execute(sql_4, (r2["channel"], r2["start"], title))
-
-    csr = con.cursor()
-    csr.execute(u"select * from tmp_title order by title_normalize, start")
-    title_norm_list = csr.fetchall()
-    csr.close()
-
-    prev = None
-    for cur in title_norm_list:
-        if not is_series(prev, cur):
-            prev = cur
-            continue
-#         print cur["title_normalize"].encode("utf-8")
-        key_list_all.append(create_keyword(prev, cur))
-        prev = cur
-
-key_list_uniq = []
-for k in key_list_all:
-    if len(k) != 0 and not k in key_list_uniq:
-        key_list_uniq.append(k)
-
-for k in key_list_uniq:
-#     s = ""
-#     for kk in k:
-#         s += kk + ","
-#     print s.encode("utf-8")
-
-    csr = con.cursor()
-    csr.execute(u"select max(series_id) as series_id from series")
-    row = csr.fetchone()
-    if row and row["series_id"]:
-        series_id = row["series_id"] + 1
-    else:
-        series_id = 1
-    csr.close()
-
-    keyword_length = 0
-    for keyword in k:
-        keyword_length += len(keyword)
-        con.execute(u"insert into keywords (series_id, keyword) values (?, ?)", (series_id, keyword))
-
-    con.execute(u"insert into series (series_id, keyword_length) values (?, ?)", (series_id, keyword_length))
-
-
-
-
-
-
-con.commit()
-con.close()
+if __name__ == '__main__':
+    a = Aggregater()
+    a.execute()

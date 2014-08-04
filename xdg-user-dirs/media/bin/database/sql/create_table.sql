@@ -3,6 +3,7 @@ CREATE TABLE programme (
     start INTEGER,
     stop INTEGER,
     series_id INTEGER DEFAULT -1,
+    group_id INTEGER DEFAULT -1,
     title TEXT,
     smb_filename TEXT DEFAULT '',
     category_id INTEGER,
@@ -15,6 +16,7 @@ CREATE TABLE programme (
 );
 
 CREATE INDEX idx_programme_series_id ON programme (series_id);
+CREATE INDEX idx_programme_group_id ON programme (group_id);
 CREATE INDEX idx_programme_title ON programme (title);
 
 
@@ -38,6 +40,20 @@ CREATE TABLE series (
     created_at INTEGER DEFAULT (strftime('%s','now')),
     updated_at INTEGER DEFAULT (strftime('%s','now'))
 );
+
+
+CREATE TABLE grouping (
+    group_id INTEGER PRIMARY KEY,
+    rating INTEGER DEFAULT 0,
+    channel TEXT,
+    category_id INTEGER,
+    weekday INTEGER,
+    period INTEGER,
+    created_at INTEGER DEFAULT (strftime('%s','now')),
+    updated_at INTEGER DEFAULT (strftime('%s','now'))
+);
+
+CREATE UNIQUE INDEX idx_grouping_uniq ON grouping (channel, category_id, weekday, period);
 
 
 CREATE TABLE keywords (
