@@ -98,6 +98,116 @@ and weekday = ?
 and period = ?
 """
 
+sql_7 = u"""
+select
+A.rating,
+B.series_id,
+B.group_id
+from grouping as A
+inner join
+(
+    select
+    series_id,
+    group_id
+    from programme
+    where series_id != -1
+    and group_id != -1
+    group by series_id, group_id
+) as B on (A.group_id = B.group_id)
+"""
+
+sql_8 = u"""
+update programme
+set updated_at = strftime('%s','now'),
+group_id = -1
+where series_id != -1
+and group_id != -1
+"""
+
+sql_9 = u"""
+select
+B.series_id,
+B.group_id,
+A.play_time
+from play as A
+inner join programme as B on
+(
+    A.channel = B.channel
+    and
+    A.start = B.start
+)
+where A.aggregate = 0
+"""
+
+sql_10 = u"""
+update series
+set updated_at = strftime('%s','now'),
+rating =
+    case
+        when rating < 5 then 5
+        else rating + 1
+    end
+where series_id = ?
+"""
+
+sql_11 = u"""
+update grouping
+set updated_at = strftime('%s','now'),
+rating =
+    case
+        when rating < 5 then 5
+        else rating + 1
+    end
+where group_id = ?
+"""
+
+sql_12 = u"""
+update play
+set updated_at = strftime('%s','now'),
+aggregate = 1
+where aggregate = 0;
+
+update series
+set updated_at = strftime('%s','now'),
+rating = 10
+where series_id in
+(
+    select series_id
+    from series
+    where rating > 10
+);
+
+update series
+set updated_at = strftime('%s','now'),
+rating = -10
+where series_id in
+(
+    select series_id
+    from series
+    where rating < -10
+);
+
+update grouping
+set updated_at = strftime('%s','now'),
+rating = 10
+where group_id in
+(
+    select group_id
+    from grouping
+    where rating > 10
+);
+
+update grouping
+set updated_at = strftime('%s','now'),
+rating = -10
+where group_id in
+(
+    select group_id
+    from grouping
+    where rating < -10
+);
+"""
+
 ####################################################################################################
 
 class Aggregater:
@@ -278,7 +388,6 @@ class Aggregater:
 
             sql =  u" update programme "
             sql += u" set updated_at = strftime('%s','now'), "
-            sql += u" group_id = -1, "
             sql += u" series_id = " + str(k[0])
             sql += u" where series_id = -1 "
             for kk in k[1]:
@@ -305,6 +414,32 @@ class Aggregater:
         for g in group_list:
             self.con.execute(sql_6, (g["group_id"], g["channel"], g["category_id"], g["weekday"], g["period"]))
 
+    def migrate_grouping_to_series(self):
+        csr = self.con.cursor()
+        csr.execute(sql_7)
+        group_list = csr.fetchall()
+        csr.close()
+        for g in group_list:
+            self.con.execute(u"update series set updated_at = strftime('%s','now'), rating = rating + ? where series_id = ?",
+                         (g["rating"], g["series_id"])
+                       )
+
+        self.con.execute(sql_8)
+
+    def update_rating(self):
+        csr = self.con.cursor()
+        csr.execute(sql_9)
+        play_list = csr.fetchall()
+        csr.close()
+        for p in play_list:
+            if p["play_time"] > 60 * 10:
+                if p["series_id"] != -1:
+                    self.con.execute(sql_10, (p["series_id"],))
+                elif p["group_id"] != -1:
+                    self.con.execute(sql_11 (p["group_id"],))
+
+        self.con.executescript(sql_12)
+
     def execute(self):
         self.delete_old_record()
         tmp_group = self.create_group_for_keyword()
@@ -312,6 +447,8 @@ class Aggregater:
         self.insert_keyword(key_list_uniq)
         self.create_series()
         self.create_group_for_rating()
+        self.migrate_grouping_to_series()
+        self.update_rating()
 
         self.con.commit()
         self.con.close()
