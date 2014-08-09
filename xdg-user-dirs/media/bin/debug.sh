@@ -19,11 +19,15 @@ USAGE: $(basename $0) command
                 du  [DAYS]
                 find
                 inv
+                halt
 EOF
 exit
 fi
 
 case $command in
+    halt)
+        bash $MC_BIN_SAFE_SHUTDOWN
+        ;;
     inv)
         bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) invoke
         ;;
