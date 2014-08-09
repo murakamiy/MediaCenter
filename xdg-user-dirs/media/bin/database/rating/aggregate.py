@@ -12,6 +12,7 @@ sql_1 = u"""
 delete from play            where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 delete from programme       where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 delete from series          where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from grouping        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 delete from keywords        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 delete from category        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
 vacuum;
@@ -67,7 +68,7 @@ values (?, ?, ?)
 """
 
 sql_5 = u"""
-insert ignore into grouping
+insert or ignore into grouping
 (
     channel,
     category_id,
@@ -79,20 +80,22 @@ insert ignore into grouping
     category_id,
     weekday,
     period
-    from
-    (
-        select
-        count(*) as count,
-        channel,
-        category_id,
-        weekday,
-        period
-        from programme
-        where series_id = -1
-        and group_id = -1
-        group by channel, category_id, weekday, period
-    )
-    where count = 1
+    from programme
+    where series_id = -1
+    and group_id = -1
+    group by channel, category_id, weekday, period;
+"""
+
+sql_6 = u"""
+update programme
+set updated_at = strftime('%s','now'),
+group_id = ?
+where series_id = -1
+and group_id = -1
+and channel = ?
+and category_id = ?
+and weekday = ?
+and period = ?
 """
 
 ####################################################################################################
@@ -273,7 +276,10 @@ class Aggregater:
         #         s += kk + ","
         #     print s
 
-            sql = u"update programme set series_id = " + str(k[0])
+            sql =  u" update programme "
+            sql += u" set updated_at = strftime('%s','now'), "
+            sql += u" group_id = -1, "
+            sql += u" series_id = " + str(k[0])
             sql += u" where series_id = -1 "
             for kk in k[1]:
                 sql += u" and title like '%" + kk + "%'"
@@ -286,12 +292,19 @@ class Aggregater:
         csr.close()
 
         for c in count_list:
-            self.con.execute(u"update series set series_count = ? where series_id = ?",
+            self.con.execute(u"update series set updated_at = strftime('%s','now'), series_count = ? where series_id = ?",
                          (c["count"], c["series_id"])
                        )
 
     def create_group_for_rating(self):
-        pass
+        self.con.executescript(sql_5)
+        csr = self.con.cursor()
+        csr.execute(u"select * from grouping")
+        group_list = csr.fetchall()
+        csr.close()
+        for g in group_list:
+            self.con.execute(sql_6, (g["group_id"], g["channel"], g["category_id"], g["weekday"], g["period"]))
+
     def execute(self):
         self.delete_old_record()
         tmp_group = self.create_group_for_keyword()
