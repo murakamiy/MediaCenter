@@ -6,6 +6,7 @@ import sys
 import sqlite3
 import re
 import unicodedata
+from datetime import datetime
 
 ####################################################################################################
 sql_1 = u"""
@@ -251,6 +252,16 @@ where group_id in
 );
 """
 
+sql_13 = u"""
+update series
+set updated_at = strftime('%s','now'),
+rating = rating - 1;
+
+update grouping
+set updated_at = strftime('%s','now'),
+rating = rating - 1;
+"""
+
 ####################################################################################################
 
 class Aggregater:
@@ -480,6 +491,9 @@ class Aggregater:
                     self.con.execute(sql_10, (p["series_id"],))
                 elif p["group_id"] != -1:
                     self.con.execute(sql_11 (p["group_id"],))
+
+        if datetime.now().day == 1:
+            self.con.executescript(sql_13)
 
         self.con.executescript(sql_12)
 
