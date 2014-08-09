@@ -9,12 +9,55 @@ import unicodedata
 
 ####################################################################################################
 sql_1 = u"""
-delete from play            where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
-delete from programme       where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
-delete from series          where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
-delete from grouping        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
-delete from keywords        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
-delete from category        where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 6;
+delete from programme where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 12;
+delete from play      where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 12;
+
+delete from series
+where series_id in
+(
+    select
+    A.series_id
+    from series as A
+    left outer join programme as B on (A.series_id = B.series_id)
+    where B.series_id is null
+    group by A.series_id
+);
+
+delete from keywords
+where series_id in
+(
+    select
+    A.series_id
+    from keywords as A
+    left outer join series as B on (A.series_id = B.series_id)
+    where B.series_id is null
+    group by A.series_id
+);
+
+delete from grouping
+where group_id in
+(
+    select
+    A.group_id
+    from grouping as A
+    left outer join programme as B on (A.group_id = B.group_id)
+    where B.group_id is null
+    group by A.group_id
+);
+
+delete from category
+where category_id in
+(
+    select
+    A.category_id
+    from category as A
+    left outer join programme as B on (A.category_id = B.category_id)
+    left outer join grouping as C on (A.category_id = C.category_id)
+    where B.category_id is null
+    and C.category_id is null
+    group by A.category_id
+);
+
 vacuum;
 """
 
