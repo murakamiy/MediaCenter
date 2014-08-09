@@ -12,7 +12,8 @@ import sqlite3
 sql = u"""
 update
 programme
-set smb_filename = ?
+set updated_at = strftime('%s','now'),
+smb_filename = ?
 where channel = ?
 and start = ?
 """
