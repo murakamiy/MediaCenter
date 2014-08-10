@@ -129,6 +129,17 @@ class ReserveMaker:
         if self.dry_run == False:
             print >> self.logfd, "%s\t%s\treserve.py" % (time.strftime("%H:%M:%S"), message)
         print "%s" % (message)
+    def rating_log(self, pinfo, rating_v):
+        self.log(" %s %s %6s %+3d %s %s" %
+                    (
+                        pinfo.start.strftime('%d %H:%M'),
+                        pinfo.end.strftime('%H:%M'),
+                        pinfo.channel,
+                        rating_v,
+                        pinfo.found_by[0:3],
+                        pinfo.title
+                    )
+                )
     def reserve_log(self, pinfo):
         self.log(" %s %s %6s %3d %s %s" %
                     (
@@ -168,7 +179,9 @@ class ReserveMaker:
             prog_list = isdb[0]
             rinfo_list = isdb[1]
             if self.random_finder != None:
-                rinfo_list.extend(self.find_random(span_list, prog_list, title_list))
+                random_list = self.find_random(span_list, prog_list, title_list)
+                random_list = self.apply_rating(random_list)
+                rinfo_list.extend(random_list)
                 rinfo_list = self.apply_priority(rinfo_list, False)
             if self.dry_run == False:
                 rinfo_list = self.remove_border_strech(rinfo_list)
@@ -202,9 +215,12 @@ class ReserveMaker:
                 self.reserve_log(r.pinfo)
         return new_list
     def apply_rating(self, rinfo_list):
+        self.log("apply_rating: ")
         for rinfo in rinfo_list:
-            rating_v = self.provider.get_rating_element(rinfo.pinfo.element)
-            rinfo.pinfo.priority = rinfo.pinfo.priority + (rating_v * 10)
+            rating_v = self.provider.get_rating(rinfo.pinfo)
+            rinfo.pinfo.priority += rating_v
+            if rating_v != 0:
+                self.rating_log(rinfo.pinfo, rating_v)
         return rinfo_list
     def apply_priority(self, rinfo_list, do_print):
         remove_list = self.simulate_recording(rinfo_list)
