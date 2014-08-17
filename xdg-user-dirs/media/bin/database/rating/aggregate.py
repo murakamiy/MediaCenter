@@ -490,7 +490,7 @@ class Aggregater:
                 if p["series_id"] != -1:
                     self.con.execute(sql_10, (p["series_id"],))
                 elif p["group_id"] != -1:
-                    self.con.execute(sql_11 (p["group_id"],))
+                    self.con.execute(sql_11, (p["group_id"],))
 
         if datetime.now().day == 1:
             self.con.executescript(sql_13)
