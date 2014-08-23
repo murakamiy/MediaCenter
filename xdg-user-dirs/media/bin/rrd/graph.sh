@@ -15,6 +15,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/cpu.png \
 --end "$end_param" \
 --x-grid $x_grid \
 --upper-limit 100 \
+--lower-limit 0 \
+--rigid \
 --width 700 \
 --height 300 \
 DEF:USER=$db_file:CPU_USER:AVERAGE \
@@ -59,6 +61,9 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/io_raid.png \
 --start "$start_param" \
 --end "$end_param" \
 --x-grid $x_grid \
+--upper-limit 10 \
+--lower-limit -10 \
+--rigid \
 --width 700 \
 --height 300 \
 DEF:HD_1_W=$db_file:HD_ARRAY_1_WRITE:AVERAGE \
@@ -142,6 +147,9 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/io.png \
 --start "$start_param" \
 --end "$end_param" \
 --x-grid $x_grid \
+--upper-limit 10 \
+--lower-limit -10 \
+--rigid \
 --width 700 \
 --height 300 \
 DEF:SSD_R=$db_file:SSD_READ:AVERAGE \
