@@ -1,11 +1,11 @@
 .mode column
-.width 16, 4, 6, 8, 15, 60
+.width 4, 4, 6, 10, 60
 
-.print "datetime          day  period   channel   finder           title"
+.print "id    day  period   channel     title"
 
 select
-strftime('%Y/%m/%d %H:%M:%S', start, 'unixepoch', 'localtime'),
-case weekday
+A.group_id,
+case A.weekday
     when 1 then 'Mon'
     when 2 then 'Tue'
     when 3 then 'Wed'
@@ -14,7 +14,7 @@ case weekday
     when 6 then 'Sat'
     when 7 then 'Sun'
 end,
-case period
+case A.period
     when 1 then '00-03'
     when 2 then '03-06'
     when 3 then '06-09'
@@ -24,13 +24,11 @@ case period
     when 7 then '18-21'
     when 8 then '21-24'
 end,
-channel,
-foundby,
-title
-from programme
-where title like '%'
-order by start desc
-limit 30
+A.channel,
+B.title
+from grouping as A
+inner join programme as B on (A.group_id = B.group_id)
+where A.group_id = 1
 ;
 
 .mode list
