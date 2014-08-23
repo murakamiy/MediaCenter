@@ -90,6 +90,9 @@ function md() {
 function inv() {
     screen -c /etc/screenrc bash /home/mc/xdg-user-dirs/media/bin/debug.sh inv
 }
+function invk() {
+    bash /home/mc/xdg-user-dirs/media/bin/debug.sh invk
+}
 function vinfom() {
     if [ -z "$1" ];then
         mplayer dvd:////dev/sr0 -vo null -ao null -frames 0 -v 2>&1 | egrep '([as]id|VIDEO: |AUDIO: |Selected audio codec: | Track ID )'

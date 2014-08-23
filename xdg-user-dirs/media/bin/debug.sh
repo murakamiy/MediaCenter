@@ -19,6 +19,7 @@ USAGE: $(basename $0) command
                 du  [DAYS]
                 find
                 inv
+                invk
                 halt
 EOF
 exit
@@ -30,6 +31,9 @@ case $command in
         ;;
     inv)
         bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) invoke
+        ;;
+    invk)
+        kill $(ps aux | grep $($MC_BIN_REALPATH /home/mc/work/invoke.sh) | awk '{ print $2 }')
         ;;
     atrm)
         for i in $(atq | grep -v ' = ' | awk '{ print $1 }');do
