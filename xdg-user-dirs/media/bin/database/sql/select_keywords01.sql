@@ -1,7 +1,10 @@
 .mode column
-.width 4, 4, 100
+.width 16, 4, 4, 60
+
+.print "datetime         len   id     keyword"
 
 select
+strftime('%Y/%m/%d %H:%M:%S', B.created_at, 'unixepoch', 'localtime'),
 B.keyword_length,
 A.series_id,
 A.keyword
