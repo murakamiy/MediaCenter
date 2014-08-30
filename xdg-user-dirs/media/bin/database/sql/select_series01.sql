@@ -1,5 +1,7 @@
 .mode column
-.width 4, 4, 100
+.width 5, 4, 80
+
+.print "count  id    title"
 
 select
 A.series_count,
