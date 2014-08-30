@@ -166,3 +166,14 @@ DS:SSD_Temperature:GAUGE:172800:0:U \
 DS:SSD_Current_Pending:GAUGE:172800:0:U \
 RRA:LAST:0.5:1:35 \
 RRA:MAX:0.5:35:1
+
+
+db_file=/home/mc/xdg-user-dirs/media/bin/rrd/rec.rrd
+rrdtool create $db_file \
+--start $start_date \
+--step 60 \
+DS:T_Prefer:GAUGE:120:0:3 \
+DS:T_Random:GAUGE:120:0:3 \
+DS:S_Prefer:GAUGE:120:0:3 \
+DS:S_Random:GAUGE:120:0:3 \
+RRA:MAX:0.5:5:10080

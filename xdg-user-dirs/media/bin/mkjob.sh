@@ -86,25 +86,24 @@ pid_smb=$!
 log 'starting title'
 find $MC_DIR_TITLE_TS_NEW -type f -ctime +7 -delete
 
-log 'starting rrd'
-bash $MC_BIN_RRD
-
 log 'starting smb_play'
 bash $MC_BIN_SMB_PLAY
 
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 
-if [ "$MC_RESERVE_SATELLITE" = "true" ];then
-wait $pid_epg_bs_cs
-fi
-wait $pid_epg_digital
 log 'starting find program'
 if [ "$MC_RESERVE_SATELLITE" = "true" ];then
-python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+    wait $pid_epg_bs_cs
+    wait $pid_epg_digital
+    python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
 else
-python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+    wait $pid_epg_digital
+    python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
 fi
+
+log 'starting rrd'
+bash $MC_BIN_RRD
 
 log 'starting xml format'
 for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do

@@ -17,6 +17,7 @@ from rating import rating
 DIR_EPG = os.environ["MC_DIR_EPG"]
 DIR_TS = os.environ["MC_DIR_TS"]
 DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
+DIR_RRD = os.environ["MC_DIR_RRD"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
@@ -189,6 +190,8 @@ class ReserveMaker:
             all_rinfo_list.extend(rinfo_list)
 
         all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)
+        if self.dry_run == False:
+            self.update_rrd(all_rinfo_list)
         all_rinfo_list = self.create_reserve(all_rinfo_list)
         self.do_reserve(all_rinfo_list)
 
@@ -402,6 +405,58 @@ class ReserveMaker:
             self.log("parse failed %s" % (xml_file))
             return None
         return tree
+    def update_rrd(self, rinfo_list):
+        begin = None
+        end = None
+        for r in rinfo_list:
+            if begin == None or begin > r.pinfo.start:
+                begin = r.pinfo.start
+            if end == None or end < r.pinfo.end:
+                end = r.pinfo.end
+
+        rrdfile = "/tmp/rrdupdate.sh"
+        rrdfd = open(rrdfile, "w")
+        one_minute = timedelta(0, 60, 0)
+        now = begin
+        i = 1
+        buf = ""
+        while now <= end:
+            t_prefer = 0
+            t_random = 0
+            s_prefer = 0
+            s_random = 0
+            for r in rinfo_list:
+                if r.pinfo.start <= now and now < r.pinfo.end:
+                    if r.pinfo.broadcasting == 'Digital':
+                        if r.pinfo.found_by == 'RandomFinder':
+                            t_random += 1
+                        else:
+                            t_prefer += 1
+                    else:
+                        if r.pinfo.found_by == 'RandomFinder':
+                            s_random += 1
+                        else:
+                            s_prefer += 1
+
+            buf += "'%s'@%d:%d:%d:%d " % (
+                    now.strftime("%Y%m%d %H:%M"),
+                    t_prefer,
+                    t_random,
+                    s_prefer,
+                    s_random)
+
+            if i % 10 == 0:
+                rrdfd.write("rrdtool update %s/rec.rrd %s\n" % (DIR_RRD, buf))
+                buf = ""
+            i += 1
+            now += one_minute
+
+        if buf != "":
+            rrdfd.write("rrdtool update %s/rec.rrd %s\n" % (DIR_RRD, buf))
+
+        rrdfd.close()
+        ret = os.system("bash " + rrdfile)
+
     def create_reserve(self, rinfo_list):
         new_list = []
         for r in rinfo_list:

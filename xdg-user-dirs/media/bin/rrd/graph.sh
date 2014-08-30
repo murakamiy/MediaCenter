@@ -365,6 +365,34 @@ COMMENT:" \j"
 
 }
 
+function create_graph_rec() {
+
+LANG=C rrdtool graph ${png_dir}/${cycle}/rec.png \
+--title "Reserve $start_string" \
+--imgformat PNG \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
+--upper-limit 2.5 \
+--lower-limit -2.5 \
+--rigid \
+--width 700 \
+--height 300 \
+DEF:T_Prefer=$db_file:T_Prefer:MAX \
+DEF:T_Random=$db_file:T_Random:MAX \
+DEF:S_Prefer=$db_file:S_Prefer:MAX \
+DEF:S_Random=$db_file:S_Random:MAX \
+CDEF:S_Prefer_G=S_Prefer,-1,* \
+CDEF:S_Random_G=S_Random,-1,* \
+COMMENT:" " \
+AREA:T_Prefer#FFA500:"t_prefer" \
+STACK:T_Random#00FFFF:"t_random" \
+AREA:S_Prefer_G#FFFF00:"s_prefer" \
+STACK:S_Random_G#ADFF2F:"s_random" \
+COMMENT:" \j"
+
+}
+
 
 yesterday=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 24)) }')
 
@@ -379,6 +407,13 @@ create_graph_io
 create_graph_temp
 create_graph_mem
 create_graph_du
+
+start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() + 60 * 60 * 23)) }')
+start_param=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 00:00", systime() + 60 * 60 * 23)) }')
+db_file=${rrd_dir}/rec.rrd
+create_graph_rec
+db_file=${rrd_dir}/stat.rrd
+
 
 cycle=weekly
 start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y%mw%V\n", systime() - 60 * 60 * 24)) }')
@@ -397,6 +432,11 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
+db_file=${rrd_dir}/rec.rrd
+create_graph_rec
+db_file=${rrd_dir}/stat.rrd
+
+
 cycle=monthly
 start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m", systime() - 60 * 60 * 24)) }')
 start_param=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m01", systime() - 60 * 60 * 24)) }')
@@ -408,6 +448,10 @@ create_graph_io
 create_graph_temp
 create_graph_mem
 create_graph_du
+
+db_file=${rrd_dir}/rec.rrd
+create_graph_rec
+db_file=${rrd_dir}/stat.rrd
 
 
 
