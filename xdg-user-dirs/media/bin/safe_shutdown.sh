@@ -48,12 +48,18 @@ if [ $wakeup_time -ne -1 ];then
     next_wakeup_time=$(awk -v epoc=$wakeup_time 'BEGIN { print strftime("%Y/%m/%d %H:%M:%S", epoc) }')
 
     if [ -z "$SSH_CONNECTION" ];then
+        echo -e "computer will be shutdown in 60 seconds.\nto cancel shutdown type\nmd abort" | write mc
         zenity --question --no-wrap --timeout=60 --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
-            log "shutdown=yes : X Server"
-            log "next wakeup time: $next_wakeup_time"
-            log "next job file : $next_job_file"
-            do_shutdown
+            if [ -e $MC_ABORT_SHUTDOWN ];then
+                /bin/rm $MC_ABORT_SHUTDOWN
+                log "shutdown cancelled"
+            else
+                log "shutdown=yes : X Server"
+                log "next wakeup time: $next_wakeup_time"
+                log "next job file : $next_job_file"
+                do_shutdown
+            fi
         fi
     else
         echo "next wakeup time: $next_wakeup_time\n\n"

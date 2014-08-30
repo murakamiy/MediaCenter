@@ -21,11 +21,16 @@ USAGE: $(basename $0) command
                 inv
                 invk
                 halt
+                abort
 EOF
 exit
 fi
 
 case $command in
+    abort)
+        touch $MC_ABORT_SHUTDOWN
+        echo shutdown cancelled
+        ;;
     halt)
         bash $MC_BIN_SAFE_SHUTDOWN
         ;;
