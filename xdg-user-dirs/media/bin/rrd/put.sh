@@ -44,4 +44,4 @@ prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%mw%V\n", systime() - 60 * 60 *
 smb_update $prefix weekly 28 # 7graphs * 4weeks
 
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m\n", systime() - 60 * 60 * 24)) }')
-smb_update $prefix monthly 27 # 9graphs * 3month
+smb_update $prefix monthly 108 # 9graphs * 12month
