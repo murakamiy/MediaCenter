@@ -223,12 +223,12 @@ where series_id in
 
 update series
 set updated_at = strftime('%s','now'),
-rating = -10
+rating = -5
 where series_id in
 (
     select series_id
     from series
-    where rating < -10
+    where rating < -5
 );
 
 update grouping
@@ -243,12 +243,12 @@ where group_id in
 
 update grouping
 set updated_at = strftime('%s','now'),
-rating = -10
+rating = -5
 where group_id in
 (
     select group_id
     from grouping
-    where rating < -10
+    where rating < -5
 );
 """
 
