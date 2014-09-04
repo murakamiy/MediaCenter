@@ -9,7 +9,6 @@ function create_graph_cpu() {
 
 LANG=C rrdtool graph ${png_dir}/${cycle}/cpu.png \
 --title "CPU usage $start_string" \
---vertical-label "Percent" \
 --imgformat PNG \
 --start "$start_param" \
 --end "$end_param" \
@@ -56,7 +55,6 @@ function create_graph_io_raid() {
 
 LANG=C rrdtool graph ${png_dir}/${cycle}/io_raid.png \
 --title "IO HD raid $start_string" \
---vertical-label "per second" \
 --imgformat PNG \
 --start "$start_param" \
 --end "$end_param" \
@@ -275,16 +273,14 @@ STACK:CACHED#00FF00:"cached" \
 STACK:BUFFERS#8A2BE2:"buffers" \
 STACK:FREE#0000FF:"free" \
 COMMENT:" \j" \
-COMMENT:" " \
-COMMENT:" min" \
+COMMENT:"MIN " \
 GPRINT:USED_MIN:"used \: %4.0lf" \
 GPRINT:SHARED_MIN:"shared \: %4.0lf" \
 GPRINT:CACHED_MIN:"cached \: %4.0lf" \
 GPRINT:BUFFERS_MIN:"buffers \: %4.0lf" \
 GPRINT:FREE_MIN:"free \: %4.0lf" \
 COMMENT:" \j" \
-COMMENT:" " \
-COMMENT:" max" \
+COMMENT:"MAX " \
 GPRINT:USED_MAX:"used \: %4.0lf" \
 GPRINT:SHARED_MAX:"shared \: %4.0lf" \
 GPRINT:CACHED_MAX:"cached \: %4.0lf" \
