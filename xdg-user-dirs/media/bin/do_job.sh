@@ -54,6 +54,7 @@ else
                 -vsync 1 \
                 -r 30000/1001 \
                 -filter:v yadif=0 \
+                -b:v 500k \
                 -vcodec libx264 -acodec libvo_aacenc \
                 -ac 2 \
                 -preset:v superfast \
