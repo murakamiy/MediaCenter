@@ -34,8 +34,6 @@ if [ "$event_handle" = "not_yet" ];then
         date +"%Y/%m/%d %H:%M:%S.%N battery level $battery_level" >> $log_file
     fi
 
-    (sleep 5; /bin/rm -f $log_file;) &
-
 else
     date +"%Y/%m/%d %H:%M:%S.%N event hendler already finished" >> $log_file
 fi

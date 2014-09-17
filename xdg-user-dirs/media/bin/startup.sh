@@ -12,9 +12,9 @@ for f in $(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING $MC_D
 done
 $MC_BIN_USB_CONTROL -w
 $MC_BIN_USB_POWER_OFF >> ${MC_DIR_LOG}/usb-disk.log 2>&1
-sudo /etc/init.d/sixad restart
 /bin/rm $MC_STAT_POWEROFF
 /bin/rm $MC_ABORT_SHUTDOWN
+sudo /usr/bin/sixad --start &> /var/log/sixad &
 bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) &
 
 log "end"

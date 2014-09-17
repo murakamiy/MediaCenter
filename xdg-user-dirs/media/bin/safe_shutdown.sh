@@ -2,6 +2,7 @@
 source $(dirname $0)/00.conf
 
 function do_shutdown() {
+    sudo /usr/bin/sixad --stop
     bash $MC_BIN_DEBUG invk
     $MC_BIN_USB_POWER_OFF
     sudo $MC_BIN_USB_CONTROL -e
