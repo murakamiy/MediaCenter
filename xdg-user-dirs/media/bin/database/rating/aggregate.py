@@ -158,6 +158,7 @@ inner join
     and group_id != -1
     group by series_id, group_id
 ) as B on (A.group_id = B.group_id)
+where A.rating > 0
 """
 
 sql_8 = u"""
