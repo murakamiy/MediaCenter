@@ -121,6 +121,8 @@ class MoterSportsFinder(Finder):
                 return True
             if re.search('WRC', pinfo.title):
                 return True
+            if re.search('FIAフォーミュラE選手権', pinfo.title):
+                return True
         return False
 
 class CarInfomationFinder(Finder):
@@ -152,6 +154,8 @@ class NatureFinder(Finder):
 class MusicFinder(Finder):
     priority = 30
     allow_list = [
+        u'洋楽トップヒッツ',
+        u'邦楽トップヒッツ',
         u'ベストヒットUSA',
     ]
     def allow(self, pinfo):
