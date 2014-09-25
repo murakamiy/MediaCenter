@@ -10,8 +10,8 @@ from datetime import datetime
 
 ####################################################################################################
 sql_1 = u"""
-delete from programme where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 1;
-delete from play      where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 1;
+delete from programme where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 12;
+delete from play      where created_at < strftime('%s','now') - 60 * 60 * 24 * 30 * 12;
 
 delete from series
 where series_id in

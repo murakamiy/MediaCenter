@@ -91,6 +91,7 @@ bash $MC_BIN_SMB_PLAY
 
 log 'starting aggregate'
 python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
+log 'end aggregate'
 
 if [ "$MC_RESERVE_SATELLITE" = "true" ];then
     wait $pid_epg_bs_cs
