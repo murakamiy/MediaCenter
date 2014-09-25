@@ -2,6 +2,7 @@
 import re
 import random
 from datetime import date
+from datetime import datetime
 
 class FindresCheif:
     finders = []
@@ -154,12 +155,13 @@ class NatureFinder(Finder):
 class MusicFinder(Finder):
     priority = 30
     allow_list = [
-        u'洋楽トップヒッツ',
-        u'邦楽トップヒッツ',
         u'ベストヒットUSA',
     ]
+    today = datetime.now().weekday
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
+            return True
+        if self.today == 1 and re.search(u'(洋楽|邦楽)トップヒッツ', pinfo.title):
             return True
         return False
 
@@ -190,11 +192,8 @@ class RandomFinder(Finder):
         pinfo.found_by = self.__class__.__name__
         pinfo.priority = random.choice((1,2,3,4,5)) + 10.0 * pinfo.rectime / self.rectime_max
 
-        if '映画' in pinfo.category_list:
-            pinfo.priority += 5
-
-        if '洋画' in pinfo.category_list:
-            pinfo.priority += 10
+        if pinfo.channel not in ('CS_323', 'CS_325'):
+            pinfo.priority -= 10
 
         return pinfo
 
