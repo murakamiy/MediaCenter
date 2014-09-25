@@ -174,6 +174,7 @@ class ReserveMaker:
             isdb_set.append((prog_list, rinfo_list))
 
         span_list = self.create_span(isdb_set)
+        span_list = self.optimize_span(span_list)
 
         all_rinfo_list = []
         for isdb in isdb_set:
@@ -311,6 +312,37 @@ class ReserveMaker:
         for s in span_list_m:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m
+    def optimize_span(self, span_list):
+        span_list_l = []
+        for s in span_list:
+            span_list_l.append([s[0], s[1]])
+        one_hour = timedelta(0, 60 * 59, 0)
+        for s in span_list_l:
+            s[0] -= timedelta(0, 60 * s[0].minute, 0)
+            s[1] += one_hour
+            s[1] -= timedelta(0, 60 * s[1].minute, 0)
+        thirty_minute = timedelta(0, 60 * 30, 0)
+        for i in xrange(0, len(span_list_l) - 1):
+            after = span_list_l[i + 1][0] - span_list_l[i][1]
+            if after < thirty_minute:
+                span_list_l[i][1] = span_list_l[i + 1][1]
+                span_list_l[i + 1][0] = span_list_l[i][0]
+        span_list_m = []
+        for s in span_list_l:
+            if s not in span_list_m:
+                span_list_m.append(s)
+
+        span_list_m2 = []
+        for i in xrange(0, len(span_list_m) - 1):
+            if span_list_m[i][0] != span_list_m[i + 1][0]:
+                span_list_m2.append(span_list_m[i])
+        if span_list_m[-1][0] != span_list_m2[-1][0]:
+            span_list_m2.append(span_list_m[-1])
+
+        self.log("span_list_optimized:")
+        for s in span_list_m2:
+            self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
+        return span_list_m2
     def set_dry_run(self, dry_run):
         self.dry_run = dry_run
     def set_include_channel(self, channel):
