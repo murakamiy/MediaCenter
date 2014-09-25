@@ -107,14 +107,14 @@ function epgdumpy() {
     python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
 }
 function seltime() {
-    xmlstarlet sel --encode utf-8 -t -m '//programme' -v '@start' -n $@ |
+    xmlstarlet sel --encode utf-8 -t -m '//programme' -v '@channel' -o ' ' -v '@start' -o ' ' -v '@stop' -n $@ |
     python -c '
 import datetime
 import sys
 for line in sys.stdin:
     str = line.split()
-    if str:
-        print datetime.datetime.strptime(str[0], "%Y%m%d%H%M%S")'
+    if len(str) == 5:
+        print "%s %s %s" % (str[0], datetime.datetime.strptime(str[1], "%Y%m%d%H%M%S"), datetime.datetime.strptime(str[3], "%Y%m%d%H%M%S"))'
 }
 function selanime() {
     xmlstarlet sel --encode utf-8 -t -m "//programme" \
@@ -153,5 +153,5 @@ old : $(basename $old)
 new : $(basename $new)
 
 EOF
-    diff -s $old_tmp $new_tmp
+    diff -s --unified=0 $old_tmp $new_tmp
 }
