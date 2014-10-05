@@ -170,7 +170,6 @@ class CreditFinder(Finder):
     allow_list = [
         u'アリアナ・グランデ',
         u'テイラー・スウィフト',
-        u'西野カナ',
     ]
     deny_list = [
         u'BSプレマップ',
