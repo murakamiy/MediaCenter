@@ -149,7 +149,7 @@ HD_WRITE=${iostat_arr[17]}
 LOAD_AVERAGE=$(uptime | awk -F 'load average: ' '{ print $2 }' | awk -F , '{ print $1 }')
 DISK_USAGE=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
 
-mem_arr=($(free -mw | grep '^Mem:' | awk '
+mem_arr=($(free -m | grep '^Mem:' | awk '
 {
     total = $2
     free = $4
