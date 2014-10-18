@@ -391,7 +391,16 @@ class Aggregater:
         key_list_uniq = []
         for k in key_list_all:
             if len(k) != 0 and not k in key_list_uniq:
-                key_list_uniq.append(k)
+                length = 0
+                for kk in k:
+                    length += len(kk)
+                if length >= 5:
+                    key_list_uniq.append(k)
+
+#         for k in key_list_uniq:
+#             for kk in k:
+#                 print kk.encode("utf-8")
+#             print ""
 
         return key_list_uniq
 

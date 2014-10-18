@@ -14,6 +14,7 @@ inner join programme as B on
     A.channel = B.channel and
     A.start = B.start
 )
+where B.title like '%'
 order by B.start desc
 limit 30
 ;
