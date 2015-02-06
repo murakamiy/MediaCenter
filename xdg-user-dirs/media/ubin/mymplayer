@@ -54,10 +54,9 @@ fi
 
 input=$1
 
-mplayer $media $delay $volume \
--volstep 10 \
--fs -geometry 960x540+0+50 -monitoraspect 16:9 \
--dr -vf pp=ac/linblenddeint \
--vo gl:swapinterval=1 \
-$aid $sid $audio \
+mplayer2 $media $delay $volume \
+--volstep=10 \
+--fs --geometry=960x540+0+50 --monitoraspect=16:9 \
+--dr --vo=gl:swapinterval=1 \
+--vf=kerndeint \
 $input

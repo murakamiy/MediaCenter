@@ -7,4 +7,4 @@ sleep 1800
 /bin/rm $MC_DIR_PLAY/mplayer_$$.xml
 ) &
 
-exec $MC_BIN_MYMPLAYER -t $2
+exec $MC_BIN_MYMPLAYER $2
