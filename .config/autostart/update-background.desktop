@@ -1,11 +1,11 @@
-
 [Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
 Type=Application
-Exec=/home/mc/xdg-user-dirs/media/bin/update-background.sh
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[ja_JP]=update-background
 Name=update-background
-Comment[ja_JP]=
-Comment=
+Comment=update-background
+Exec=/home/mc/xdg-user-dirs/media/bin/update-background.sh
+OnlyShowIn=XFCE;
+StartupNotify=false
+Terminal=false
+Hidden=false
