@@ -306,13 +306,17 @@ class ReserveMaker:
             prev = cur
         if merge != None:
             span_list_m.append(merge)
-        if span_list_m[-1][1] < cur[1]:
-            span_list_m.append(cur)
+        if span_list_m and cur:
+            if span_list_m[-1][1] < cur[1]:
+                span_list_m.append(cur)
         self.log("span_list:")
         for s in span_list_m:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m
     def optimize_span(self, span_list):
+        if len(span_list) <= 1:
+            return span_list
+
         span_list_l = []
         for s in span_list:
             span_list_l.append([s[0], s[1]])
@@ -438,6 +442,8 @@ class ReserveMaker:
             return None
         return tree
     def update_rrd(self, rinfo_list):
+        if not rinfo_list:
+            return
         begin = None
         end = None
         for r in rinfo_list:
