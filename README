@@ -1,12 +1,12 @@
 地上デジタル放送自動録画システム
 
-OS : Debian sid amd64
+OS : Debian jessie amd64
 
 ハードウェア:
 マザーボード         : ASUSTek Intel Socket 1155 DDR3メモリ対応 mini-ITXマザーボード P8H77-I
 CPU                  : Intel CPU Core I3-3225 3.3GHz 3MBキャッシュ LGA1155 BX80637I33225
 メモリ               : CFD DDR3 PC3-12800 CL9 4GB ヒートシンク付 W3U1600HQ-4G/N x 2
-SSD                  : CFD販売 SATA6Gbps 256GB CSSD-S6T256NHG5Q
+SSD                  : Crucial CT256M550
 PCケース             : Fractal Design MiniITX DTX用キューブPCケース Black Node 304 CS3966 FD-CA-NODE-304-BL
 カードリーダー       : NTTME SCR3310-NTTCom
 チューナー           : アースソフト PT3 Rev.A
