@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=SafeShutdown
 Type=Application
-Exec=/home/mc/xdg-user-dirs/media/bin/safe_shutdown.sh %U
+Exec=/home/mc/xdg-user-dirs/media/bin/safe_shutdown_gui.sh
 Icon=system-shutdown
 Terminal=false

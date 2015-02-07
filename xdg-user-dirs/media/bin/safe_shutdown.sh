@@ -2,7 +2,7 @@
 source $(dirname $0)/00.conf
 
 function do_shutdown() {
-    sudo /usr/bin/sixad --stop
+    sudo $MC_BIN_SIXAD stop
     bash $MC_BIN_DEBUG invk
     $MC_BIN_USB_POWER_OFF
     sudo $MC_BIN_USB_CONTROL -e
@@ -27,20 +27,30 @@ for f in $(ls $MC_DIR_RESERVED | sort -t '-' --key=1,2 -n);do
         break
     fi
 done
-
 wakeup_time=$(python $MC_BIN_WAKEUP_TIME $next_job_time)
 
+if [ "$0" = $MC_BIN_SAFE_SHUTDOWN_GUI ];then
+    gui=true
+else
+    gui=false
+fi
+
+if [ $gui = false ];then
 running=$(find $MC_DIR_PLAY -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo playing movie
     echo $running
     return
 fi
+fi
 
 running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo job is running
     echo $running
+    if [ $gui = true ];then
+        zenity --warning --no-wrap --timeout=10 --display=:0.0 --text="<span font_desc='40'>job is running</span>" &
+    fi
     return
 fi
 
@@ -51,7 +61,7 @@ if [ $wakeup_time -ne -1 ];then
 
     if [ -z "$SSH_CONNECTION" ];then
         echo -e "computer will be shutdown in 60 seconds.\nto cancel shutdown type\nmd abort" | write mc
-        zenity --question --no-wrap --timeout=60 --display=:0.0 --text="<span font_desc='40'>next wakeup time: $next_wakeup_time\n\nShutDown ?</span>"
+        zenity --question --no-wrap --timeout=60 --display=:0.0 --text="<span font_desc='40'>next wakeup: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
             if [ -e $MC_ABORT_SHUTDOWN ];then
                 /bin/rm $MC_ABORT_SHUTDOWN
