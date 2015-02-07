@@ -220,7 +220,7 @@ media:x:1001:mc
 # sudoers
 ####################################################################################################
 
-%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/ubin/sixad-task
+%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/bin/sixad-task
 
 ####################################################################################################
 # crontab
@@ -354,3 +354,23 @@ chown mc:mc /mnt/hd_array/ts_hd
 
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 update-initramfs -u
+
+####################################################################################################
+# init database
+####################################################################################################
+
+cd xdg-user-dirs/media/bin/database
+bash init.sh
+
+cd xdg-user-dirs/media/bin/rrd
+bash create.sh
+
+####################################################################################################
+# smbclient
+####################################################################################################
+
+~/.smbauth
+
+username = username
+password = password
+domain   =
