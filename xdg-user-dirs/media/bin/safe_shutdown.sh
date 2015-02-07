@@ -60,8 +60,14 @@ if [ $wakeup_time -ne -1 ];then
     next_wakeup_time=$(awk -v epoc=$wakeup_time 'BEGIN { print strftime("%Y/%m/%d %H:%M:%S", epoc) }')
 
     if [ -z "$SSH_CONNECTION" ];then
-        echo -e "computer will be shutdown in 60 seconds.\nto cancel shutdown type\nmd abort" | write mc
-        zenity --question --no-wrap --timeout=60 --display=:0.0 --text="<span font_desc='40'>next wakeup: $next_wakeup_time\n\nShutDown ?</span>"
+        if [ $gui = true ];then
+            timeout=5
+        else
+            timeout=60
+        fi
+
+        echo -e "computer will be shutdown in $timeout seconds.\nto cancel shutdown type\nmd abort" | write mc
+        zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
             if [ -e $MC_ABORT_SHUTDOWN ];then
                 /bin/rm $MC_ABORT_SHUTDOWN
