@@ -7,7 +7,7 @@ function do_encode_ffmpeg() {
     local output=${MC_DIR_ENCODE_HD}/${base}.mp4
 
     nice -n 10 \
-    avconv -y -i $input -f mp4 \
+    ffmpeg -y -i $input -f mp4 \
         -s 1280x720 \
         -loglevel quiet \
         -threads 1 \

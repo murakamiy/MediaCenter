@@ -24,7 +24,7 @@ broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_fil
 foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
-avconv_rec_time_max=10800
+ffmpeg_rec_time_max=10800
 
 bash $MC_BIN_SMB_JOB &
 bash $MC_BIN_ENCODE $channel &
@@ -40,14 +40,14 @@ else
         log "rec start: $title $(hard_ware_info)"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
-        if (($rec_time < $avconv_rec_time_max));then
+        if (($rec_time < $ffmpeg_rec_time_max));then
             fifo_dir=/tmp/pt3/fifo
             mkdir -p $fifo_dir
             fifo_b25=${fifo_dir}/b25_$$
             mkfifo -m 644 $fifo_b25
 
             nice -n 5 \
-            avconv -y -i $fifo_b25 -f mp4 \
+            ffmpeg -y -i $fifo_b25 -f mp4 \
                 -s 640x360 \
                 -loglevel quiet \
                 -threads 1 \
@@ -60,7 +60,7 @@ else
                 -preset:v superfast \
                 ${MC_DIR_MP4}/${job_file_mp4} &
 
-            pid_avconv=$!
+            pid_ffmpeg=$!
 
             touch ${MC_DIR_TS}/${job_file_ts}
             tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
@@ -83,11 +83,11 @@ else
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
-        if (($rec_time < $avconv_rec_time_max));then
+        if (($rec_time < $ffmpeg_rec_time_max));then
             sync
             kill -TERM $pid_tail
-            ( sleep 60; kill -KILL $pid_avconv ) &
-            wait $pid_avconv
+            ( sleep 60; kill -KILL $pid_ffmpeg ) &
+            wait $pid_ffmpeg
             rm -f $fifo_b25
         fi
 
