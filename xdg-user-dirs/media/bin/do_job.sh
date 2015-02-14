@@ -132,6 +132,9 @@ else
             log "failed: $title ts_duration=$duration rec_time=$rec_time"
         fi
 
+        stat --format=%s ${MC_DIR_TS}/${job_file_ts}   > ${MC_DIR_FILE_SIZE}/${job_file_ts}
+        stat --format=%s ${MC_DIR_MP4}/${job_file_mp4} > ${MC_DIR_FILE_SIZE}/${job_file_mp4}
+
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         log "rec end: $title $(hard_ware_info)"
 
