@@ -37,7 +37,7 @@ BEGIN {
     cpu_line = 1
     next
 }
-/^ata-TOSHIBA_THNSNH256GCST_73IS101WTPHY/ {
+/^ata-Crucial_CT256M550SSD1_14520E2FA416/ {
     ssd_line = 1
     next
 }

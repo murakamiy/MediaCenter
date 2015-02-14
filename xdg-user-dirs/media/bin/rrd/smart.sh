@@ -105,17 +105,17 @@ HD4_Offline_Uncrect=${arr[14]}
 HD4_UDMA_CRC_Error=${arr[15]}
 HD4_Multi_Zone_Err=${arr[16]}
 
-arr=($(smart_attr ata-TOSHIBA_THNSNH256GCST_73IS101WTPHY))
+arr=($(smart_attr ata-Crucial_CT256M550SSD1_14520E2FA416))
 SSD_Raw_Read_Error=${arr[0]}
-SSD_Throughput_Perf=${arr[1]}
-SSD_Spin_Up_Time=${arr[2]}
-SSD_Reallocated_Sec=${arr[3]}
-SSD_Power_On_Hours=${arr[6]}
-SSD_Power_Cycle=${arr[8]}
-SSD_Program_Fail_Ct=${arr[13]}
-SSD_Power_Off_Ret=${arr[14]}
-SSD_Temperature=${arr[15]}
-SSD_Current_Pending=${arr[16]}
+SSD_Throughput_Perf=0
+SSD_Spin_Up_Time=0
+SSD_Reallocated_Sec=${arr[1]}
+SSD_Power_On_Hours=${arr[2]}
+SSD_Power_Cycle=${arr[3]}
+SSD_Program_Fail_Ct=0
+SSD_Power_Off_Ret=0
+SSD_Temperature=${arr[12]}
+SSD_Current_Pending=${arr[14]}
 
 
 # cat << EOF

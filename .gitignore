@@ -18,3 +18,4 @@ xdg-user-dirs/media/bin/database/tv.db
 xdg-user-dirs/media/bin/nautilus/action.sh
 xdg-user-dirs/media/bin/rrd/png
 xdg-user-dirs/media/bin/rrd/*.rrd
+xdg-user-dirs/media/bin/rrd/tbw_yesterday
