@@ -33,7 +33,8 @@ function move_to_hd() {
     fi
     size=$(stat --format=%s $file)
     start=$(date +%s.%N)
-    /bin/mv $file $dir
+    /bin/cp $file $dir
+    /bin/rm $file
     end=$(date +%s.%N)
     speed=$(echo "scale=3; r = $size / ($end - $start); scale=0; r / 1024 / 1024" | bc)
     log "move to HD $mode : $speed MB/s $(($size / 1024 / 1024)) MB $(basename $dir) $title"

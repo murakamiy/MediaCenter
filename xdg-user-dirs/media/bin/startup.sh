@@ -16,12 +16,6 @@ $MC_BIN_USB_POWER_OFF >> ${MC_DIR_LOG}/usb-disk.log 2>&1
 /bin/rm $MC_ABORT_SHUTDOWN
 sudo $MC_BIN_SIXAD start
 
-size_spec=72
-size_kb=$(cat /sys/fs/ext4/sda1/lifetime_write_kbytes)
-size_tb=$(($size_kb / 1024 / 1024 / 1024))
-size_remain=$(($size_spec - $size_tb))
-zenity --info --no-wrap --timeout=30 --display=:0.0 --text="<span font_desc='40'>SSD LIFE: ${size_spec}TB - ${size_tb}TB = ${size_remain}TB</span>" &
-
 bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) &
 
 log "end"

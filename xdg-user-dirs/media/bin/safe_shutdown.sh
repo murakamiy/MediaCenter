@@ -54,7 +54,10 @@ if [ -n "$running" ];then
     return
 fi
 
-log $(df -h | grep ^/dev/sda | awk '{ printf("disk used=%s avail=%s\n", $3, $4) }')
+used=$(df -h | grep ^/dev/sda | awk '{ print $3 }')
+write_s=$(echo $(cat /sys/fs/ext4/sda1/session_write_kbytes) / 1024 / 1024 | bc)
+write_t=$(echo $(cat /sys/fs/ext4/sda1/lifetime_write_kbytes) / 1024 / 1024 | bc)
+log "disk used=$used session=${write_s}G total=${write_t}G"
 
 if [ $wakeup_time -ne -1 ];then
     next_wakeup_time=$(awk -v epoc=$wakeup_time 'BEGIN { print strftime("%Y/%m/%d %H:%M:%S", epoc) }')
