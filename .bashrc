@@ -7,6 +7,13 @@ PATH=$PATH:/home/mc/xdg-user-dirs/media/ubin
 # LANG=ja_JP.eucJP
 LANG=ja_JP.utf8
 # LANG=C
+LC_CTYPE="$LANG"
+LC_NUMERIC="$LANG"
+LC_TIME="C"
+LC_COLLATE="$LANG"
+LC_MONETARY="$LANG"
+LC_MESSAGES="C"
+LC_ALL=
 PAGER='less -MQXcgi -x4'
 EDITOR='vim'
 HISTSIZE=2000
@@ -14,6 +21,7 @@ HISTFILESIZE=2000
 HISTCONTROL=ignoredups
 HISTIGNORE=ls:ll:la:cd:bg:fg
 export PATH PS1 PAGER EDITOR LANG HISTSIZE HISTFILESIZE HISTCONTROL HISTIGNORE
+export LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES LC_ALL
 source /etc/bash_completion
 #####################################################################################################
 # Alias
