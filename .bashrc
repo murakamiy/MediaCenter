@@ -176,7 +176,7 @@ function wstat() {
         egrep -v '(kB_ccwr/s|^Linux|^$)' $log_file | grep "$2" |
         awk '
 {
-    if (1000 < $5) {
+    if (1024 < $5 * 60) {
         printf("%s\t%dMB\t", $1, $5 * 60 / 1024)
         for (i = 8; i <= NF; i++)
             printf("%s ", $i)
