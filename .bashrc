@@ -163,3 +163,41 @@ new : $(basename $new)
 EOF
     diff -s --unified=0 $old_tmp $new_tmp
 }
+function wstat() {
+    log_dir=/home/mc/xdg-user-dirs/media/job/state/pidstat
+
+    if [ -n "$1" -a -f ${log_dir}/${1} ];then
+        log_file=${log_dir}/${1}
+    else
+        log_file=${log_dir}/$(date +%Y%m%d)
+    fi
+
+    if [ -n "$2" ];then
+        egrep -v '(kB_ccwr/s|^Linux|^$)' $log_file | grep "$2" |
+        awk '
+{
+    if (1000 < $5) {
+        printf("%s\t%dMB\t", $1, $5 * 60 / 1024)
+        for (i = 8; i <= NF; i++)
+            printf("%s ", $i)
+        printf("\n")
+    }
+}' | column -t -s '	'
+    else
+        egrep -v '(kB_ccwr/s|^Linux|^$)' $log_file |
+        awk '{ printf("%s    %s\n", $8, $5) }' | sort |
+        awk '
+        {
+            proc = $1
+            size = $2
+            arr[proc] += int(size) * 60
+        }
+        END {
+            for (proc in arr) {
+                if ( 0 < arr[proc] ) {
+                    printf("%dMB    %s\n", arr[proc] / 1024, proc)
+                }
+            }
+        }' | sort -n | column -t
+    fi
+}
