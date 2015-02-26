@@ -356,8 +356,6 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
-start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() + 60 * 60 * 23)) }')
-start_param=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 00:00", systime() + 60 * 60 * 23)) }')
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
 db_file=${rrd_dir}/stat.rrd
