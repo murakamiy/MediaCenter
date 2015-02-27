@@ -4,13 +4,11 @@ source $(dirname $0)/00.conf
 job_dir=$MC_DIR_RECORDING
 root_dir=$MC_DIR_BACKGROUND
 run_dir=${root_dir}/run
-input_dir=${root_dir}/in
-work_dir=${root_dir}/work
-job_file=${root_dir}/job.bmp
+job_file=${root_dir}/job.png
 font_name=/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf
-font_size=128
+font_size=68
 font_color=black
-x=220
+background_color=darkgray
 
 xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s $job_file
 
@@ -27,49 +25,42 @@ while [ true ];do
         continue
     fi
 
-    i=1
-    meta_work=$(for f in $(find $job_dir -type f -name '*.xml' -not -size 0);do
+    i=0
+    for f in $(find $job_dir -type f -name '*.xml' -not -size 0);do
+
         epoch=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
 cat << EOF
 $epoch	$f
 EOF
-    done | sort -k 1 -n | tail -n 4 | awk '{ print $2 }' |
-    while read f;do
 
-        if [ $i -eq 1 ];then
-            y1=160
-            y2=320
-        else
-            y1=150
-            y2=300
-        fi
+    done | sort -k 1 -n | tail -n 4 | awk '{ print $2 }' |
+    (while read f;do
 
         title=$(xmlsel -t -m '//title' -v '.' $f | tr -d '[[:punct:]]' | sed -e 's/　/ /g')
         channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
         start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f | awk '{ print substr($2, 1, 5) }')
         stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f   | awk '{ print substr($2, 1, 5) }')
 
-        convert ${input_dir}/${i}.bmp -font $font_name -pointsize $font_size -fill $font_color \
-        -draw "text $x,$y1 '[ $start >> $stop ]  @$channel'" \
-        -draw "text $x,$y2 '$title'" \
-        ${work_dir}/${i}.bmp
+        j=$(($i * 2 + 1))
+        y1=$((84 * $j))
+        y2=$((84 * ($j + 1)))
 
-        echo -n $i
+        echo -n " -draw \"text 60,$y1 '[ $start >> $stop ]  @$channel'\" -draw \"text 60,$y2 '$title'\""
+
         ((i++))
-    done)
+    done; echo) |
+    while read draw_command;do
 
-    meta_in=1234
-    meta_in=${meta_in/$meta_work/}
-    list_work=
-    list_in=
-    if [ -n "$meta_in" ];then
-        list_in=${input_dir}/[$meta_in].bmp
-    fi
-    if [ -n "$meta_work" ];then
-        list_work=${work_dir}/[$meta_work].bmp
-    fi
+        eval convert \
+        -size 1280x720 xc:$background_color \
+        -font $font_name \
+        -pointsize $font_size \
+        -fill $font_color \
+        $draw_command \
+        $job_file
 
-    convert -append $list_work $list_in $job_file
+    done
+
     xfdesktop --reload
 
     sleep 60
