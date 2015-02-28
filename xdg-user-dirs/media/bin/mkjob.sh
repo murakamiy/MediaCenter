@@ -116,6 +116,7 @@ done
 
 wait $pid_smb
 wait $pid_mig_array
+bash $MC_BIN_MIGRATE_MP4
 
 running=$(find $MC_DIR_PLAY $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
 if [ -z "$running" ];then
