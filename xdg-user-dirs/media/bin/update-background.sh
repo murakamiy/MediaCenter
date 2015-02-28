@@ -10,7 +10,9 @@ font_size=68
 font_color=black
 background_color=darkgray
 
+convert -size 1280x720 xc:$background_color $job_file
 xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s $job_file
+xfdesktop --reload
 
 find $run_dir -type f -delete
 touch ${run_dir}/{01,02}
