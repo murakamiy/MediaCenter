@@ -4,6 +4,9 @@ import random
 from datetime import date
 from datetime import datetime
 
+FILE_RELEASE = 'release'
+FILE_KEEP = 'keep'
+
 class FindresCheif:
     finders = []
     def __init__(self, finders):
@@ -32,8 +35,7 @@ class Finder:
     deny_list = None
     allow_pattern = None
     deny_pattern = None
-#     original_file = 'release'
-    original_file = 'keep'
+    original_file = FILE_KEEP
     encode_width = 640
     encode_height = 360
     def __init__(self):
@@ -84,7 +86,6 @@ class TitleFinder(Finder):
     allow_list = [
         u'NARUTO',
         u'Kanon',
-        u'HERO　',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -111,6 +112,7 @@ class AnimeFinder(Finder):
         return False
 
 class BoxingFinder(Finder):
+    original_file = FILE_RELEASE
     priority = 40
     allow_list = [
         u'ボクシング',
@@ -134,6 +136,7 @@ class MoterSportsFinder(Finder):
         return False
 
 class CarInfomationFinder(Finder):
+    original_file = FILE_RELEASE
     priority = 40
     def allow(self, pinfo):
         if re.search('カーグラフィックTV', pinfo.title) and pinfo.channel != 'CS_299':
@@ -141,6 +144,7 @@ class CarInfomationFinder(Finder):
         return False
 
 class CultureFinder(Finder):
+    original_file = FILE_RELEASE
     priority = 30
     allow_list = [
         u'スーパープレゼンテーション',
@@ -152,6 +156,7 @@ class CultureFinder(Finder):
         return False
 
 class NatureFinder(Finder):
+    original_file = FILE_RELEASE
     priority = 30
     def allow(self, pinfo):
         r = random.choice((1,2,3,4,5))
@@ -160,6 +165,7 @@ class NatureFinder(Finder):
         return False
 
 class MusicFinder(Finder):
+    original_file = FILE_RELEASE
     priority = 30
     allow_list = [
         u'ベストヒットUSA',
@@ -187,8 +193,10 @@ class CreditFinder(Finder):
         return False
 
 class RandomFinder(Finder):
+    original_file = FILE_RELEASE
+    encode_width = 320
+    encode_height = 180
     def allow(self, pinfo):
-        return None
         if pinfo.start.hour == self.cron_hour or self.next_cron < pinfo.end:
             return None
         if pinfo.title == '放送休止' or pinfo.title == '文字放送':
@@ -198,6 +206,9 @@ class RandomFinder(Finder):
 
         pinfo.found_by = self.__class__.__name__
         pinfo.priority = random.choice((1,2,3,4,5)) + 10.0 * pinfo.rectime / self.rectime_max
+        pinfo.original_file = self.original_file
+        pinfo.encode_width = self.encode_width
+        pinfo.encode_height = self.encode_height
 
         if pinfo.channel not in ('CS_323', 'CS_325'):
             pinfo.priority -= 10
