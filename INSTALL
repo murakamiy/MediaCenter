@@ -359,6 +359,8 @@ mkfs.ext4 \
 mount -o noatime,stripe=768 /dev/md0 /mnt/hd_array
 mkdir /mnt/hd_array/ts_hd
 chown mc:mc /mnt/hd_array/ts_hd
+mkdir /mnt/hd_array/mp4_hd
+chown mc:mc /mnt/hd_array/mp4_hd
 
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 update-initramfs -u

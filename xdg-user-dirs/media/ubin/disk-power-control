@@ -24,6 +24,7 @@ function mount_usb_disk() {
     mount -o noatime,stripe=768 /dev/md0 /mnt/hd_array
     mount -o noatime ${arr[3]}1 /mnt/hd
     mount --bind /mnt/hd_array/ts_hd /home/mc/xdg-user-dirs/media/video/ts_hd
+    mount --bind /mnt/hd_array/mp4_hd /home/mc/xdg-user-dirs/media/video/mp4_hd
     mount --bind /mnt/hd/encode_hd   /home/mc/xdg-user-dirs/media/video/encode_hd
 }
 

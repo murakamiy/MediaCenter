@@ -41,20 +41,7 @@ function move_to_hd() {
 }
 
 function order_of_deletion() {
-
-    older_pos=$(($(ls $MC_DIR_TS_HD | wc -l) * 1 / 2))
-    older_ref=$MC_DIR_TS_HD/$(ls $MC_DIR_TS_HD | sort | sed -n ${older_pos}p)
-    for ts in $(find $MC_DIR_TS_HD -type f -not -newer $older_ref | sort);do
-
-        xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
-        foundby=$(xmlsel -t -m //foundby -v . $xml | sed -e 's/Finder//')
-        if [ "$foundby" = "Random" ];then
-            echo $ts
-        fi
-
-    done
-
-    find $MC_DIR_TS_HD -type f | sort
+    find $MC_DIR_TS_HD $MC_DIR_MP4_HD -type f -printf '%P %p\n' | sort -k 1 | awk '{ print $2 }'
 }
 
 function do_migrate() {
@@ -71,30 +58,28 @@ total_size=0
 total_count=0
 last_date=
 has_free_space print
-for ts in $(order_of_deletion);do
+for video_file in $(order_of_deletion);do
 
     has_free_space
     if [ $? -eq 0 ];then
         break
     fi
 
-    xml=${MC_DIR_JOB_FINISHED}/$(basename $ts .ts).xml
-    png_thumb=${MC_DIR_THUMB}/$(basename $ts)
+    ext=$(basename $video_file | awk -F . '{ print $2 }')
+    xml=${MC_DIR_JOB_FINISHED}/$(basename $video_file .${ext}).xml
+    png_thumb=${MC_DIR_THUMB}/$(basename $video_file)
 
     if [ -f "$png_thumb" ];then
         inode=$(stat --format='%i' $png_thumb)
         find $MC_DIR_TITLE_TS -inum $inode -delete
     fi
 
-    foundby=$(xmlsel -t -m //foundby -v . $xml | sed -e 's/Finder//')
-    if [ "$foundby" != "Random" ];then
-        last_date=$(basename $ts | awk -F - '{ print $1 }')
-    fi
-    size=$(stat --format=%s $ts)
+    last_date=$(basename $video_file | awk -F - '{ print $1 }')
+    size=$(stat --format=%s $video_file)
     total_size=$(($total_size + $size))
     total_count=$(($total_count + 1))
 
-    /bin/rm -f $ts $png_thumb $xml
+    /bin/rm -f $video_file $png_thumb $xml
 done
 
 if [ $total_count -ne 0 ];then
