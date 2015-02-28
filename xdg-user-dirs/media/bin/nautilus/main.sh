@@ -10,14 +10,15 @@ function safe_finish() {
 png_file="$1"
 inode=$(stat --format='%i' $png_file)
 thumb_file=$(basename $(find $MC_DIR_THUMB -inum $inode))
-base=$(echo $thumb_file | awk -F . '{ print $1 }')
-xml_file=${base}.xml
 
 if [ -n "$thumb_file" ];then
 
+    base=$(echo $thumb_file | awk -F . '{ print $1 }')
+    xml_file=${base}.xml
+
     echo $png_file | grep -q $MC_DIR_TITLE_TS
     if [ $? -eq 0 ];then
-        dir="$MC_DIR_TS_HD $MC_DIR_TS"
+        dir="$MC_DIR_TS_HD $MC_DIR_TS $MC_DIR_MP4_HD $MC_DIR_MP4"
     else
         echo $png_file | grep -q $MC_DIR_TITLE_ENCODE
         if [ $? -eq 0 ];then
@@ -35,7 +36,7 @@ if [ -n "$thumb_file" ];then
     fi
     video_file=$(find $dir -type f -name $thumb_file)
 
-    if [ "$dir" = "$MC_DIR_TS_HD $MC_DIR_TS" ];then
+    if [ "$dir" = "$MC_DIR_TS_HD $MC_DIR_TS $MC_DIR_MP4_HD $MC_DIR_MP4" ];then
         trap safe_finish 1 2 3 15
         python ${MC_DIR_DB_RATING}/play.py ${MC_DIR_JOB_FINISHED}/${xml_file} >> ${MC_DIR_DB_RATING}/log 2>&1 &
         pid_play=$!
