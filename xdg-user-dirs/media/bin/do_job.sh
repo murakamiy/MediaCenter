@@ -22,6 +22,16 @@ event_id=$(xmlsel -t -m //event-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
+original_file=$(xmlsel -t -m //original-file -v . ${MC_DIR_RESERVED}/${job_file_xml})
+encode_width=$(xmlsel -t -m //encode-width   -v . ${MC_DIR_RESERVED}/${job_file_xml})
+encode_height=$(xmlsel -t -m //encode-height -v . ${MC_DIR_RESERVED}/${job_file_xml})
+if [ "$original_file" = "keep" ];then
+    job_file=$job_file_ts
+    job_file_path=${MC_DIR_TS}/${job_file_ts}
+else
+    job_file=$job_file_mp4
+    job_file_path=${MC_DIR_MP4}/${job_file_mp4}
+fi
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 ffmpeg_rec_time_max=10800
@@ -48,7 +58,7 @@ else
 
             nice -n 5 \
             ffmpeg -y -i $fifo_b25 -f mp4 \
-                -s 640x360 \
+                -s ${encode_width}x${encode_height} \
                 -loglevel quiet \
                 -threads 1 \
                 -vsync 1 \
@@ -62,9 +72,11 @@ else
 
             pid_ffmpeg=$!
 
+            if [ "$original_file" = "keep" ];then
             touch ${MC_DIR_TS}/${job_file_ts}
             tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
             pid_tail=$!
+            fi
         fi
 
         if [ "$broadcasting" = "BS" ];then
@@ -78,22 +90,28 @@ else
 
         now=$(awk 'BEGIN { print systime() }')
         rec_time_adjust=$(($end - $now - 10))
+        if [ "$original_file" = "keep" ];then
+            rec_output=${MC_DIR_TS}/${job_file_ts}
+        else
+            rec_output=$fifo_b25
+        fi
 
-        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust ${MC_DIR_TS}/${job_file_ts}
+        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $rec_output
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         if (($rec_time < $ffmpeg_rec_time_max));then
             sync
+            if [ "$original_file" = "keep" ];then
             kill -TERM $pid_tail
+            fi
             ( sleep 60; kill -KILL $pid_ffmpeg ) &
             wait $pid_ffmpeg
             rm -f $fifo_b25
         fi
 
-        thumb_file=${MC_DIR_THUMB}/${job_file_ts}
-        echo "ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
-        ffmpeg -y -i ${MC_DIR_TS}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+        thumb_file=${MC_DIR_THUMB}/${job_file}
+        ffmpeg -y -i $job_file_path -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
         if [ $? -eq 0 ];then
             mv ${thumb_file}.png $thumb_file
         else
@@ -119,9 +137,9 @@ else
         done
         ln $thumb_file "${foundby_dir}/${today}_${title}_${i}.png"
 
-        ffprobe -show_format ${MC_DIR_TS}/${job_file_ts}
+        ffprobe -show_format $job_file_path
         if [ $? -eq 0 ];then
-            duration=$(ffprobe -show_format ${MC_DIR_TS}/${job_file_ts} | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
+            duration=$(ffprobe -show_format $job_file_path | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
             integrity=$(($rec_time - $duration))
             if [ "$integrity" -lt 60 ];then
                 python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
@@ -132,7 +150,9 @@ else
             log "failed: $title ts_duration=$duration rec_time=$rec_time"
         fi
 
+        if [ "$original_file" = "keep" ];then
         stat --format=%s ${MC_DIR_TS}/${job_file_ts}   > ${MC_DIR_FILE_SIZE}/${job_file_ts}
+        fi
         stat --format=%s ${MC_DIR_MP4}/${job_file_mp4} > ${MC_DIR_FILE_SIZE}/${job_file_mp4}
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED

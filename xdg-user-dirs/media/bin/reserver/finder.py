@@ -19,6 +19,9 @@ class FindresCheif:
         else:
             pinfo.priority = found_by.how_much_like()
             pinfo.found_by = found_by.__class__.__name__
+            pinfo.original_file = found_by.original_file
+            pinfo.encode_width = found_by.encode_width
+            pinfo.encode_height = found_by.encode_height
             return pinfo
 
 class Finder:
@@ -29,6 +32,10 @@ class Finder:
     deny_list = None
     allow_pattern = None
     deny_pattern = None
+#     original_file = 'release'
+    original_file = 'keep'
+    encode_width = 640
+    encode_height = 360
     def __init__(self):
         if self.allow_list != None and len(self.allow_list) > 0:
             self.allow_pattern = self.create_pattern(self.allow_list)
@@ -181,6 +188,7 @@ class CreditFinder(Finder):
 
 class RandomFinder(Finder):
     def allow(self, pinfo):
+        return None
         if pinfo.start.hour == self.cron_hour or self.next_cron < pinfo.end:
             return None
         if pinfo.title == '放送休止' or pinfo.title == '文字放送':

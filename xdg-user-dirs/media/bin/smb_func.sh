@@ -94,7 +94,6 @@ function smb_copy_mp4() {
             smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir __NEW" $MC_SMB_SERVER
             smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "mkdir $foundby" $MC_SMB_SERVER
             smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
-            /bin/rm "$mp4"
 
             python ${MC_DIR_DB_RATING}/smb.py $xml "$remote" >> ${MC_DIR_DB_RATING}/log 2>&1
 

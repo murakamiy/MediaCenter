@@ -540,6 +540,13 @@ class ReserveMaker:
         command_element.append(at_element)
         command_element.append(rec_element)
 
+        original_file_element = Element("original-file")
+        original_file_element.text = pinfo.original_file
+        encode_width_element = Element("encode-width")
+        encode_width_element.text = str(pinfo.encode_width)
+        encode_height_element = Element("encode-height")
+        encode_height_element.text = str(pinfo.encode_height)
+
         reserved_element = Element("record")
         reserved_element.append(el)
         reserved_element.append(priority_element)
@@ -552,4 +559,9 @@ class ReserveMaker:
         reserved_element.append(rec_channel_element)
         reserved_element.append(rec_time_element)
         reserved_element.append(command_element)
+
+        reserved_element.append(original_file_element)
+        reserved_element.append(encode_width_element)
+        reserved_element.append(encode_height_element)
+
         return ReserveInfo(pinfo, reserved_element, "echo '%s' | %s" % (do_job_command, at_command))
