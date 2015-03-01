@@ -73,11 +73,21 @@ function smb_update_wtime() {
 
 function smb_copy_mp4() {
 
+    if [ "$1" = "all" ];then
+        /bin/rm $MC_SMB_PUT_STAT
+    fi
+    touch $MC_SMB_PUT_STAT
+
     cd $MC_DIR_MP4
     for mp4 in $(find . -type f -size +10M -printf '%TY%Tm%Td %TT %f\n' | sort | awk '{ print $3}');do
 
+        put_finished=1
+        if [ "$1" = "one" ];then
+            grep -q $mp4 $MC_SMB_PUT_STAT
+            put_finished=$?
+        fi
         fuser "$mp4"
-        if [ $? -eq 0 ];then
+        if [ $? -eq 0 -o $put_finished -eq 0 ];then
             continue
         fi
 
@@ -91,13 +101,14 @@ function smb_copy_mp4() {
         mp4_size=$(ls -sh "$mp4")
         log "smb put $title"
 
-            smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir __NEW" $MC_SMB_SERVER
-            smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "mkdir $foundby" $MC_SMB_SERVER
-            smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir __NEW" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "mkdir $foundby" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
 
-            python ${MC_DIR_DB_RATING}/smb.py $xml "$remote" >> ${MC_DIR_DB_RATING}/log 2>&1
+        python ${MC_DIR_DB_RATING}/smb.py $xml "$remote" >> ${MC_DIR_DB_RATING}/log 2>&1
 
         if [ "$1" = "one" ];then
+            echo $mp4 >> $MC_SMB_PUT_STAT
             break
         fi
 
