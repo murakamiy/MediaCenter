@@ -80,28 +80,26 @@ case $command in
         done
         ;;
     rec)
-        date +"%Y/%m/%d %H:%M:%S"
-        echo
         (
         echo RECORDING
-        for f in $(find $MC_DIR_RECORDING -type f -not -name mkjob.xml);do
+        for f in $(find $MC_DIR_RECORDING -type f -not -name mkjob.xml | sort);do
             title=$(print_title $f)
-            start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
-            end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
-            ((time = (end - start) / 60))
-            start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
+            time_start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f | awk '{ print $2 }')
+            time_stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f | awk '{ print $2 }')
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
-            echo -e "$start\t$time\t$channel\t$title"
+            priority=$(xmlsel -t -m '//priority' -v . $f | awk '{ printf("%3d", $1) }')
+            foundby=$(xmlsel -t -m '//foundby' -v . $f | awk '{ print substr($1, 0, 3) }')
+            echo -e "$time_start\t$time_stop\t$channel\t$priority\t$foundby\t$title"
         done
         echo ENCODING
         for f in $(find $MC_DIR_ENCODING -type f -not -name mkjob.xml);do
             title=$(print_title $f)
-            start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' $f)
-            end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' $f)
-            ((time = (end - start) / 60))
-            start=$(stat --format=%Z $f | awk '{ print strftime("%Y/%m/%d %H:%M:%S", $1) }')
+            time_start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f | awk '{ print $2 }')
+            time_stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f | awk '{ print $2 }')
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
-            echo -e "$start\t$time\t$channel\t$title"
+            priority=$(xmlsel -t -m '//priority' -v . $f | awk '{ printf("%3d", $1) }')
+            foundby=$(xmlsel -t -m '//foundby' -v . $f | awk '{ print substr($1, 0, 3) }')
+            echo -e "$time_start\t$time_stop\t$channel\t$priority\t$foundby\t$title"
         done
         ) | column -t -s '	'
         ;;
@@ -184,12 +182,15 @@ case $command in
         done
         ;;
     rsv)
-        for f in $(find $MC_DIR_RESERVED -type f);do
+        for f in $(find $MC_DIR_RESERVED -type f | sort);do
             title=$(print_title $f)
-            time=$(xmlsel -t -m "//time[@type='start']" -v '.' $f)
+            time_start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f | awk '{ print $2 }')
+            time_stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f | awk '{ print $2 }')
             channel=$(xmlsel -t -m '//programme' -v '@channel' $f)
-            echo -e "$time\t$channel\t$title"
-        done | sort | column -t -s '	'
+            priority=$(xmlsel -t -m '//priority' -v . $f | awk '{ printf("%3d", $1) }')
+            foundby=$(xmlsel -t -m '//foundby' -v . $f | awk '{ print substr($1, 0, 3) }')
+            echo -e "$time_start\t$time_stop\t$channel\t$priority\t$foundby\t$title"
+        done | column -t -s '	'
         ;;
     cpu)
         day=1
