@@ -25,6 +25,7 @@ foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -
 original_file=$(xmlsel -t -m //original-file -v . ${MC_DIR_RESERVED}/${job_file_xml})
 encode_width=$(xmlsel -t -m //encode-width   -v . ${MC_DIR_RESERVED}/${job_file_xml})
 encode_height=$(xmlsel -t -m //encode-height -v . ${MC_DIR_RESERVED}/${job_file_xml})
+encode_bitrate=$(xmlsel -t -m //encode-bitrate -v . ${MC_DIR_RESERVED}/${job_file_xml})
 if [ "$original_file" = "keep" ];then
     job_file=$job_file_ts
     job_file_path=${MC_DIR_TS}/${job_file_ts}
@@ -64,7 +65,7 @@ else
                 -vsync 1 \
                 -r 30000/1001 \
                 -filter:v yadif=0 \
-                -b:v 500k \
+                -b:v $encode_bitrate \
                 -vcodec libx264 -acodec libvo_aacenc \
                 -ac 2 \
                 -preset:v superfast \

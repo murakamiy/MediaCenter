@@ -25,6 +25,7 @@ class FindresCheif:
             pinfo.original_file = found_by.original_file
             pinfo.encode_width = found_by.encode_width
             pinfo.encode_height = found_by.encode_height
+            pinfo.encode_bitrate = found_by.encode_bitrate
             return pinfo
 
 class Finder:
@@ -38,6 +39,7 @@ class Finder:
     original_file = FILE_KEEP
     encode_width = 640
     encode_height = 360
+    encode_bitrate = '500k'
     def __init__(self):
         if self.allow_list != None and len(self.allow_list) > 0:
             self.allow_pattern = self.create_pattern(self.allow_list)
@@ -196,6 +198,7 @@ class RandomFinder(Finder):
     original_file = FILE_RELEASE
     encode_width = 320
     encode_height = 180
+    encode_bitrate = '250k'
     def allow(self, pinfo):
         if pinfo.start.hour == self.cron_hour or self.next_cron < pinfo.end:
             return None
@@ -209,6 +212,7 @@ class RandomFinder(Finder):
         pinfo.original_file = self.original_file
         pinfo.encode_width = self.encode_width
         pinfo.encode_height = self.encode_height
+        pinfo.encode_bitrate = self.encode_bitrate
 
         if pinfo.channel not in ('CS_323', 'CS_325'):
             pinfo.priority -= 10

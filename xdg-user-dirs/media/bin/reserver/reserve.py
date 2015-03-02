@@ -546,6 +546,8 @@ class ReserveMaker:
         encode_width_element.text = str(pinfo.encode_width)
         encode_height_element = Element("encode-height")
         encode_height_element.text = str(pinfo.encode_height)
+        encode_bitrate_element = Element("encode-bitrate")
+        encode_bitrate_element.text = pinfo.encode_bitrate
 
         reserved_element = Element("record")
         reserved_element.append(el)
@@ -563,5 +565,6 @@ class ReserveMaker:
         reserved_element.append(original_file_element)
         reserved_element.append(encode_width_element)
         reserved_element.append(encode_height_element)
+        reserved_element.append(encode_bitrate_element)
 
         return ReserveInfo(pinfo, reserved_element, "echo '%s' | %s" % (do_job_command, at_command))
