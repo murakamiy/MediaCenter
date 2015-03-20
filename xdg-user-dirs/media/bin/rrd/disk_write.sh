@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -z "$MC_DIR_FILE_SIZE" -o ! -d "$MC_DIR_FILE_SIZE" ];then
+    exit
+fi
+
 size_spec=72 # terabyte
 
 rrd_dir=/home/mc/xdg-user-dirs/media/bin/rrd
@@ -8,34 +12,34 @@ png_dir=${rrd_dir}/png
 font_name=/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf
 font_color=black
 
-cat /sys/fs/ext4/sda1/lifetime_write_kbytes > ${rrd_dir}/tbw_today
+today=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime())) }')
+one_day_before=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 24)) }')
+two_day_before=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 48)) }')
+yesterday=$one_day_before
 
-if [ -f ${rrd_dir}/tbw_yesterday ];then
+cat /sys/fs/ext4/sda1/lifetime_write_kbytes > ${MC_DIR_FILE_SIZE}/tbw_${today}
 
-    size_today=$(cat ${rrd_dir}/tbw_today)
-    size_yesterday=$(cat ${rrd_dir}/tbw_yesterday)
-    written_today=$(echo "($size_today - $size_yesterday) / 1024 / 1024" | bc)
-    written_total=$(echo "$size_today / 1024 / 1024 / 1024" | bc)
+if [ -f ${MC_DIR_FILE_SIZE}/tbw_${two_day_before} ];then
+
+    size_new=$(cat ${MC_DIR_FILE_SIZE}/tbw_${one_day_before})
+    size_old=$(cat ${MC_DIR_FILE_SIZE}/tbw_${two_day_before})
+    written_yesterday=$(echo "($size_new - $size_old) / 1024 / 1024" | bc)
+    written_total=$(echo "$size_new / 1024 / 1024 / 1024" | bc)
     remain=$(echo "100 - $written_total * 100 / $size_spec" | bc)
-    today=$(date +%Y/%m/%d)
 
-    if [ -n "$MC_DIR_FILE_SIZE" -a -d "$MC_DIR_FILE_SIZE" ];then
-
-        size_ts=$(find $MC_DIR_FILE_SIZE -type f -name '*.ts' -exec cat '{}' \; | awk '
-BEGIN { ttl = 0 }
-{ ttl += $1 / 1024 / 1024 }
-END { printf("%.1f", ttl / 1024) }')
-        size_mp4=$(find $MC_DIR_FILE_SIZE -type f -name '*.mp4' -exec cat '{}' \; | awk '
+    size_ts=$(find $MC_DIR_FILE_SIZE -type f -name "${yesterday}*.ts" -exec cat '{}' \; | awk '
 BEGIN { ttl = 0 }
 { ttl += $1 / 1024 / 1024 }
 END { printf("%.1f", ttl / 1024) }')
 
-        find $MC_DIR_FILE_SIZE -type f -delete
-    fi
+    size_mp4=$(find $MC_DIR_FILE_SIZE -type f -name "${yesterday}*.mp4" -exec cat '{}' \; | awk '
+BEGIN { ttl = 0 }
+{ ttl += $1 / 1024 / 1024 }
+END { printf("%.1f", ttl / 1024) }')
 
-    if [ $written_today -lt 40 ];then
+    if [ $written_yesterday -lt 40 ];then
         color=green
-    elif [ $written_today -lt 80 ];then
+    elif [ $written_yesterday -lt 80 ];then
         color=yellow
     else
         color=red
@@ -43,15 +47,15 @@ END { printf("%.1f", ttl / 1024) }')
 
     convert -size 640x360 xc:$color \
     -font $font_name -pointsize 34 -fill $font_color \
-    -draw "text 10,50 'SSD Total Bytes Written  $today'" \
+    -draw "text 10,50 'SSD Total Bytes Written  $yesterday'" \
     -font $font_name -pointsize 34 -fill $font_color \
     -draw "text 10,100 'ts : $size_ts GB        mp4 : $size_mp4 GB'" \
     -font $font_name -pointsize 110 -fill $font_color \
-    -draw "text 10,220 '$written_today GB'" \
+    -draw "text 10,220 '$written_yesterday GB'" \
     -font $font_name -pointsize 110 -fill $font_color \
     -draw "text 10,330 '$remain %'" \
     ${png_dir}/daily/dw.png
 
 fi
 
-/bin/mv ${rrd_dir}/tbw_today ${rrd_dir}/tbw_yesterday
+find $MC_DIR_FILE_SIZE -type f -ctime +7 -delete
