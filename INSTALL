@@ -109,6 +109,7 @@ python-pysqlite2
 vlc
 vobcopy
 xdg-utils
+hdparm
 
 fonts-takao
 fonts-takao-gothic
