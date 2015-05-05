@@ -143,6 +143,9 @@ for line in sys.stdin:
 function smbaterm() {
     smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1'
 }
+function smbput() {
+    smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1' -c "put $@"
+}
 function pdiff() {
     work_dir=/home/mc/xdg-user-dirs/media/dpkg
     today=$(date +%Y%m%d)
