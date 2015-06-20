@@ -66,6 +66,8 @@ alias cdjob='cd /home/mc/xdg-user-dirs/media/job'
 alias cdvideo='cd /home/mc/xdg-user-dirs/media/video'
 alias cdfile='cd /home/mc/xdg-user-dirs/media/files'
 alias scr='screen -r'
+alias um='usb-disk-mount'
+alias up='usb-disk-power-off'
 #####################################################################################################
 # Function
 #####################################################################################################
