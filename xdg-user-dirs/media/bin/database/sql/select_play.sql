@@ -4,7 +4,7 @@
 .print "datetime        agg  time   title"
 
 select
-strftime('%Y/%m/%d %H:%M:%S', B.start, 'unixepoch', 'localtime'),
+strftime('%Y/%m/%d %H:%M:%S', A.created_at, 'unixepoch', 'localtime'),
 A.aggregate,
 A.play_time / 60,
 B.title
@@ -15,7 +15,7 @@ inner join programme as B on
     A.start = B.start
 )
 where B.title like '%'
-order by B.start desc
+order by A.created_at desc
 limit 30
 ;
 
