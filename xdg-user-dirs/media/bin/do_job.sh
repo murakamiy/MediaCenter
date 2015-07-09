@@ -97,8 +97,11 @@ else
             rec_output=$fifo_b25
         fi
 
-        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $rec_output
+        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $rec_output &
+        pid_recpt1=$!
+        (sleep $rec_time_adjust; sleep 10; kill -KILL $pid_recpt1) &
 
+        wait $pid_recpt1
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         if (($rec_time < $ffmpeg_rec_time_max));then
