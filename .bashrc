@@ -111,7 +111,11 @@ function vinfom() {
     fi
 }
 function vinfof() {
-    ffmpeg -i "$1" 2>&1 | egrep 'Stream #' | grep -v ': Data: ' | sed -e 's/  */ /' -e 's/^ Stream //'
+    for f in $@;do
+        ls -sh $f
+        ffmpeg -i $f 2>&1 | egrep 'Stream #|Duration:' | sed -r -e 's/^[[:space:]]+//'
+        echo
+    done
 }
 function epgdumpy() {
     python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
