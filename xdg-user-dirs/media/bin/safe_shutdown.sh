@@ -69,7 +69,7 @@ if [ $wakeup_time -ne -1 ];then
             timeout=60
         fi
 
-        echo -e "computer will be shutdown in $timeout seconds.\nto cancel shutdown type\nmd abort" | write mc
+        echo -e "computer will be shutdown in $timeout seconds.\nto cancel shutdown type\n\n\nmd abort\n\n" | write mc
         zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup: $next_wakeup_time\n\nShutDown ?</span>"
         if [ $? -ne 1 ];then
             if [ -e $MC_ABORT_SHUTDOWN ];then
