@@ -3,8 +3,7 @@ source $(dirname $0)/00.conf
 
 job_file_base=$1
 job_file_xml=${job_file_base}.xml
-job_file_ts=${job_file_base}.ts
-job_file_mp4=${job_file_base}.mp4
+job_file=${job_file_base}.mkv
 
 if [ ! -f ${MC_DIR_RESERVED}/${job_file_xml} ];then
     log "file not found: $job_file_xml"
@@ -16,9 +15,6 @@ start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_fi
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 rec_channel=$(xmlsel -t -m //rec-channel -v . ${MC_DIR_RESERVED}/${job_file_xml})
 rec_time=$(xmlsel -t -m //rec-time -v . ${MC_DIR_RESERVED}/${job_file_xml})
-transport_stream_id=$(xmlsel -t -m //transport-stream-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
-service_id=$(xmlsel -t -m //service-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
-event_id=$(xmlsel -t -m //event-id -v . ${MC_DIR_RESERVED}/${job_file_xml})
 channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
@@ -26,16 +22,8 @@ original_file=$(xmlsel -t -m //original-file -v . ${MC_DIR_RESERVED}/${job_file_
 encode_width=$(xmlsel -t -m //encode-width   -v . ${MC_DIR_RESERVED}/${job_file_xml})
 encode_height=$(xmlsel -t -m //encode-height -v . ${MC_DIR_RESERVED}/${job_file_xml})
 encode_bitrate=$(xmlsel -t -m //encode-bitrate -v . ${MC_DIR_RESERVED}/${job_file_xml})
-if [ "$original_file" = "keep" ];then
-    job_file=$job_file_ts
-    job_file_path=${MC_DIR_TS}/${job_file_ts}
-else
-    job_file=$job_file_mp4
-    job_file_path=${MC_DIR_MP4}/${job_file_mp4}
-fi
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
-ffmpeg_rec_time_max=10800
 
 bash $MC_BIN_SMB_JOB &
 bash $MC_BIN_ENCODE $channel &
@@ -51,35 +39,6 @@ else
         log "rec start: $title $(hard_ware_info)"
         mv ${MC_DIR_RESERVED}/${job_file_xml} $MC_DIR_RECORDING
 
-        if (($rec_time < $ffmpeg_rec_time_max));then
-            fifo_dir=/tmp/pt3/fifo
-            mkdir -p $fifo_dir
-            fifo_b25=${fifo_dir}/b25_$$
-            mkfifo -m 644 $fifo_b25
-
-            nice -n 5 \
-            ffmpeg -y -i $fifo_b25 -f mp4 \
-                -s ${encode_width}x${encode_height} \
-                -loglevel quiet \
-                -threads 1 \
-                -vsync 1 \
-                -r 30000/1001 \
-                -filter:v yadif=0 \
-                -b:v $encode_bitrate \
-                -vcodec libx264 -acodec libvo_aacenc \
-                -ac 2 \
-                -preset:v superfast \
-                ${MC_DIR_MP4}/${job_file_mp4} &
-
-            pid_ffmpeg=$!
-
-            if [ "$original_file" = "keep" ];then
-            touch ${MC_DIR_TS}/${job_file_ts}
-            tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_b25 &
-            pid_tail=$!
-            fi
-        fi
-
         if [ "$broadcasting" = "BS" ];then
             channel_file=$MC_FILE_CHANNEL_BS
         elif [ "$broadcasting" = "CS" ];then
@@ -91,28 +50,77 @@ else
 
         now=$(awk 'BEGIN { print systime() }')
         rec_time_adjust=$(($end - $now - 10))
+
+        fifo_dir=/tmp/pt3/fifo
+        mkdir -p $fifo_dir
+        fifo_recpt1=${fifo_dir}/recpt1_$$
+        fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
+        mkfifo -m 644 $fifo_recpt1
+        mkfifo -m 644 $fifo_ffmpeg
+
         if [ "$original_file" = "keep" ];then
-            rec_output=${MC_DIR_TS}/${job_file_ts}
+            ffmpeg_output=${MC_DIR_TS}/${job_file}
+            job_file_path=${MC_DIR_TS}/${job_file}
         else
-            rec_output=$fifo_b25
+            ffmpeg_output=$fifo_ffmpeg
+            job_file_path=${MC_DIR_MP4}/${job_file}
         fi
 
-        $MC_BIN_REC --b25 --strip --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $rec_output &
+        nice -n 5 \
+        gst-launch-1.0 -q \
+         filesrc location=$fifo_ffmpeg ! matroskademux name=demux \
+         demux. ! queue \
+                ! mpegvideoparse \
+                ! vaapidecode \
+                ! vaapipostproc \
+                  deinterlace-mode=auto \
+                  deinterlace-method=bob \
+                  height=$encode_height \
+                  force-aspect-ratio=true \
+                ! x264enc \
+                  threads=1 \
+                  speed-preset=veryfast \
+                  pass=cbr \
+                  bitrate=$(egrep -o '[0-9]+' <<< $encode_bitrate) \
+                ! mux. \
+         demux. ! queue \
+                ! aacparse \
+                ! mux. \
+         matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file} &
+        pid_gst=$!
+
+        ffmpeg -y -i $fifo_recpt1 \
+        -loglevel quiet \
+        -threads 1 \
+        -f matroska \
+        -vcodec copy \
+        -acodec libfdk_aac -b:a 256k \
+        $ffmpeg_output &
+        pid_ffmpeg=$!
+
+        if [ "$original_file" = "keep" ];then
+            touch ${MC_DIR_TS}/${job_file}
+            tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file} > $fifo_ffmpeg &
+            pid_tail=$!
+        fi
+
+        $MC_BIN_REC --b25 --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $fifo_recpt1 &
         pid_recpt1=$!
         (sleep $rec_time_adjust; sleep 10; kill -KILL $pid_recpt1) &
 
         wait $pid_recpt1
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
-        if (($rec_time < $ffmpeg_rec_time_max));then
-            sync
-            if [ "$original_file" = "keep" ];then
+        sync
+        ( sleep 60; kill -KILL $pid_gst ) &
+        wait $pid_gst
+        kill -KILL $pid_ffmpeg
+        if [ "$original_file" = "keep" ];then
             kill -TERM $pid_tail
-            fi
-            ( sleep 60; kill -KILL $pid_ffmpeg ) &
-            wait $pid_ffmpeg
-            rm -f $fifo_b25
         fi
+
+        rm -f $fifo_recpt1
+        rm -f $fifo_ffmpeg
 
         thumb_file=${MC_DIR_THUMB}/${job_file}
         ffmpeg -y -i $job_file_path -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
@@ -155,9 +163,9 @@ else
         fi
 
         if [ "$original_file" = "keep" ];then
-        stat --format=%s ${MC_DIR_TS}/${job_file_ts}   > ${MC_DIR_FILE_SIZE}/${job_file_ts}
+            stat --format=%s ${MC_DIR_TS}/${job_file}  > ${MC_DIR_FILE_SIZE}/${job_file}.large
         fi
-        stat --format=%s ${MC_DIR_MP4}/${job_file_mp4} > ${MC_DIR_FILE_SIZE}/${job_file_mp4}
+        stat --format=%s ${MC_DIR_MP4}/${job_file} > ${MC_DIR_FILE_SIZE}/${job_file}.small
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         log "rec end: $title $(hard_ware_info)"
