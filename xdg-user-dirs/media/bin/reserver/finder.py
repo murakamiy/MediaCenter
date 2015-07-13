@@ -70,17 +70,6 @@ class Finder:
 class DateTimeFinder(Finder):
     priority = 100
     def allow(self, pinfo):
-        date_list = (
-                date(2014, 7, 21),
-                date(2014, 7, 22),
-                date(2014, 7, 23),
-                )
-        if pinfo.channel == "CS_340" and pinfo.start.date() in date_list and re.search("宇宙スペシャル", pinfo.title):
-            return True
-
-        if pinfo.channel == "BS_103" and pinfo.start.date() == date(2014, 7, 19) and re.search("クジラ親子に出会う旅", pinfo.title):
-            return True
-
         return False
 
 class TitleFinder(Finder):
@@ -164,7 +153,8 @@ class NatureFinder(Finder):
     def allow(self, pinfo):
         r = random.choice((1,2,3,4,5))
         if r == 1 and '自然・動物・環境' in pinfo.category_list:
-            return True
+            if not re.search('調整用カラーバー', pinfo.title):
+                return True
         return False
 
 class MusicFinder(Finder):
@@ -204,7 +194,7 @@ class RandomFinder(Finder):
     def allow(self, pinfo):
         if pinfo.start.hour == self.cron_hour or self.next_cron < pinfo.end:
             return None
-        if pinfo.title == '放送休止' or pinfo.title == '文字放送':
+        if re.search('放送休止', pinfo.title) or re.search('文字放送', pinfo.title) or re.search('調整用カラーバー', pinfo.title):
             return None
         if 'ショッピング・通販' in pinfo.category_list:
             return None
