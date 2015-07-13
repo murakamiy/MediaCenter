@@ -73,35 +73,41 @@ function smb_update_wtime() {
 
 function smb_copy_mp4() {
 
+    local f
     touch $MC_SMB_PUT_STAT
     cd $MC_DIR_MP4
 
-    for mp4 in $(find . -type f -size +10M -printf '%TY%Tm%Td %TT %f\n' | sort | awk '{ print $3}');do
+    for f in $(find . -type f -size +10M -printf '%TY%Tm%Td %TT %f\n' | sort | awk '{ print $3}');do
 
-        grep -q $mp4 $MC_SMB_PUT_STAT
+        grep -q $f $MC_SMB_PUT_STAT
         put_finished=$?
 
-        fuser "$mp4"
+        fuser "$f"
         if [ $? -eq 0 -o $put_finished -eq 0 ];then
             continue
         fi
 
         smb_delete_old_file $(($MC_SMB_DISK_SIZE_GB * 1 / 5))
 
-        xml=${MC_DIR_JOB_FINISHED}/$(basename $mp4 .mp4).xml
+        ext=$(basename $f | awk -F . '{ print $2 }')
+        xml=${MC_DIR_JOB_FINISHED}/$(basename $f .${ext}).xml
+        if [ ! -f "$xml" ];then
+            log "smb put failed $(basename $f)"
+            continue
+        fi
+
         title=$(print_title $xml)
         foundby=$(xmlsel -t -m //foundby -v . $xml | sed -e 's/Finder//')
         date=$(date +%m%d)
-        remote=${title}_${date}.mp4
-        mp4_size=$(ls -sh "$mp4")
+        remote=${title}_${date}.${ext}
         log "smb put $title"
 
         smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir __NEW" $MC_SMB_SERVER
         smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "mkdir $foundby" $MC_SMB_SERVER
-        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $mp4 \"$remote\"" $MC_SMB_SERVER
+        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $f \"$remote\"" $MC_SMB_SERVER
 
         python ${MC_DIR_DB_RATING}/smb.py $xml "$remote" >> ${MC_DIR_DB_RATING}/log 2>&1
-        echo $mp4 >> $MC_SMB_PUT_STAT
+        echo $f >> $MC_SMB_PUT_STAT
 
         if [ "$1" = "one" ];then
             break
@@ -172,6 +178,7 @@ function smb_delete_dot_file() {
 
 function smb_delete_old_file() {
 
+    local f
     th=$1
     total_size=0
     total_count=0
