@@ -2,7 +2,6 @@
 
 rrd_dir=/home/mc/xdg-user-dirs/media/bin/rrd
 png_dir=${rrd_dir}/png
-db_file=${rrd_dir}/stat.rrd
 
 
 function create_graph_cpu() {
@@ -290,7 +289,6 @@ COMMENT:" \j"
 
 }
 
-
 function create_graph_du() {
 
 LANG=C rrdtool graph ${png_dir}/${cycle}/du.png \
@@ -309,6 +307,32 @@ AREA:DISK_USAGE#696969:"disk usage" \
 COMMENT:" \j" \
 COMMENT:" " \
 GPRINT:DISK_USAGE_MAX:"disk usage max \: %3.0lf" \
+COMMENT:" \j"
+
+}
+
+function create_graph_gpu() {
+
+LANG=C rrdtool graph ${png_dir}/${cycle}/gpu.png \
+--title "GPU usage $start_string" \
+--imgformat PNG \
+--start "$start_param" \
+--end "$end_param" \
+--x-grid $x_grid \
+--upper-limit 100  \
+--width 700 \
+--height 300 \
+DEF:GPU_RENDER=$db_file:GPU_RENDER:AVERAGE \
+DEF:GPU_BITSTREAM=$db_file:GPU_BITSTREAM:AVERAGE \
+VDEF:GPU_RENDER_MAX=GPU_RENDER,MAXIMUM \
+VDEF:GPU_BITSTREAM_MAX=GPU_BITSTREAM,MAXIMUM \
+COMMENT:" " \
+AREA:GPU_RENDER#FF8C00:"render" \
+AREA:GPU_BITSTREAM#FFFF00:"bitstream" \
+COMMENT:" \j" \
+COMMENT:"MAX" \
+GPRINT:GPU_RENDER_MAX:"render max\: %2.0lf%%" \
+GPRINT:GPU_BITSTREAM_MAX:"bitstream max\: %2.0lf%%" \
 COMMENT:" \j"
 
 }
@@ -349,6 +373,8 @@ start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 *
 start_param=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 00:00", systime() - 60 * 60 * 24)) }')
 end_param='start+24h'
 x_grid='HOUR:1:HOUR:1:HOUR:1:0:%H'
+
+db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
 create_graph_io_raid
 create_graph_io
@@ -356,9 +382,10 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
+db_file=${rrd_dir}/gpu.rrd
+create_graph_gpu
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
-db_file=${rrd_dir}/stat.rrd
 
 
 cycle=weekly
@@ -371,6 +398,8 @@ BEGIN {
 }')
 end_param='start+1WEEK'
 x_grid='HOUR:12:HOUR:12:DAY:1:0:%d'
+
+db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
 create_graph_io_raid
 create_graph_io
@@ -378,9 +407,10 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
+db_file=${rrd_dir}/gpu.rrd
+create_graph_gpu
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
-db_file=${rrd_dir}/stat.rrd
 
 
 cycle=monthly
@@ -388,6 +418,8 @@ start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m", systime() - 60 * 60
 start_param=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m01", systime() - 60 * 60 * 24)) }')
 end_param='start+1MONTH'
 x_grid='DAY:1:DAY:1:DAY:1:0:%d'
+
+db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
 create_graph_io_raid
 create_graph_io
@@ -395,9 +427,10 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
+db_file=${rrd_dir}/gpu.rrd
+create_graph_gpu
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
-db_file=${rrd_dir}/stat.rrd
 
 
 

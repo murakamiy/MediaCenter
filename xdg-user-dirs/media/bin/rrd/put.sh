@@ -38,10 +38,10 @@ function smb_update() {
 
 
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d\n", systime() - 60 * 60 * 24)) }')
-smb_update $prefix daily 56 # 7graphs + 1stat * 7days
+smb_update $prefix daily 63 # 8graphs + 1stat * 7days
 
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%mw%V\n", systime() - 60 * 60 * 24)) }')
-smb_update $prefix weekly 28 # 7graphs * 4weeks
+smb_update $prefix weekly 32 # 8graphs * 4weeks
 
 prefix=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m\n", systime() - 60 * 60 * 24)) }')
-smb_update $prefix monthly 108 # 9graphs * 12month
+smb_update $prefix monthly 120 # 10graphs * 12month

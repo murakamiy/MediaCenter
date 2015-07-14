@@ -177,3 +177,16 @@ DS:T_Random:GAUGE:120:0:3 \
 DS:S_Prefer:GAUGE:120:0:3 \
 DS:S_Random:GAUGE:120:0:3 \
 RRA:MAX:0.5:5:10080
+
+
+db_file=/home/mc/xdg-user-dirs/media/bin/rrd/gpu.rrd
+rrdtool create $db_file \
+--start $start_date \
+--step 300 \
+DS:GPU_RENDER:GAUGE:600:0:100 \
+DS:GPU_BITSTREAM:GAUGE:600:0:100 \
+DS:GPU_BLITTER:GAUGE:600:0:100 \
+RRA:AVERAGE:0.5:1:10080 \
+RRA:AVERAGE:0.5:288:35 \
+RRA:MIN:0.5:288:35 \
+RRA:MAX:0.5:288:35
