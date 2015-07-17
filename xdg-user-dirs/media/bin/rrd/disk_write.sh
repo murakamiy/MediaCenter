@@ -32,7 +32,7 @@ BEGIN { ttl = 0 }
 { ttl += $1 / 1024 / 1024 }
 END { printf("%.1f", ttl / 1024) }')
 
-    size_mp4=$(find $MC_DIR_FILE_SIZE -type f -name "${yesterday}*.mp4" -exec cat '{}' \; | awk '
+    size_mkv=$(find $MC_DIR_FILE_SIZE -type f -name "${yesterday}*.mkv" -exec cat '{}' \; | awk '
 BEGIN { ttl = 0 }
 { ttl += $1 / 1024 / 1024 }
 END { printf("%.1f", ttl / 1024) }')
@@ -49,7 +49,7 @@ END { printf("%.1f", ttl / 1024) }')
     -font $font_name -pointsize 34 -fill $font_color \
     -draw "text 10,50 'SSD Total Bytes Written  $yesterday'" \
     -font $font_name -pointsize 34 -fill $font_color \
-    -draw "text 10,100 'ts : $size_ts GB        mp4 : $size_mp4 GB'" \
+    -draw "text 10,100 'ts : $size_ts GB        mkv : $size_mkv GB'" \
     -font $font_name -pointsize 110 -fill $font_color \
     -draw "text 10,220 '$written_yesterday GB'" \
     -font $font_name -pointsize 110 -fill $font_color \
