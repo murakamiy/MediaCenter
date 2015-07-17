@@ -18,7 +18,9 @@ DIR_EPG = os.environ["MC_DIR_EPG"]
 DIR_TS = os.environ["MC_DIR_TS"]
 DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
 DIR_RRD = os.environ["MC_DIR_RRD"]
+DIR_ENCODE = os.environ["MC_DIR_ENCODE_RESERVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
+BIN_ENCODE = os.environ["MC_BIN_ENCODE"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
 
@@ -175,6 +177,7 @@ class ReserveMaker:
 
         span_list = self.create_span(isdb_set)
         span_list = self.optimize_span(span_list)
+        (span_list, encode_list) = self.reserve_encode(len(glob(DIR_ENCODE + '/' + '*.xml')), span_list)
 
         all_rinfo_list = []
         for isdb in isdb_set:
@@ -192,9 +195,10 @@ class ReserveMaker:
 
         all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)
         if self.dry_run == False:
-            self.update_rrd(all_rinfo_list)
+            self.update_rrd(all_rinfo_list, encode_list)
         all_rinfo_list = self.create_reserve(all_rinfo_list)
         self.do_reserve(all_rinfo_list)
+        self.do_reserve_encode(encode_list)
 
     def remove_border_strech(self, rinfo_list):
         new_list = []
@@ -347,6 +351,42 @@ class ReserveMaker:
         for s in span_list_m2:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m2
+    def reserve_encode(self, count, span_list):
+        encode_list = []
+        if count == 0:
+            return (span_list, encode_list)
+        encode_time = timedelta(0, 60 * 60 * 3, 0)
+        one_day = timedelta(1, 0, 0)
+        while 0 < count:
+            for s in span_list:
+                if len(s) == 2 and encode_time <= s[1] - s[0] and s[1] - self.now < one_day:
+                    encode_command = "exec bash %s" % (BIN_ENCODE)
+                    at_command = "at -t %s > /dev/null 2>&1" % (s[0].strftime("%Y%m%d%H%M"))
+                    s.append("echo '%s' | %s" % (encode_command, at_command))
+                    break
+            count -= 1
+        span_list_ret = []
+        for s in span_list:
+            if len(s) == 2:
+                span_list_ret.append(s)
+            else:
+                encode_list.append(s)
+        self.log("span_list_modified:")
+        for s in span_list_ret:
+            self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
+        return (span_list_ret, encode_list)
+    def do_reserve_encode(self, encode_list):
+        self.log("reserved encode:")
+        for e in encode_list:
+            if self.dry_run == False:
+                os.system(e[2])
+            self.log(" %s %s %s" %
+                        (
+                            e[0].strftime('%d %H:%M'),
+                            e[1].strftime('%H:%M'),
+                            "ENCODE_JOB"
+                        )
+                    )
     def set_dry_run(self, dry_run):
         self.dry_run = dry_run
     def set_include_channel(self, channel):
@@ -441,7 +481,7 @@ class ReserveMaker:
             self.log("parse failed %s" % (xml_file))
             return None
         return tree
-    def update_rrd(self, rinfo_list):
+    def update_rrd(self, rinfo_list, encode_list):
         if not rinfo_list:
             return
         begin = None
@@ -463,6 +503,10 @@ class ReserveMaker:
             t_random = 0
             s_prefer = 0
             s_random = 0
+            encode = 0
+            for e in encode_list:
+                if e[0] <= now and now < e[1]:
+                    encode = 1
             for r in rinfo_list:
                 if r.pinfo.start <= now and now < r.pinfo.end:
                     if r.pinfo.broadcasting == 'Digital':
@@ -476,12 +520,13 @@ class ReserveMaker:
                         else:
                             s_prefer += 1
 
-            buf += "'%s'@%d:%d:%d:%d " % (
+            buf += "'%s'@%d:%d:%d:%d:%d " % (
                     now.strftime("%Y%m%d %H:%M"),
                     t_prefer,
                     t_random,
                     s_prefer,
-                    s_random)
+                    s_random,
+                    encode)
 
             if i % 10 == 0:
                 rrdfd.write("rrdtool update %s/rec.rrd %s\n" % (DIR_RRD, buf))

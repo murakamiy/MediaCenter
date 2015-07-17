@@ -176,6 +176,7 @@ DS:T_Prefer:GAUGE:120:0:3 \
 DS:T_Random:GAUGE:120:0:3 \
 DS:S_Prefer:GAUGE:120:0:3 \
 DS:S_Random:GAUGE:120:0:3 \
+DS:Encode:GAUGE:120:0:3 \
 RRA:MAX:0.5:5:10080
 
 

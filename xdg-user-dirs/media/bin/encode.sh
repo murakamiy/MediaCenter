@@ -8,34 +8,16 @@ function do_encode_ffmpeg() {
 
     nice -n 10 \
     ffmpeg -y -i $input -f mp4 \
-        -s 1280x720 \
         -loglevel quiet \
+        -s 1280x720 \
         -threads 1 \
-        -vsync 1 \
         -r 30000/1001 \
         -filter:v yadif=0 \
-        -vcodec libx264 -acodec libvo_aacenc \
+        -vcodec libx264 \
+        -acodec libfdk_aac -b:a 256k \
         -profile:v main -crf 25 -level 31 \
         $output
 }
-function is_encoding_job_running() {
-    local running=$(find $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f')
-    if [ -n "$running" ];then
-        ret=0
-    else
-        ret=1
-    fi
-    return $ret
-}
-
-sum=$(echo $1 | md5sum | awk '{ print $1 }' | tr '[a-f]' '[A-F]')
-sleep_time=$(echo "ibase = 16; $sum % 3C" | bc)
-sleep $sleep_time
-
-is_encoding_job_running
-if [ $? -eq 0 ];then
-    exit
-fi
 
 xml=$(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort | head -n 1)
 if [ -n "$xml" ];then

@@ -354,13 +354,17 @@ DEF:T_Prefer=$db_file:T_Prefer:MAX \
 DEF:T_Random=$db_file:T_Random:MAX \
 DEF:S_Prefer=$db_file:S_Prefer:MAX \
 DEF:S_Random=$db_file:S_Random:MAX \
+DEF:Encode=$db_file:Encode:MAX \
 CDEF:S_Prefer_G=S_Prefer,-1,* \
 CDEF:S_Random_G=S_Random,-1,* \
+CDEF:Encode_G=Encode,-1,* \
 COMMENT:" " \
 AREA:T_Prefer#FF8C00:"t_prefer" \
 STACK:T_Random#8A2BE2:"t_random" \
+STACK:Encode#696969:"encode" \
 AREA:S_Prefer_G#FF8C00:"s_prefer" \
 STACK:S_Random_G#8A2BE2:"s_random" \
+STACK:Encode_G#696969:"encode" \
 COMMENT:" \j"
 
 }

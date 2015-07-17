@@ -28,7 +28,6 @@ now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
 bash $MC_BIN_SMB_JOB &
-bash $MC_BIN_ENCODE $channel &
 bash $MC_BIN_MIGRATE_JOB &
 
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
@@ -74,6 +73,7 @@ else
         gst-launch-1.0 -q \
          filesrc location=$gst_input ! tsdemux name=demux \
          demux. ! queue \
+                  silent=true \
                 ! mpegvideoparse \
                 ! vaapidecode \
                 ! vaapipostproc \
@@ -81,6 +81,11 @@ else
                   deinterlace-method=bob \
                   height=$encode_height \
                   force-aspect-ratio=true \
+                ! queue \
+                  silent=true \
+                  max-size-buffers=1000 \
+                  max-size-bytes=1073741824 \
+                  max-size-time=10000000000 \
                 ! x264enc \
                   threads=1 \
                   speed-preset=veryfast \
@@ -88,6 +93,7 @@ else
                   bitrate=$(egrep -o '[0-9]+' <<< $encode_bitrate) \
                 ! mux. \
          demux. ! queue \
+                  silent=true \
                 ! aacparse \
                 ! mux. \
          matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
