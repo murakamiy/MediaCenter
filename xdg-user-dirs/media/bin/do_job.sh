@@ -88,7 +88,7 @@ else
                   max-size-time=10000000000 \
                 ! x264enc \
                   threads=1 \
-                  speed-preset=veryfast \
+                  speed-preset=superfast \
                   pass=cbr \
                   bitrate=$(egrep -o '[0-9]+' <<< $encode_bitrate) \
                 ! mux. \

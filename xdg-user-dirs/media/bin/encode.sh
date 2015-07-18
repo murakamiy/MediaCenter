@@ -9,13 +9,14 @@ function do_encode_ffmpeg() {
     nice -n 10 \
     ffmpeg -y -i $input -f mp4 \
         -loglevel quiet \
-        -s 1280x720 \
         -threads 1 \
+        -s 1280x720 \
         -r 30000/1001 \
-        -filter:v yadif=0 \
         -vcodec libx264 \
+        -profile:v high \
+        -preset:v faster \
+        -crf 25 -level 31 \
         -acodec libfdk_aac -b:a 256k \
-        -profile:v main -crf 25 -level 31 \
         $output
 }
 
