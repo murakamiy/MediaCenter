@@ -58,6 +58,6 @@ if [ -n "$xml" ];then
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_FAILED
     fi
 
-
+    $MC_BIN_USB_POWER_OFF >> ${MC_DIR_LOG}/usb-disk.log 2>&1
     bash $MC_BIN_SAFE_SHUTDOWN
 fi
