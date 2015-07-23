@@ -178,7 +178,8 @@ class ReserveMaker:
 
         span_list = self.create_span(isdb_set)
         span_list = self.optimize_span(span_list)
-        (span_list, encode_list) = self.reserve_encode(len(glob(DIR_ENCODE + '/' + '*.xml')), span_list)
+        encode_len = len(glob(DIR_ENCODE + '/' + '*.xml'))
+        (span_list, encode_span_list) = self.create_encode_span(encode_len, span_list)
 
         all_rinfo_list = []
         for isdb in isdb_set:
@@ -195,6 +196,7 @@ class ReserveMaker:
             all_rinfo_list.extend(rinfo_list)
 
         all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)
+        encode_list = self.reserve_encode(encode_span_list, all_rinfo_list)
         if self.dry_run == False:
             self.update_rrd(all_rinfo_list, encode_list)
         all_rinfo_list = self.create_reserve(all_rinfo_list)
@@ -352,18 +354,16 @@ class ReserveMaker:
         for s in span_list_m2:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m2
-    def reserve_encode(self, count, span_list):
-        encode_list = []
+    def create_encode_span(self, count, span_list):
+        encode_span_list = []
         if count == 0:
-            return (span_list, encode_list)
+            return (span_list, encode_span_list)
         encode_time = timedelta(0, 60 * 60 * 3, 0)
         one_day = timedelta(1, 0, 0)
         while 0 < count:
             for s in span_list:
                 if len(s) == 2 and encode_time <= s[1] - s[0] and s[1] - self.now < one_day:
-                    encode_command = "exec bash %s" % (BIN_ENCODE)
-                    at_command = "at -t %s > /dev/null 2>&1" % (s[0].strftime("%Y%m%d%H%M"))
-                    s.append("echo '%s' | %s" % (encode_command, at_command))
+                    s.append(True)
                     break
             count -= 1
         span_list_ret = []
@@ -371,11 +371,21 @@ class ReserveMaker:
             if len(s) == 2:
                 span_list_ret.append(s)
             else:
-                encode_list.append(s)
+                encode_span_list.append(s)
         self.log("span_list_modified:")
         for s in span_list_ret:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
-        return (span_list_ret, encode_list)
+        return (span_list_ret, encode_span_list)
+    def reserve_encode(self, encode_span_list, rinfo_list):
+        for e in encode_span_list:
+            for r in rinfo_list:
+                if e[0] <= r.pinfo.start:
+                    e[0] = r.pinfo.start
+                    encode_command = "exec bash %s" % (BIN_ENCODE)
+                    at_command = "at -t %s > /dev/null 2>&1" % (e[0].strftime("%Y%m%d%H%M"))
+                    e[2] = "echo '%s' | %s" % (encode_command, at_command)
+                    break
+        return encode_span_list
     def do_reserve_encode(self, encode_list):
         self.log("reserved encode:")
         for e in encode_list:
