@@ -56,16 +56,18 @@ else
         mkdir -p $fifo_dir
         fifo_recpt1=${fifo_dir}/recpt1_$$
         fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
-        fifo_tee=${fifo_dir}/tee_$$
+        fifo_tail=${fifo_dir}/tee_$$
         mkfifo -m 644 $fifo_recpt1
         mkfifo -m 644 $fifo_ffmpeg
-        mkfifo -m 644 $fifo_tee
+        mkfifo -m 644 $fifo_tail
 
         if [ "$original_file" = "keep" ];then
-            gst_input=$fifo_tee
+            gst_input=$fifo_tail
+            ffmpeg_output=${MC_DIR_TS}/${job_file_ts}
             job_file_path=${MC_DIR_TS}/${job_file_ts}
         else
             gst_input=$fifo_ffmpeg
+            ffmpeg_output=$fifo_ffmpeg
             job_file_path=${MC_DIR_MP4}/${job_file_mkv}
         fi
 
@@ -86,11 +88,11 @@ else
                   max-size-buffers=1000 \
                   max-size-bytes=1073741824 \
                   max-size-time=10000000000 \
-                ! x264enc \
-                  threads=1 \
-                  speed-preset=superfast \
-                  pass=cbr \
-                  bitrate=$(egrep -o '[0-9]+' <<< $encode_bitrate) \
+                ! vaapiencode_h264 \
+                   tune=high-compression \
+                   rate-control=cqp \
+                   init-qp=33 \
+                   min-qp=1 \
                 ! mux. \
          demux. ! queue \
                   silent=true \
@@ -99,24 +101,27 @@ else
          matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
 
-        if [ "$original_file" = "keep" ];then
-            cat $fifo_ffmpeg | tee ${MC_DIR_TS}/${job_file_ts} > $fifo_tee &
-        fi
-
         ffmpeg -y -i $fifo_recpt1 \
         -loglevel quiet \
         -threads 1 \
         -f mpegts \
         -vcodec copy \
         -acodec libfdk_aac -b:a 256k \
-        $fifo_ffmpeg &
+        $ffmpeg_output &
         pid_ffmpeg=$!
+
+        if [ "$original_file" = "keep" ];then
+            touch ${MC_DIR_TS}/${job_file_ts}
+            tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_tail &
+            pid_tail=$!
+        fi
 
         $MC_BIN_REC --b25 --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $fifo_recpt1 &
         pid_recpt1=$!
         (
             sleep $rec_time_adjust
             sleep 10
+
             kill -TERM $pid_recpt1
             sleep 1
             kill -KILL $pid_recpt1
@@ -129,9 +134,17 @@ else
         (
             sleep 10
 
+            if [ "$original_file" = "keep" ];then
+                kill -TERM $pid_tail
+                sleep 1
+                kill -KILL $pid_tail
+                sleep 5
+            fi
+
             kill -TERM $pid_ffmpeg
             sleep 1
             kill -KILL $pid_ffmpeg
+            sleep 5
 
             kill -TERM $pid_gst
             sleep 1
@@ -142,7 +155,7 @@ else
 
         rm -f $fifo_recpt1
         rm -f $fifo_ffmpeg
-        rm -f $fifo_tee
+        rm -f $fifo_tail
 
         if [ "$original_file" = "keep" ];then
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
