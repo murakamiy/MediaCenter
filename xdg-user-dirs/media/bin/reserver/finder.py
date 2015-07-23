@@ -106,7 +106,6 @@ class BoxingFinder(Finder):
     original_file = FILE_RELEASE
     priority = 40
     allow_list = [
-        u'ボクシング',
         u'エキサイトマッチ',
     ]
     def allow(self, pinfo):

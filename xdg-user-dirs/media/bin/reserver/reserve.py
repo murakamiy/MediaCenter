@@ -121,8 +121,9 @@ class ReserveMaker:
         rule = rrule.rrule(rrule.DAILY,
                 dtstart=datetime(self.now.year, self.now.month, self.now.day, cron[0], cron[1], cron[2]))
         self.next_cron = rule.after(self.now)
-        self.random_finder.cron_hour = cron[0]
-        self.random_finder.next_cron = self.next_cron
+        if self.random_finder != None:
+            self.random_finder.cron_hour = cron[0]
+            self.random_finder.next_cron = self.next_cron
         if self.dry_run == True:
             self.border_time = self.now + timedelta(1, 0, 0)
         else:
