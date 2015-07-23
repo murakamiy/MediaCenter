@@ -16,7 +16,7 @@ $MC_BIN_USB_POWER_OFF >> ${MC_DIR_LOG}/usb-disk.log 2>&1
 /bin/rm $MC_ABORT_SHUTDOWN
 sudo $MC_BIN_SIXAD start
 
-LANG=C pidstat -dl 60 >> /home/mc/xdg-user-dirs/media/job/state/pidstat/$(date +%Y%m%d) &
+# LANG=C pidstat -dl 60 >> /home/mc/xdg-user-dirs/media/job/state/pidstat/$(date +%Y%m%d) &
 
 bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) &
 bash $MC_BIN_RRD_GPU &

@@ -163,16 +163,16 @@ HD2_READ=${iostat_arr[18]}
 HD2_WRITE=${iostat_arr[19]}
 
 LOAD_AVERAGE=$(uptime | awk -F 'load average: ' '{ print $2 }' | awk -F , '{ print $1 }')
-DISK_USAGE=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
+DISK_USAGE=$(LANG=C df -P | grep '/mnt/hd2$' | awk '{ printf("%d\n", $(NF - 1)) }')
 
 mem_arr=($(free -m | grep '^Mem:' | awk '
 {
     total = $2
+    used = $3
     free = $4
     shared = $5
-    buffers = $6
-    cached = $7
-    used = total - cached - buffers - shared - free
+    buffers = 0
+    cached = $6
 
     printf("%d %d %d %d %d %d\n", used, free, shared, buffers, cached, total)
 }'))
@@ -208,12 +208,12 @@ BEGIN {
 {
 
     if (match($0, "^Core 0:") != 0) {
-        TEMP_CPU = $4
-    }
-    else if (match($1, "fan1:") != 0) {
-        FAN1 = $2
+        TEMP_CPU = $3
     }
     else if (match($1, "fan2:") != 0) {
+        FAN1 = $2
+    }
+    else if (match($1, "fan1:") != 0) {
         FAN2 = $2
     }
 
