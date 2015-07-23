@@ -35,11 +35,11 @@ function do_usb_disk_opration() {
 
     elif [ $prog_name = "usb-disk-power-on" ];then
 
-        sudo $power_control -p $(cat $usb_disk_id)
+        sudo $power_control -p $usb_disk_id
 
     elif [ $prog_name = "usb-disk-mount" ];then
 
-        sudo $power_control -m $(cat $usb_disk_id)
+        sudo $power_control -m $usb_disk_id
 
     fi
 }
