@@ -8,9 +8,9 @@ cat << EOF
 USAGE: $(basename $0) command
        command:
                 atrm
-                mk_title_encode [FILE]...
+                mk_title_encode
                 mk_title_encode_mt
-                mk_title_ts [FILE]...
+                mk_title_ts
                 ts
                 encode
                 rec
@@ -105,7 +105,7 @@ case $command in
         ;;
     mk_title_encode)
         shift
-        for f in $@;do
+        for f in $(find $MC_DIR_ENCODE_HD -type f | sort);do
             base=$(basename $f | awk -F . '{ print $1 }')
             ext=$(basename $f | awk -F . '{ print $2 }')
 
@@ -154,7 +154,7 @@ case $command in
         ;;
     mk_title_ts)
         shift
-        for f in $@;do
+        for f in $(find $MC_DIR_TS_HD -type f -name '*.ts' | sort);do
             job_file_base=$(basename $f .ts)
             job_file_xml=${job_file_base}.xml
             job_file_ts=${job_file_base}.ts
