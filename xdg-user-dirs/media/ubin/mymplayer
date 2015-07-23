@@ -56,7 +56,7 @@ input=$1
 
 mplayer2 $media $delay $volume \
 --volstep=10 \
---fs --geometry=960x540+0+50 --monitoraspect=16:9 \
---dr --vo=gl:swapinterval=1 \
---vf=kerndeint \
+--fs \
+--vo=gl_nosw \
+--vf=lavcdeint \
 $input
