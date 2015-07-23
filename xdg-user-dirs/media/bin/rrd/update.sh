@@ -23,6 +23,8 @@ BEGIN {
     HD_RAID_WRITE = 0
     HD_READ = 0
     HD_WRITE = 0
+    HD2_READ = 0
+    HD2_WRITE = 0
 
     cpu_line = 0
     ssd_line = 0
@@ -30,6 +32,7 @@ BEGIN {
     hd_array_2_line = 0
     hd_array_3_line = 0
     hd_line = 0
+    hd2_line = 0
     hd_raid_line = 0
 }
 
@@ -39,6 +42,10 @@ BEGIN {
 }
 /^ata-Crucial_CT256M550SSD1_14520E2FA416/ {
     ssd_line = 1
+    next
+}
+/^ata-TOSHIBA_MQ01ABD050_55DTT3QDT/ {
+    hd2_line = 1
     next
 }
 /^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397/ {
@@ -77,6 +84,11 @@ BEGIN {
         SSD_READ = $2
         SSD_WRITE = $3
     }
+    else if (hd2_line == 1) {
+        hd2_line = 0
+        HD2_READ = $2
+        HD2_WRITE = $3
+    }
     else if (hd_array_1_line == 1) {
         hd_array_1_line = 0
         HD_ARRAY_1_READ = $2
@@ -106,7 +118,7 @@ BEGIN {
 
 END {
 
-    printf("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s \n",
+    printf("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n",
             CPU_USER,
             CPU_NICE,
             CPU_SYSTEM,
@@ -124,7 +136,9 @@ END {
             HD_RAID_READ,
             HD_RAID_WRITE,
             HD_READ,
-            HD_WRITE)
+            HD_WRITE,
+            HD2_READ,
+            HD2_WRITE)
 }'))
 
 CPU_USER=${iostat_arr[0]}
@@ -145,6 +159,8 @@ HD_RAID_READ=${iostat_arr[14]}
 HD_RAID_WRITE=${iostat_arr[15]}
 HD_READ=${iostat_arr[16]}
 HD_WRITE=${iostat_arr[17]}
+HD2_READ=${iostat_arr[18]}
+HD2_WRITE=${iostat_arr[19]}
 
 LOAD_AVERAGE=$(uptime | awk -F 'load average: ' '{ print $2 }' | awk -F , '{ print $1 }')
 DISK_USAGE=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
@@ -187,79 +203,18 @@ BEGIN {
     FAN1 = 0
     FAN2 = 0
 
-    temp_mother_board_line = 0
-    temp_cpu_line = 0
-    volt_fan_line = 0
 }
-
-/^acpitz-virtual-0/ {
-    temp_mother_board_line = 1
-    next
-}
-
-/^coretemp-isa-0000/ {
-    temp_cpu_line = 1
-    next
-}
-
-/^it8771-isa-0290/ {
-    volt_fan_line = 1
-    next
-}
-
 
 {
 
-    if (temp_mother_board_line == 1) {
-        if (match($1, "temp1:") != 0) {
-            TEMP_MOTHER_BORD_1 = $2
-        }
-        else if (match($1, "temp2:") != 0) {
-            temp_mother_board_line = 0
-            TEMP_MOTHER_BORD_2 = $2
-        }
+    if (match($0, "^Core 0:") != 0) {
+        TEMP_CPU = $4
     }
-    else if (temp_cpu_line == 1) {
-        if (match($0, "^Physical id 0:") != 0) {
-            temp_cpu_line = 0
-            TEMP_CPU = $4
-        }
+    else if (match($1, "fan1:") != 0) {
+        FAN1 = $2
     }
-    else if (volt_fan_line == 1) {
-        if (match($1, "in0:") != 0) {
-            VOLT_IN0 = $2
-        }
-        else if (match($1, "in1:") != 0) {
-            VOLT_IN1 = $2
-        }
-        else if (match($1, "in2:") != 0) {
-            VOLT_IN2 = $2
-        }
-        else if (match($1, "in3:") != 0) {
-            VOLT_IN3 = $2
-        }
-        else if (match($1, "in4:") != 0) {
-            VOLT_IN4 = $2
-        }
-        else if (match($1, "in5:") != 0) {
-            VOLT_IN5 = $2
-        }
-        else if (match($1, "in6:") != 0) {
-            VOLT_IN6 = $2
-        }
-        else if (match($1, "3VSB:") != 0) {
-            VOLT_3VSB = $2
-        }
-        else if (match($1, "Vbat:") != 0) {
-            VOLT_VBAT = $2
-        }
-        else if (match($1, "fan1:") != 0) {
-            FAN1 = $2
-        }
-        else if (match($1, "fan2:") != 0) {
-            volt_fan_line = 0
-            FAN2 = $2
-        }
+    else if (match($1, "fan2:") != 0) {
+        FAN2 = $2
     }
 
 }
@@ -343,4 +298,4 @@ FAN2=${sensors_arr[13]}
 
 
 rrdtool update $db_file \
-N:$CPU_USER:$CPU_NICE:$CPU_SYSTEM:$CPU_IOWAIT:$CPU_STEAL:$CPU_IDLE:$SSD_READ:$SSD_WRITE:$HD_ARRAY_1_READ:$HD_ARRAY_1_WRITE:$HD_ARRAY_2_READ:$HD_ARRAY_2_WRITE:$HD_ARRAY_3_READ:$HD_ARRAY_3_WRITE:$HD_RAID_READ:$HD_RAID_WRITE:$HD_READ:$HD_WRITE:$LOAD_AVERAGE:$MEMORY_USED:$MEMORY_FREE:$MEMORY_SHARED:$MEMORY_BUFFERS:$MEMORY_CACHED:$DISK_USAGE:$TEMP_CPU:$TEMP_MOTHER_BORD_1:$TEMP_MOTHER_BORD_2:$VOLT_IN0:$VOLT_IN1:$VOLT_IN2:$VOLT_IN3:$VOLT_IN4:$VOLT_IN5:$VOLT_IN6:$VOLT_3VSB:$VOLT_VBAT:$FAN1:$FAN2
+N:$CPU_USER:$CPU_NICE:$CPU_SYSTEM:$CPU_IOWAIT:$CPU_STEAL:$CPU_IDLE:$SSD_READ:$SSD_WRITE:$HD_ARRAY_1_READ:$HD_ARRAY_1_WRITE:$HD_ARRAY_2_READ:$HD_ARRAY_2_WRITE:$HD_ARRAY_3_READ:$HD_ARRAY_3_WRITE:$HD_RAID_READ:$HD_RAID_WRITE:$HD_READ:$HD_WRITE:$HD2_READ:$HD2_WRITE:$LOAD_AVERAGE:$MEMORY_USED:$MEMORY_FREE:$MEMORY_SHARED:$MEMORY_BUFFERS:$MEMORY_CACHED:$DISK_USAGE:$TEMP_CPU:$TEMP_MOTHER_BORD_1:$TEMP_MOTHER_BORD_2:$VOLT_IN0:$VOLT_IN1:$VOLT_IN2:$VOLT_IN3:$VOLT_IN4:$VOLT_IN5:$VOLT_IN6:$VOLT_3VSB:$VOLT_VBAT:$FAN1:$FAN2
