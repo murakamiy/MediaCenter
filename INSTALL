@@ -28,15 +28,21 @@ FONTSIZE="16x32"
 
 /etc/apt/sources.list
 
-deb     http://cdn.debian.or.jp/debian unstable main contrib non-free
-deb-src http://cdn.debian.or.jp/debian unstable main contrib non-free
+deb     http://cdn.debian.or.jp/debian testing main contrib non-free
+deb-src http://cdn.debian.or.jp/debian testing main contrib non-free
 
-deb     http://www.deb-multimedia.org unstable main non-free
-deb-src http://www.deb-multimedia.org unstable main non-free
+deb     http://www.deb-multimedia.org testing main non-free
+deb-src http://www.deb-multimedia.org testing main non-free
+
+deb     http://liquorix.net/debian sid main
+deb-src http://liquorix.net/debian sid main
 
 aptitude update
 aptitude install deb-multimedia-keyring
+aptitude install liquorix-keyring
 aptitude update
+
+aptitude install linux-image-liquorix-amd64 linux-headers-liquorix-amd64
 
 ####################################################################################################
 # package install 1
@@ -160,6 +166,20 @@ x11vnc
 
 ethtool
 
+sudo
+vainfo
+intel-gpu-tools
+mesa-utils
+powertop
+cpufrequtils
+lshw
+
+gstreamer1.0-plugins-ugly
+gstreamer1.0-plugins-bad
+gstreamer1.0-plugins-base-apps
+gstreamer1.0-tools
+gstreamer1.0-vaapi
+
 ####################################################################################################
 # remove package
 ####################################################################################################
@@ -169,6 +189,11 @@ gvfs-common
 gvfs
 gvfs-daemons
 udisks2
+
+evince
+iceweasel
+gimp
+libreoffice
 
 ####################################################################################################
 # boot loader
@@ -274,7 +299,8 @@ xdg-user-dirs-update  --set  VIDEOS       "$HOME/xdg-user-dirs/videos"
 ####################################################################################################
 /etc/modules
 
-it87
+coretemp
+nct6775
 ####################################################################################################
 # autologin
 ####################################################################################################
