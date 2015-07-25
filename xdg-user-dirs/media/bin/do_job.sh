@@ -50,7 +50,7 @@ else
         ch_array=($(awk -F '\t' -v channel=$rec_channel '{ if ($1 == channel) printf("%s %s", $2, $4) }' $channel_file))
 
         now=$(awk 'BEGIN { print systime() }')
-        rec_time_adjust=$(($end - $now - 10))
+        rec_time_adjust=$(($end - $now - 20))
 
         fifo_dir=/tmp/pt3/fifo
         mkdir -p $fifo_dir
