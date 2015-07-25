@@ -72,11 +72,17 @@ class DateTimeFinder(Finder):
     def allow(self, pinfo):
         return False
 
+class NarutoFinder(Finder):
+    priority = 90
+    def allow(self, pinfo):
+        if pinfo.channel == '18' and re.search('NARUTO', pinfo.title):
+            return True
+        return False
+
 class TitleFinder(Finder):
     priority = 90
     allow_list = [
-        u'NARUTO',
-        u'Kanon',
+        u'',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
