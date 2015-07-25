@@ -121,6 +121,36 @@ function vinfof() {
 function epgdumpy() {
     python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
 }
+function seltitle() {
+xmlstarlet sel --encode utf-8 -t \
+    -m '//programme' -n \
+    -v title -o '	' \
+    -v '@start' -o '	' \
+    -v '@stop' -o '	' \
+    -v 'category[1]' -o '	' \
+    -v 'category[2]' -o '	' \
+    -v 'category[3]' -o '	' \
+    -v 'category[4]' -o '	' \
+    -v 'category[5]' -o '	' \
+    --var 'channel=@channel' \
+    -m '..//channel' -i '@id=$channel' -v '@id' -o '	' -v 'display-name[1]' -o '	' \
+    $@ | xmlstarlet unesc |
+python -c '
+import datetime
+import sys
+for line in sys.stdin:
+    arr = line.rstrip().split("\t")
+    if arr and 10 <= len(arr):
+        start = datetime.datetime.strptime(arr[1].split()[0], "%Y%m%d%H%M%S")
+        end   = datetime.datetime.strptime(arr[2].split()[0], "%Y%m%d%H%M%S")
+        start_date = start.strftime("%m/%d")
+        start_time = start.strftime("%H:%M")
+        end_time = end.strftime("%H:%M")
+
+        print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (start_date, start_time, end_time, arr[8], arr[9], arr[0], arr[3], arr[4], arr[5], arr[6], arr[7])
+
+' | column -t -s '	'
+}
 function seltime() {
     xmlstarlet sel --encode utf-8 -t -m '//programme' -v '@channel' -o ' ' -v '@start' -o ' ' -v '@stop' -n $@ |
     python -c '
