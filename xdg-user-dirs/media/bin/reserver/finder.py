@@ -211,8 +211,14 @@ class RandomFinder(Finder):
         pinfo.encode_height = self.encode_height
         pinfo.encode_bitrate = self.encode_bitrate
 
-        if pinfo.channel not in ('CS_323', 'CS_325'):
-            pinfo.priority -= 10
+        if pinfo.channel not in ('CS_340', 'CS_341', 'CS_343'):
+            return None
+
+        if not '自然・動物・環境' in pinfo.category_list:
+            pinfo.priority -= 20
+        if re.search('調整用カラーバー', pinfo.title):
+            pinfo.priority -= 20
+
 
         return pinfo
 
