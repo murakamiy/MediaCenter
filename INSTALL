@@ -195,6 +195,18 @@ iceweasel
 gimp
 libreoffice
 
+uim
+uim-anthy
+uim-common
+uim-fep
+uim-gtk2.0
+uim-gtk3
+uim-mozc:amd64
+uim-qt
+uim-utils
+uim-xim
+anthy
+
 ####################################################################################################
 # boot loader
 ####################################################################################################
