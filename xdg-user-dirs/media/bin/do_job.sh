@@ -75,19 +75,12 @@ else
         gst-launch-1.0 -q \
          filesrc location=$gst_input ! tsdemux name=demux \
          demux. ! queue \
-                  silent=true \
                 ! mpegvideoparse \
                 ! vaapidecode \
                 ! vaapipostproc \
                   deinterlace-mode=auto \
                   deinterlace-method=bob \
                   height=$encode_height \
-                  force-aspect-ratio=true \
-                ! queue \
-                  silent=true \
-                  max-size-buffers=1000 \
-                  max-size-bytes=1073741824 \
-                  max-size-time=10000000000 \
                 ! vaapiencode_h264 \
                    tune=high-compression \
                    rate-control=cqp \
@@ -95,7 +88,6 @@ else
                    min-qp=1 \
                 ! mux. \
          demux. ! queue \
-                  silent=true \
                 ! aacparse \
                 ! mux. \
          matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
