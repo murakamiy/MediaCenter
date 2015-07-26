@@ -77,6 +77,8 @@ else
          demux. ! queue \
                 ! mpegvideoparse \
                 ! vaapidecode \
+                ! queue \
+                  leaky=upstream \
                 ! vaapipostproc \
                   deinterlace-mode=auto \
                   deinterlace-method=bob \
