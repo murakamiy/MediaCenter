@@ -18,6 +18,7 @@ USAGE: $(basename $0) command
                 cpu [DAYS]
                 du  [DAYS]
                 find
+                re_schedule
                 inv
                 invk
                 halt
@@ -230,6 +231,27 @@ case $command in
             python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml" DRY_RUN
         else
             python $MC_BIN_RESERVER "${prefix_digital}_*.xml" DRY_RUN
+        fi
+        ;;
+    re_schedule)
+        echo "remove current reserve,"
+        echo "and create new reserve ?"
+        read input
+
+        if [ "$input" = yes ];then
+
+            for i in $(atq | grep -v ' = ' | awk '{ print $1 }');do
+                atrm $i
+            done
+            rm -f $MC_DIR_RESERVED/*.xml
+
+            prefix_digital=digital
+            prefix_bs_cs=bs_cs
+            if [ "$MC_RESERVE_SATELLITE" = "true" ];then
+                python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+            else
+                python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+            fi
         fi
         ;;
 esac

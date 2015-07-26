@@ -343,12 +343,18 @@ class ReserveMaker:
             if s not in span_list_m:
                 span_list_m.append(s)
 
-        span_list_m2 = []
-        for i in xrange(0, len(span_list_m) - 1):
-            if span_list_m[i][0] != span_list_m[i + 1][0]:
-                span_list_m2.append(span_list_m[i])
-        if span_list_m[-1][0] != span_list_m2[-1][0]:
-            span_list_m2.append(span_list_m[-1])
+        if 1 < len(span_list_m):
+            span_list_m2 = []
+            for i in xrange(0, len(span_list_m) - 1):
+                if span_list_m[i][0] != span_list_m[i + 1][0]:
+                    span_list_m2.append(span_list_m[i])
+            if len(span_list_m2) == 0:
+                span_list_m2 = span_list_m
+            else:
+                if span_list_m[-1][0] != span_list_m2[-1][0]:
+                    span_list_m2.append(span_list_m[-1])
+        else:
+            span_list_m2 = span_list_m
 
         self.log("span_list_optimized:")
         for s in span_list_m2:
