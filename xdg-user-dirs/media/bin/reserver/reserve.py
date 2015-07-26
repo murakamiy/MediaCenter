@@ -185,7 +185,7 @@ class ReserveMaker:
         for isdb in isdb_set:
             prog_list = isdb[0]
             rinfo_list = isdb[1]
-            if self.random_finder != None and self.dry_run == False:
+            if self.random_finder != None:
                 random_list = self.find_random(span_list, prog_list, title_list)
                 random_list = self.apply_rating(random_list)
                 rinfo_list.extend(random_list)
