@@ -145,7 +145,6 @@ class CultureFinder(Finder):
     priority = 30
     allow_list = [
         u'スーパープレゼンテーション',
-        u'THE世界遺産',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -153,13 +152,17 @@ class CultureFinder(Finder):
         return False
 
 class NatureFinder(Finder):
-    original_file = FILE_RELEASE
-    priority = 30
+    original_file = FILE_KEEP
+    priority = 45
+    allow_list = [
+        u'プラネットアース',
+        u'BBC　EARTH',
+    ]
     def allow(self, pinfo):
-        r = random.choice((1,2,3,4,5))
-        if r == 1 and '自然・動物・環境' in pinfo.category_list:
-            if not re.search('調整用カラーバー', pinfo.title):
-                return True
+        if re.search(self.allow_pattern, pinfo.title):
+            return True
+        if pinfo.channel == '16' and re.search('世界遺産', pinfo.title):
+            return True
         return False
 
 class MusicFinder(Finder):
@@ -193,9 +196,6 @@ class CreditFinder(Finder):
 
 class RandomFinder(Finder):
     original_file = FILE_RELEASE
-    encode_width = 320
-    encode_height = 180
-    encode_bitrate = '250k'
     def allow(self, pinfo):
         if pinfo.start.hour == self.cron_hour or self.next_cron < pinfo.end:
             return None
