@@ -110,7 +110,7 @@ class AnimeFinder(Finder):
 
 class BoxingFinder(Finder):
     original_file = FILE_RELEASE
-    priority = 40
+    priority = 30
     allow_list = [
         u'エキサイトマッチ',
     ]
@@ -121,7 +121,7 @@ class BoxingFinder(Finder):
 
 class MoterSportsFinder(Finder):
     original_file = FILE_RELEASE
-    priority = 40
+    priority = 30
     def allow(self, pinfo):
         if 'モータースポーツ' in pinfo.category_list:
             if re.search('F1', pinfo.title) and re.search('決勝', pinfo.title):
@@ -134,7 +134,7 @@ class MoterSportsFinder(Finder):
 
 class CarInfomationFinder(Finder):
     original_file = FILE_RELEASE
-    priority = 40
+    priority = 30
     def allow(self, pinfo):
         if re.search('カーグラフィックTV', pinfo.title) and pinfo.channel != 'CS_299':
             return True
@@ -153,12 +153,14 @@ class CultureFinder(Finder):
 
 class NatureFinder(Finder):
     original_file = FILE_KEEP
-    priority = 45
+    priority = 40
     allow_list = [
         u'プラネットアース',
         u'BBC　EARTH',
     ]
     def allow(self, pinfo):
+        if not '自然・動物・環境' in pinfo.category_list:
+            return False
         if re.search(self.allow_pattern, pinfo.title):
             return True
         if pinfo.channel == '16' and re.search('世界遺産', pinfo.title):
@@ -216,9 +218,6 @@ class RandomFinder(Finder):
 
         if not '自然・動物・環境' in pinfo.category_list:
             pinfo.priority -= 20
-        if re.search('調整用カラーバー', pinfo.title):
-            pinfo.priority -= 20
-
 
         return pinfo
 
