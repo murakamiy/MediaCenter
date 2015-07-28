@@ -17,7 +17,7 @@ one_day_before=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 *
 two_day_before=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m%d", systime() - 60 * 60 * 48)) }')
 yesterday=$one_day_before
 
-cat /sys/fs/ext4/sda1/lifetime_write_kbytes > ${MC_DIR_FILE_SIZE}/tbw_${today}
+cat /sys/fs/ext4/sdb1/lifetime_write_kbytes > ${MC_DIR_FILE_SIZE}/tbw_${today}
 
 if [ -f ${MC_DIR_FILE_SIZE}/tbw_${two_day_before} ];then
 

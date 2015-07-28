@@ -203,6 +203,17 @@ BEGIN {
     FAN1 = 0
     FAN2 = 0
 
+    mother_board_1_line = 0
+    mother_board_2_line = 0
+}
+
+/^soc_dts0-virtual-0/ {
+    mother_board_1_line = 1
+    mother_board_2_line = 0
+}
+/^soc_dts1-virtual-0/ {
+    mother_board_1_line = 0
+    mother_board_2_line = 1
 }
 
 {
@@ -215,6 +226,12 @@ BEGIN {
     }
     else if (match($1, "fan1:") != 0) {
         FAN2 = $2
+    }
+    else if (mother_board_1_line == 1 && match($1, "temp1:") != 0) {
+        TEMP_MOTHER_BORD_1 = $2
+    }
+    else if (mother_board_2_line == 1 && match($1, "temp1:") != 0) {
+        TEMP_MOTHER_BORD_2 = $2
     }
 
 }
