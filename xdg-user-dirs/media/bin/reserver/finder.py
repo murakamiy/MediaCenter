@@ -214,7 +214,7 @@ class RandomFinder(Finder):
         pinfo.encode_bitrate = self.encode_bitrate
 
         if pinfo.channel not in ('CS_340', 'CS_341', 'CS_343'):
-            return None
+            pinfo.priority -= 20
 
         if not '自然・動物・環境' in pinfo.category_list:
             pinfo.priority -= 20
