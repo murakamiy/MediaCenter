@@ -364,11 +364,11 @@ class ReserveMaker:
         encode_span_list = []
         if count == 0:
             return (span_list, encode_span_list)
-        encode_time = timedelta(0, 60 * 60 * 3, 0)
+        encode_time = timedelta(0, 60 * 60 * 2, 0)
         one_day = timedelta(1, 0, 0)
         while 0 < count:
             for s in span_list:
-                if len(s) == 2 and encode_time <= s[1] - s[0] and s[1] - self.now < one_day:
+                if len(s) == 2 and encode_time <= s[1] - s[0] and s[0] - self.now < one_day:
                     s.append(True)
                     break
             count -= 1

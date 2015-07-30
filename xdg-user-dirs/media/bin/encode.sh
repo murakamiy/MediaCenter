@@ -9,7 +9,7 @@ function do_encode_ffmpeg() {
     nice -n 10 \
     ffmpeg -y -i $input -f mp4 \
         -loglevel quiet \
-        -threads 1 \
+        -threads 2 \
         -s 1280x720 \
         -r 30000/1001 \
         -vcodec libx264 \
