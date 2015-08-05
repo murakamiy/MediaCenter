@@ -145,6 +145,7 @@ class CultureFinder(Finder):
     priority = 30
     allow_list = [
         u'スーパープレゼンテーション',
+        u'THE NAKED',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
