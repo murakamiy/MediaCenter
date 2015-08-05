@@ -22,6 +22,11 @@ if [ "$event_handle" = "not_yet" ];then
 
     elif [ "$type" = "battery" ];then
 
+        service lightdm restart &
+#         pulseaudio --kill
+#         killall pulseaudio
+#         pulseaudio --start
+
         (
             sleep 2
             battery_level=$(tac /tmp/sixad-task | grep -o 'Battery ..' | head -n 1 | awk '{ printf("%d\n", $2) }')
