@@ -29,7 +29,6 @@ if [ -n "$xml" ];then
     log "encode start: $title $(hard_ware_info)"
     mv $xml $MC_DIR_ENCODING
 
-    $MC_BIN_USB_MOUNT >> ${MC_DIR_LOG}/usb-disk.log 2>&1
     do_encode_ffmpeg $base
 
     if [ $? -eq 0 ];then
@@ -58,6 +57,5 @@ if [ -n "$xml" ];then
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_FAILED
     fi
 
-    $MC_BIN_USB_POWER_OFF >> ${MC_DIR_LOG}/usb-disk.log 2>&1
     bash $MC_BIN_SAFE_SHUTDOWN
 fi

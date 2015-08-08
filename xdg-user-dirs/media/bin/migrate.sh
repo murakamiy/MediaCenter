@@ -8,9 +8,9 @@ fi
 
 function has_free_space() {
 
-    used=$(df -Ph --sync | awk -v dev=$MC_DEVICE_USB_DISK_TS '{ if ($1 == dev) printf("%d\n", $5) }')
+    used=$(df -Ph --sync | awk -v dev=$MC_DEVICE_HD_ARRAY '{ if ($1 == dev) printf("%d\n", $5) }')
     if [ "$1" = "print" ];then
-        log "used : $MC_DEVICE_USB_DISK_TS ${used}%"
+        log "used : $MC_DEVICE_HD_ARRAY ${used}%"
     fi
     if [ -z "$used" ];then
         return 0
@@ -46,11 +46,9 @@ function order_of_deletion() {
 
 function do_migrate() {
 
-$MC_BIN_USB_MOUNT >> ${MC_DIR_LOG}/usb-disk.log 2>&1
 mount | grep -q '^/dev/md0 on /home/mc/xdg-user-dirs/media/video/ts_hd'
 if [ $? -ne 0 ];then
-    log "ERROR: usb disk mount failed"
-    /bin/cp ${MC_DIR_LOG}/usb-disk.log ${MC_DIR_LOG}/usb-disk.log.error
+    log "ERROR: disk array mount failed"
     return
 fi
 

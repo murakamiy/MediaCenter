@@ -1,0 +1,122 @@
+#!/bin/bash
+source $(dirname $0)/00.conf
+
+function usage() {
+cat << EOF
+USAGE : $(basename $0) OPTIONS
+        -h print help
+        -w wait until all storage device are presented
+        -s set standby timeout
+        -S put hard disk arrays to standby mode
+EOF
+exit 1
+}
+
+function print_device_ssd() {
+    if [ -h /dev/disk/by-id/$MC_DEVICE_SSD ];then
+        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_SSD
+    fi
+}
+
+function print_device_hd() {
+    if [ -h /dev/disk/by-id/$MC_DEVICE_HD ];then
+        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD
+    fi
+}
+
+function print_device_hd_array() {
+    device_list=(
+        $MC_DEVICE_HD_ARRAY_1
+        $MC_DEVICE_HD_ARRAY_2
+    )
+    for d in ${device_list[@]};do
+        if [ -h /dev/disk/by-id/$d ];then
+            $MC_BIN_REALPATH /dev/disk/by-id/$d
+        fi
+    done
+}
+
+function print_device_hd_array_md() {
+    if [ -b $MC_DEVICE_HD_ARRAY ];then
+        echo $MC_DEVICE_HD_ARRAY
+    fi
+}
+
+function print_all_storage_device() {
+    (
+        print_device_ssd
+        print_device_hd
+        print_device_hd_array
+    ) | sort
+}
+
+function wait_for_storage_device() {
+    for i in $(seq 60);do
+        echo "wait for storage device $i"
+        count=$( (print_all_storage_device; print_device_hd_array_md) | wc -l)
+        if [ $count -eq 5 ];then
+            echo "wait for storage device $i all device found"
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+
+function set_standby_timeout() {
+    for d in $(print_device_ssd; print_device_hd);do
+        hdparm -S $(($MC_STORAGE_STANDBY_TIMEOUT / 5)) $d
+        hdparm -B 127 $d
+    done
+    for d in $(print_device_hd_array);do
+        hdparm -S $(($MC_STORAGE_STANDBY_TIMEOUT / 5)) $d
+    done
+}
+
+function put_into_standby_mode() {
+
+    flush_disk_cache_soft
+    for d in $(print_device_hd_array);do
+        flush_disk_cache_hard $d
+    done
+    sleep 5
+
+    for d in $(print_device_hd_array);do
+        hdparm -y $d
+    done
+}
+
+function flush_disk_cache_soft() {
+    sync
+    echo 3 > /proc/sys/vm/drop_caches
+    sync
+}
+
+function flush_disk_cache_hard() {
+    blockdev --flushbufs $1
+    hdparm -F $1
+}
+
+while getopts 'hwsS' opt;do
+    case $opt in
+        h)
+            usage
+            exit
+            ;;
+        w)
+            wait_for_storage_device
+            exit
+            ;;
+        s)
+            set_standby_timeout
+            exit
+            ;;
+        S)
+            put_into_standby_mode
+            exit
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+usage

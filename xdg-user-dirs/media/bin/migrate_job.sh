@@ -6,11 +6,6 @@ function do_migrate() {
 df=$(LANG=C df -P | grep '/$' | awk '{ printf("%d\n", $(NF - 1)) }')
 if [ $df -gt $MC_SSD_THRESHOLD ];then
     bash $MC_BIN_MIGRATE lazy
-
-    running=$(find $MC_DIR_PLAY $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
-    if [ -z "$running" ];then
-        $MC_BIN_USB_POWER_OFF >> ${MC_DIR_LOG}/usb-disk.log 2>&1
-    fi
 fi
 
 }

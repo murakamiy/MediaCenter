@@ -274,7 +274,7 @@ media:x:1001:mc
 # sudoers
 ####################################################################################################
 
-%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/ubin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/bin/sixad-task,/usr/bin/intel_gpu_top
+%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/bin/sixad-task,/usr/sbin/service
 
 ####################################################################################################
 # crontab
@@ -386,24 +386,18 @@ mdadm --stop /dev/md0
 
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164
 mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397
-mdadm --zero-superblock /dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0680500
 
-mdadm --create /dev/md0 --level=0 --raid-devices=3 -c 1024 \
+mdadm --create /dev/md0 --level=stripe --raid-devices=2 --chunk=10M \
 /dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164 \
-/dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397 \
-/dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0680500
-
-gdisk /dev/md0
-partprobe /dev/md0
+/dev/disk/by-id/ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397
 
 mkfs.ext4 \
 -m 0 \
--b 4096 \
--E stride=256,stripe-width=768,lazy_itable_init=0,lazy_journal_init=0 \
--O extent,large_file,sparse_super \
+-T largefile4 \
+-E lazy_itable_init=0,lazy_journal_init=0 \
 /dev/md0
 
-mount -o noatime,stripe=768 /dev/md0 /mnt/hd_array
+mount -o noatime /dev/md0 /mnt/hd_array
 mkdir /mnt/hd_array/ts_hd
 chown mc:mc /mnt/hd_array/ts_hd
 mkdir /mnt/hd_array/mp4_hd
@@ -439,3 +433,10 @@ domain   =
 service fancontrol stop
 pwmconfig
 service fancontrol start
+
+####################################################################################################
+# hdparm
+####################################################################################################
+
+hdparm -S 36 /dev/sdb
+hdparm -I /dev/sdb

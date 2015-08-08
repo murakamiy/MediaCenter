@@ -4,8 +4,6 @@ source $(dirname $0)/00.conf
 function do_shutdown() {
     sudo $MC_BIN_SIXAD stop
     bash $MC_BIN_DEBUG invk
-    $MC_BIN_USB_POWER_OFF
-    sudo $MC_BIN_USB_CONTROL -e
     touch $MC_STAT_POWEROFF
     sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
 }

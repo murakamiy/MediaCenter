@@ -76,8 +76,6 @@ done &
 pid_epg_bs_cs=$!
 fi
 
-$MC_BIN_USB_MOUNT >> ${MC_DIR_LOG}/usb-disk.log 2>&1
-
 bash $MC_BIN_MIGRATE &
 pid_mig_array=$!
 bash $MC_BIN_SMB &
@@ -119,11 +117,6 @@ wait $pid_mig_array
 bash $MC_BIN_MIGRATE_MP4
 
 find $MC_DIR_TITLE_TS -type d -delete
-
-running=$(find $MC_DIR_PLAY $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
-if [ -z "$running" ];then
-    $MC_BIN_USB_POWER_OFF
-fi
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 
