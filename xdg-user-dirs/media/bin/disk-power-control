@@ -12,15 +12,15 @@ EOF
 exit 1
 }
 
-function print_device_ssd() {
-    if [ -h /dev/disk/by-id/$MC_DEVICE_SSD ];then
-        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_SSD
-    fi
-}
-
 function print_device_hd() {
     if [ -h /dev/disk/by-id/$MC_DEVICE_HD ];then
         $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD
+    fi
+}
+
+function print_device_hd2() {
+    if [ -h /dev/disk/by-id/$MC_DEVICE_HD2 ];then
+        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD2
     fi
 }
 
@@ -44,8 +44,8 @@ function print_device_hd_array_md() {
 
 function print_all_storage_device() {
     (
-        print_device_ssd
         print_device_hd
+        print_device_hd2
         print_device_hd_array
     ) | sort
 }
@@ -64,11 +64,11 @@ function wait_for_storage_device() {
 }
 
 function set_standby_timeout() {
-    for d in $(print_device_ssd; print_device_hd);do
+    for d in $(print_device_hd);do
+        hdparm -B 128 $d
         hdparm -S $(($MC_STORAGE_STANDBY_TIMEOUT / 5)) $d
-        hdparm -B 127 $d
     done
-    for d in $(print_device_hd_array);do
+    for d in $(print_device_hd2; print_device_hd_array);do
         hdparm -S $(($MC_STORAGE_STANDBY_TIMEOUT / 5)) $d
     done
 }
@@ -76,12 +76,12 @@ function set_standby_timeout() {
 function put_into_standby_mode() {
 
     flush_disk_cache_soft
-    for d in $(print_device_hd_array);do
+    for d in $(print_device_hd2; print_device_hd_array);do
         flush_disk_cache_hard $d
     done
     sleep 5
 
-    for d in $(print_device_hd_array);do
+    for d in $(print_device_hd2; print_device_hd_array);do
         hdparm -y $d
     done
 }
