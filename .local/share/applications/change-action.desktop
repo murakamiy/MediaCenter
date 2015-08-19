@@ -2,5 +2,5 @@
 Name=ChangeAction
 Type=Application
 Exec=/home/mc/xdg-user-dirs/media/bin/change-action.sh %U
-Icon=applications-system
+Icon=view-refresh-symbolic
 Terminal=false

@@ -2,5 +2,5 @@
 Name=SafeShutdown
 Type=Application
 Exec=/home/mc/xdg-user-dirs/media/bin/safe_shutdown_gui.sh
-Icon=system-shutdown
+Icon=system-shutdown-symbolic
 Terminal=false
