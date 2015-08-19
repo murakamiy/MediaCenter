@@ -12,37 +12,20 @@ mkfs.ext4 \
 /dev/sda1
 
 ####################################################################################################
-# console font
-####################################################################################################
-
-dpkg-reconfigure console-setup
-/etc/default/console-setup
-CHARMAP="UTF-8"
-CODESET="guess"
-FONTFACE="TerminusBold"
-FONTSIZE="16x32"
-
-####################################################################################################
 # debian repository
 ####################################################################################################
 
 /etc/apt/sources.list
 
-deb     http://cdn.debian.or.jp/debian testing main contrib non-free
-deb-src http://cdn.debian.or.jp/debian testing main contrib non-free
-
-deb     http://www.deb-multimedia.org testing main non-free
-deb-src http://www.deb-multimedia.org testing main non-free
-
-deb     http://liquorix.net/debian sid main
-deb-src http://liquorix.net/debian sid main
+deb http://cdn.debian.or.jp/debian testing main contrib non-free
+deb http://security.debian.org/    testing/updates main contrib non-free
+deb http://www.deb-multimedia.org  testing main non-free
+deb http://liquorix.net/debian     sid main
 
 aptitude update
 aptitude install deb-multimedia-keyring
 aptitude install liquorix-keyring
 aptitude update
-
-aptitude install linux-image-liquorix-amd64 linux-headers-liquorix-amd64
 
 ####################################################################################################
 # package install 1
@@ -66,7 +49,7 @@ ufw enable
 
 git clone git@github.com:murakamiy/MediaCenter.git
 git clone git@github.com:murakamiy/epgdump_py.git
-git clone git@github.com:murakamiy/dotfile.git
+git clone git@github.com:murakamiy/dotfiles.git
 
 ####################################################################################################
 # mount option
@@ -80,47 +63,90 @@ tmpfs      /tmp  tmpfs  nodev,nosuid,noexec                  0  0
 # package install 2
 ####################################################################################################
 
-autoconf automake
-build-essential
-dkms
-ffmpeg
-gawk
-gdisk
-hwinfo
-iotop
-linux-headers-amd64
-lm-sensors
-lockfile-progs
-mdadm
-parted
-pcscd libpcsclite1 libpcsclite-dev pcsc-tools
-pkg-config
-python-dateutil
-screen
-smbclient
-sqlite3
-trash-cli
-unzip
-xmlstarlet
-zenity
-zip
 astyle
-htop
-imagemagick
-iotop
-mkvtoolnix
-mp4v2-utils
-mplayer2
-python-pysqlite2
-vlc
-vobcopy
-xdg-utils
-hdparm
-
+autoconf
+automake
+bluez
+build-essential
+cpufrequtils
+diffstat
+dkms
+dvd+rw-tools
+ethtool
+fancontrol
+ffmpeg
+firmware-linux
+firmware-linux-nonfree
+firmware-realtek
 fonts-takao
 fonts-takao-gothic
 fonts-takao-mincho
-
+gawk
+gdisk
+git
+gstreamer1.0-plugins-bad
+gstreamer1.0-plugins-good
+gstreamer1.0-plugins-ugly
+gstreamer1.0-tools
+gstreamer1.0-vaapi
+handbrake-cli
+hdparm
+htop
+hwinfo
+imagemagick
+intel-gpu-tools
+iotop
+libbluetooth-dev
+libdbus-1-dev
+libdbus-glib-1-dev
+libjack-jackd2-dev
+libpcsclite-dev
+libpcsclite1
+libusb-dev
+lightdm
+linux-headers-amd64
+lm-sensors
+lockfile-progs
+lshw
+lsof
+mdadm
+mediatomb
+mesa-utils
+mkvtoolnix
+mp4v2-utils
+mplayer2
+openssh-server
+parted
+patchutils
+pavucontrol
+pcsc-tools
+pcscd
+pkg-config
+powertop
+pulseaudio
+pyqt4-dev-tools
+python-dateutil
+python-dbus
+python-pysqlite2
+python-qt4
+python-qt4-dev
+rrdtool
+screen
+smartmontools
+smbclient
+sqlite3
+sudo
+sysstat
+thunar
+trash-cli
+ufw
+unzip
+vainfo
+vim
+vlc
+vobcopy
+x11vnc
+xdg-utils
 xfce4
 xfce4-artwork
 xfce4-panel
@@ -128,59 +154,16 @@ xfce4-session
 xfce4-settings
 xfce4-taskmanager
 xfce4-terminal
-thunar
-lightdm
+xmlstarlet
+zenity
+zip
 
-lsof
-pulseaudio
-pavucontrol
+####################################################################################################
+# package install 2
+####################################################################################################
 
-handbrake-cli
-
-libusb-dev
-libbluetooth-dev
-libdbus-1-dev
-libdbus-glib-1-dev
-python-qt4-dev
-python-qt4
-pyqt4-dev-tools
-libjack-jackd2-dev
-python-dbus
-bluez
-
-firmware-linux
-firmware-linux-nonfree 
-firmware-realtek
-
-smartmontools
-rrdtool
-sysstat
-ntpdate
-dvd+rw-tools
-
-mediatomb
-
-diffstat
-patchutils
-x11vnc
-
-ethtool
-
-sudo
-vainfo
-intel-gpu-tools
-mesa-utils
-powertop
-cpufrequtils
-lshw
-
-gstreamer1.0-plugins-ugly
-gstreamer1.0-plugins-bad
-gstreamer1.0-plugins-base-apps
-gstreamer1.0-tools
-gstreamer1.0-vaapi
-
-fancontrol
+linux-image-liquorix-amd64
+linux-headers-liquorix-amd64
 
 ####################################################################################################
 # remove package
@@ -210,11 +193,15 @@ uim-xim
 anthy
 
 ####################################################################################################
-# boot loader
+# console font
 ####################################################################################################
 
-dpkg-reconfigure grub-pc
-grub install devices:
+dpkg-reconfigure console-setup
+/etc/default/console-setup
+CHARMAP="UTF-8"
+CODESET="guess"
+FONTFACE="TerminusBold"
+FONTSIZE="16x32"
 
 ####################################################################################################
 # sshd
@@ -260,6 +247,14 @@ RAMTMP=yes
 
 /etc/default/rcS
 FSCKFIX=yes
+
+####################################################################################################
+# mediatomb
+####################################################################################################
+
+/etc/default/mediatomb
+
+MT_INTERFACE="eth0"
 
 ####################################################################################################
 # group
@@ -311,10 +306,22 @@ xdg-user-dirs-update  --set  VIDEOS       "$HOME/xdg-user-dirs/videos"
 ####################################################################################################
 # sensor
 ####################################################################################################
+
+sensors-detect
+
 /etc/modules
 
 coretemp
 nct6775
+
+####################################################################################################
+# fancontrol
+####################################################################################################
+
+service fancontrol stop
+pwmconfig
+service fancontrol start
+
 ####################################################################################################
 # autologin
 ####################################################################################################
@@ -427,16 +434,42 @@ password = password
 domain   =
 
 ####################################################################################################
-# fancontrol
-####################################################################################################
-
-service fancontrol stop
-pwmconfig
-service fancontrol start
-
-####################################################################################################
 # hdparm
 ####################################################################################################
 
 hdparm -S 36 /dev/sdb
 hdparm -I /dev/sdb
+
+####################################################################################################
+# bluetooth pairing
+####################################################################################################
+
+sixad --stop
+service bluetooth stop
+hciconfig hci0 up
+
+bluetoothctl
+    agent on
+    default-agent
+    discoverable on
+    pairable on
+    scan on
+
+press playstation power button
+
+bluetoothctl
+    untrust <playstation_device_addr>
+    remove  <playstation_device_addr>
+
+connect playstation controller with usb cable
+
+sixpair
+
+bluetoothctl
+    trust <playstation_device_addr>
+
+disconnect playstation controller
+
+sixad --start
+
+press playstation power button
