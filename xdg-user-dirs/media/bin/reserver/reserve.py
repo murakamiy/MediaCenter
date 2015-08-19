@@ -368,6 +368,8 @@ class ReserveMaker:
         one_day = timedelta(0, 60 * 60 * 22, 0)
         while 0 < count:
             for s in span_list:
+                if self.now.month in (7, 8) and 8 < s[0].hour:
+                    continue
                 if len(s) == 2 and encode_time <= s[1] - s[0] and s[0] - self.now < one_day:
                     s.append(True)
                     break
