@@ -22,10 +22,7 @@ if [ "$event_handle" = "not_yet" ];then
 
     elif [ "$type" = "battery" ];then
 
-        service lightdm restart &
-#         pulseaudio --kill
-#         killall pulseaudio
-#         pulseaudio --start
+#         xfce4-session-logout --logout
 
         (
             sleep 2
