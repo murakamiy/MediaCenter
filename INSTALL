@@ -473,3 +473,11 @@ disconnect playstation controller
 sixad --start
 
 press playstation power button
+
+####################################################################################################
+# mouse cursor size
+####################################################################################################
+
+xrdb -merge .Xresources
+xrdb -query
+
