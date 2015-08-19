@@ -25,6 +25,7 @@ finders_list.append(finder.MusicFinder())
 finders_list.append(finder.CultureFinder())
 finders_list.append(finder.NatureFinder())
 # finders_list.append(finder.DateTimeFinder())
+finders_list.append(finder.NarutoFinder())
 
 cheif = finder.FindresCheif(finders_list)
 # r = reserve.ReserveMaker(cheif, None, dry_run)

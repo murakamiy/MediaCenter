@@ -75,7 +75,7 @@ class DateTimeFinder(Finder):
 class NarutoFinder(Finder):
     priority = 90
     def allow(self, pinfo):
-        if pinfo.channel == '18' and re.search('NARUTO', pinfo.title):
+        if re.search('NARUTO', pinfo.title):
             return True
         return False
 
