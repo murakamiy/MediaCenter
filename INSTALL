@@ -198,6 +198,9 @@ uim-utils
 uim-xim
 anthy
 
+xscreensaver
+xscreensaver-data
+
 ####################################################################################################
 # console font
 ####################################################################################################
@@ -356,6 +359,8 @@ cd xdg-user-dirs/media/bin/rrd
 bash create.sh
 
 copy ~xdg-user-dirs/media/files
+
+cp -a epgdump_py/ ~/xdg-user-dirs/media/bin/
 
 ####################################################################################################
 # smbclient
