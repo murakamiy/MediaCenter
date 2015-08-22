@@ -391,21 +391,22 @@ class ReserveMaker:
                     e[0] = r.pinfo.start
                     encode_command = "exec bash %s" % (BIN_ENCODE)
                     at_command = "at -t %s > /dev/null 2>&1" % (e[0].strftime("%Y%m%d%H%M"))
-                    e[2] = "echo '%s' | %s" % (encode_command, at_command)
+                    e.append("echo '%s' | %s" % (encode_command, at_command))
                     break
         return encode_span_list
     def do_reserve_encode(self, encode_list):
         self.log("reserved encode:")
         for e in encode_list:
-            if self.dry_run == False:
-                os.system(e[2])
-            self.log(" %s %s %s" %
-                        (
-                            e[0].strftime('%d %H:%M'),
-                            e[1].strftime('%H:%M'),
-                            "ENCODE_JOB"
+            if len(e) == 4:
+                if self.dry_run == False:
+                    os.system(e[3])
+                self.log(" %s %s %s" %
+                            (
+                                e[0].strftime('%d %H:%M'),
+                                e[1].strftime('%H:%M'),
+                                "ENCODE_JOB"
+                            )
                         )
-                    )
     def set_dry_run(self, dry_run):
         self.dry_run = dry_run
     def set_include_channel(self, channel):
