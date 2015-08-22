@@ -17,10 +17,10 @@ mkfs.ext4 \
 
 /etc/apt/sources.list
 
-deb http://cdn.debian.or.jp/debian testing main contrib non-free
-deb http://security.debian.org/    testing/updates main contrib non-free
-deb http://www.deb-multimedia.org  testing main non-free
-deb http://liquorix.net/debian     sid main
+deb http://ftp.jp.debian.org/debian/ testing main contrib non-free
+deb http://security.debian.org/      testing/updates main contrib non-free
+deb http://www.deb-multimedia.org    testing main non-free
+deb http://liquorix.net/debian       sid main
 
 aptitude update
 aptitude install deb-multimedia-keyring
@@ -35,6 +35,10 @@ git
 vim
 ufw
 openssh-server
+
+less /usr/share/tasksel/descs/debian-tasks.desc
+tasksel install standard
+aptitude remove systemd
 
 ####################################################################################################
 # firewall
@@ -95,6 +99,7 @@ htop
 hwinfo
 imagemagick
 intel-gpu-tools
+intel-microcode
 iotop
 libbluetooth-dev
 libdbus-1-dev
@@ -145,6 +150,7 @@ vainfo
 vim
 vlc
 vobcopy
+w3m
 x11vnc
 xdg-utils
 xfce4
@@ -159,7 +165,7 @@ zenity
 zip
 
 ####################################################################################################
-# package install 2
+# package install 3
 ####################################################################################################
 
 linux-image-liquorix-amd64
@@ -232,7 +238,6 @@ GRUB_TIMEOUT=5
 GRUB_CMDLINE_LINUX_DEFAULT=""
 GRUB_TERMINAL=console
 GRUB_GFXMODE=1024x768
-GRUB_DISABLE_LINUX_UUID=true
 
 ####################################################################################################
 # tmpfs
@@ -331,10 +336,45 @@ autologin-user=mc
 autologin-user-timeout=0
 
 ####################################################################################################
-# mime type png
+# xfce
 ####################################################################################################
 
 application -> setting -> mime type editor -> png -> PNGHandler
+
+screen saver off
+
+####################################################################################################
+# init database, setting files
+####################################################################################################
+
+bash ~/xdg-user-dirs/media/bin/mkdir.sh
+
+cd xdg-user-dirs/media/bin/database
+bash init.sh
+
+cd xdg-user-dirs/media/bin/rrd
+bash create.sh
+
+copy ~xdg-user-dirs/media/files
+
+####################################################################################################
+# smbclient
+####################################################################################################
+
+~/.smbauth
+
+username = username
+password = password
+domain   =
+
+####################################################################################################
+# pt3
+####################################################################################################
+
+dkms add /usr/src/pt3_drv-0.0.1
+dkms build pt3_drv/0.0.1
+dkms install pt3_drv/0.0.1
+dkms status
 
 ####################################################################################################
 # wake on lan
@@ -355,15 +395,6 @@ wakeup_time=$(awk 'BEGIN { print systime() + 120 }')
 date
 sleep 20
 sudo /home/mc/xdg-user-dirs/media/ubin/wakeuptool -w -t $wakeup_time
-
-####################################################################################################
-# pt3
-####################################################################################################
-
-dkms add /usr/src/pt3_drv-0.0.1
-dkms build pt3_drv/0.0.1
-dkms install pt3_drv/0.0.1
-dkms status
 
 ####################################################################################################
 # udev
@@ -412,26 +443,6 @@ chown mc:mc /mnt/hd_array/mp4_hd
 
 mdadm --detail --scan >> /etc/mdadm/mdadm.conf
 update-initramfs -u
-
-####################################################################################################
-# init database
-####################################################################################################
-
-cd xdg-user-dirs/media/bin/database
-bash init.sh
-
-cd xdg-user-dirs/media/bin/rrd
-bash create.sh
-
-####################################################################################################
-# smbclient
-####################################################################################################
-
-~/.smbauth
-
-username = username
-password = password
-domain   =
 
 ####################################################################################################
 # hdparm
