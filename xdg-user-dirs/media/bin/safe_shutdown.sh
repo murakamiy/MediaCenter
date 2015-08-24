@@ -5,6 +5,7 @@ function do_shutdown() {
     sudo $MC_BIN_SIXAD stop
     bash $MC_BIN_DEBUG invk
     touch $MC_STAT_POWEROFF
+    $MC_BIN_DISK_CONTROL -u
     sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
 }
 

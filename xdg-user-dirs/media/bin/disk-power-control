@@ -8,6 +8,7 @@ USAGE : $(basename $0) OPTIONS
         -w wait until all storage device are presented
         -s set standby timeout
         -S put hard disk arrays to standby mode
+        -u wakeup hard disk device
 EOF
 exit 1
 }
@@ -97,7 +98,13 @@ function flush_disk_cache_hard() {
     hdparm -F $1
 }
 
-while getopts 'hwsS' opt;do
+function wakeup() {
+    for d in $(print_device_hd; print_device_hd2; print_device_hd_array_md);do
+        ls $(mount | grep "^$d" | awk '{ print $3 }') > /dev/null
+    done
+}
+
+while getopts 'hwsSu' opt;do
     case $opt in
         h)
             usage
@@ -113,6 +120,10 @@ while getopts 'hwsS' opt;do
             ;;
         S)
             put_into_standby_mode
+            exit
+            ;;
+        u)
+            wakeup
             exit
             ;;
     esac
