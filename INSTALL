@@ -32,13 +32,16 @@ aptitude update
 ####################################################################################################
 
 git
+screen
 vim
 ufw
 openssh-server
 
 less /usr/share/tasksel/descs/debian-tasks.desc
 tasksel install standard
-aptitude remove systemd
+
+apt-get install sysvinit-core sysvinit sysvinit-utils
+apt-get remove --purge --auto-remove systemd
 
 ####################################################################################################
 # firewall
@@ -237,6 +240,8 @@ rm /etc/cron.daily/mdadm
 ####################################################################################################
 
 /etc/default/grub
+GRUB_DEFAULT=saved
+GRUB_SAVEDEFAULT=true
 GRUB_TIMEOUT=5
 GRUB_CMDLINE_LINUX_DEFAULT=""
 GRUB_TERMINAL=console
@@ -461,7 +466,7 @@ hdparm -I /dev/sdb
 ####################################################################################################
 
 sixad --stop
-service bluetooth stop
+service bluetooth restart
 hciconfig hci0 up
 
 bluetoothctl
