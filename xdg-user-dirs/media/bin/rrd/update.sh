@@ -27,10 +27,8 @@ BEGIN {
     HD2_WRITE = 0
 
     cpu_line = 0
-    ssd_line = 0
     hd_array_1_line = 0
     hd_array_2_line = 0
-    hd_array_3_line = 0
     hd_line = 0
     hd2_line = 0
     hd_raid_line = 0
@@ -40,31 +38,23 @@ BEGIN {
     cpu_line = 1
     next
 }
-/^ata-Crucial_CT256M550SSD1_14520E2FA416/ {
-    ssd_line = 1
-    next
-}
 /^ata-TOSHIBA_MQ01ABD050_55DTT3QDT/ {
-    hd2_line = 1
-    next
-}
-/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397/ {
-    hd_array_1_line = 1
-    next
-}
-/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164/ {
-    hd_array_2_line = 1
-    next
-}
-/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0680500/ {
-    hd_array_3_line = 1
-    next
-}
-/^ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078/ {
     hd_line = 1
     next
 }
-/^md-name-debian:0/ {
+/^ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078/ {
+    hd2_line = 1
+    next
+}
+/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164/ {
+    hd_array_1_line = 1
+    next
+}
+/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397/ {
+    hd_array_2_line = 1
+    next
+}
+/^md-name-MediaCenter/ {
     hd_raid_line = 1
     next
 }
@@ -78,11 +68,6 @@ BEGIN {
         CPU_IOWAIT = $4
         CPU_STEAL = $5
         CPU_IDLE = $6
-    }
-    else if (ssd_line == 1) {
-        ssd_line = 0
-        SSD_READ = $2
-        SSD_WRITE = $3
     }
     else if (hd2_line == 1) {
         hd2_line = 0
@@ -98,11 +83,6 @@ BEGIN {
         hd_array_2_line = 0
         HD_ARRAY_2_READ = $2
         HD_ARRAY_2_WRITE = $3
-    }
-    else if (hd_array_3_line == 1) {
-        hd_array_3_line = 0
-        HD_ARRAY_3_READ = $2
-        HD_ARRAY_3_WRITE = $3
     }
     else if (hd_line == 1) {
         hd_line = 0
@@ -163,7 +143,7 @@ HD2_READ=${iostat_arr[18]}
 HD2_WRITE=${iostat_arr[19]}
 
 LOAD_AVERAGE=$(uptime | awk -F 'load average: ' '{ print $2 }' | awk -F , '{ print $1 }')
-DISK_USAGE=$(LANG=C df -P | grep '/mnt/hd2$' | awk '{ printf("%d\n", $(NF - 1)) }')
+DISK_USAGE=$(LANG=C df -P | grep '/mnt/hd$' | awk '{ printf("%d\n", $(NF - 1)) }')
 
 mem_arr=($(free -m | grep '^Mem:' | awk '
 {
