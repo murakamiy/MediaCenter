@@ -86,10 +86,14 @@ else
                 ! vaapiencode_h264 \
                    tune=high-compression \
                    rate-control=cqp \
-                   init-qp=33 \
+                   init-qp=34 \
                    min-qp=1 \
                 ! mux. \
          demux. ! queue \
+                  leaky=upstream \
+                  max-size-buffers=0 \
+                  max-size-time=0 \
+                  max-size-bytes=104857600 \
                 ! aacparse \
                 ! mux. \
          matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
