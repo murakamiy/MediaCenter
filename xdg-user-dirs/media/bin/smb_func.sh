@@ -145,10 +145,9 @@ function smb_move_old_files() {
             epoch_past = epoch_time(past)
             format_past = strftime("%Y/%m/%d-%H:%M:%S", epoch_past)
             period = epoch_now - epoch_past
-            format_period = sprintf("%02d:%02d", period / 3600, period % 3600 / 60)
 
-            if (period > 1) { # 1day:86400 2days:172800
-                printf("%s\t%s\t%s\t%s\n", format_period, past, format_past, file)
+            if (60 * 60 * 24 * 2 < period) {
+                printf("%s\t%s\t%s\t%s\n", period, past, format_past, file)
             }
 
         }
