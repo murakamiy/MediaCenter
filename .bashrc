@@ -240,3 +240,6 @@ function wstat() {
         }' | sort -n | column -t
     fi
 }
+function xfce-logout() {
+    bash /home/mc/xdg-user-dirs/media/bin/xfce4-session-logout.sh
+}
