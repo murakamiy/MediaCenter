@@ -6,5 +6,5 @@ FCTEMPS= hwmon3/pwm2=hwmon1/temp1_input
 FCFANS= hwmon3/pwm2=hwmon3/fan2_input
 MINTEMP= hwmon3/pwm2=30
 MAXTEMP= hwmon3/pwm2=60
-MINSTART= hwmon3/pwm2=120
+MINSTART= hwmon3/pwm2=150
 MINSTOP= hwmon3/pwm2=100
