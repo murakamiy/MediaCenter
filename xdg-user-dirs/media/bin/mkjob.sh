@@ -55,7 +55,7 @@ pid_epg_digital=$!
 
 if [ "$MC_RESERVE_SATELLITE" = "true" ];then
 log 'starting epgdump_py bs cs'
-array=(BS15_0 CS2 CS4)
+array=(BS_101 CS_296 CS_363)
 prefix=$prefix_bs_cs
 for ((i = 0; i < ${#array[@]}; i++));do
     $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts

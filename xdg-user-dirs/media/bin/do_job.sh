@@ -114,7 +114,7 @@ else
             pid_tail=$!
         fi
 
-        $MC_BIN_REC --b25 --sid ${ch_array[0]} ${ch_array[1]} $rec_time_adjust $fifo_recpt1 &
+        $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust $fifo_recpt1 &
         pid_recpt1=$!
         (
             sleep $rec_time_adjust
