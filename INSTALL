@@ -70,6 +70,7 @@ tmpfs      /tmp  tmpfs  nodev,nosuid,noexec                  0  0
 # package install 2
 ####################################################################################################
 
+alsa-utils
 astyle
 autoconf
 automake
@@ -104,6 +105,7 @@ imagemagick
 intel-gpu-tools
 intel-microcode
 iotop
+kexec-tools
 libbluetooth-dev
 libdbus-1-dev
 libdbus-glib-1-dev
@@ -501,4 +503,19 @@ press playstation power button
 
 xrdb -merge .Xresources
 xrdb -query
+
+####################################################################################################
+# HDMI sound
+####################################################################################################
+
+/etc/pulse/default.pa
+load-module module-alsa-sink
+
+####################################################################################################
+# smbclient
+####################################################################################################
+
+/etc/samba/smb.conf
+[global]
+   client NTLMv2 auth = no
 
