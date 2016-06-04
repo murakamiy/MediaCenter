@@ -82,7 +82,7 @@ class NarutoFinder(Finder):
 class TitleFinder(Finder):
     priority = 90
     allow_list = [
-        u'',
+        u'__________',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):

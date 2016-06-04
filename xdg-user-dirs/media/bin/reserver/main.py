@@ -15,7 +15,7 @@ for a in args:
 
 finders_list = []
 finders_list.append(finder.AnimeFinder())
-# finders_list.append(finder.TitleFinder())
+finders_list.append(finder.TitleFinder())
 finders_list.append(finder.MoterSportsFinder())
 finders_list.append(finder.CarInfomationFinder())
 # finders_list.append(finder.CreditFinder())
