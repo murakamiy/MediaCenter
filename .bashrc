@@ -177,10 +177,10 @@ for line in sys.stdin:
 ' | sort -u
 }
 function smbaterm() {
-    smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1'
+    smbclient -A ~/.smbauth '//ATERM-CE6499/hts54806-1'
 }
 function smbput() {
-    smbclient -A ~/.smbauth '//ATERM-CE6499/Samsung-1' -c "put $@"
+    smbclient -A ~/.smbauth '//ATERM-CE6499/hts54806-1' -c "put $@"
 }
 function pdiff() {
     work_dir=/home/mc/xdg-user-dirs/media/dpkg
