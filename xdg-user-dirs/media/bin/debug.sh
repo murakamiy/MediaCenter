@@ -106,7 +106,12 @@ case $command in
         ;;
     mk_title_encode)
         shift
-        for f in $(find $MC_DIR_ENCODE_HD -type f | sort);do
+        if [ -n "$1" ];then
+            file_list=$1
+        else
+            file_list=$(find $MC_DIR_ENCODE_HD -type f | sort)
+        fi
+        for f in $file_list;do
             base=$(basename $f | awk -F . '{ print $1 }')
             ext=$(basename $f | awk -F . '{ print $2 }')
 
