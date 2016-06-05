@@ -160,9 +160,21 @@ for line in sys.stdin:
     if len(str) == 5:
         print "%s %s %s" % (str[0], datetime.datetime.strptime(str[1], "%Y%m%d%H%M%S"), datetime.datetime.strptime(str[3], "%Y%m%d%H%M%S"))'
 }
-function selanime() {
+function selcategory() {
+(
+    category='アニメ'
+    while getopts c: OPT
+    do
+        case $OPT in
+            c)
+                category=$OPTARG
+                ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+
     xmlstarlet sel --encode utf-8 -t -m "//programme" \
-        -m "category[contains(., 'アニメ')]" \
+        -m "category[contains(., '$category')]" \
         -v 'normalize-space(../title)' -o '	' -v '../@start' -n $@ |
     python -c '
 import datetime
@@ -175,6 +187,8 @@ for line in sys.stdin:
         t = arr[0]
         print d,t
 ' | sort -u
+
+)
 }
 function smbaterm() {
     smbclient -A ~/.smbauth '//ATERM-CE6499/hts54806-1'
