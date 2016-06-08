@@ -55,14 +55,16 @@ else
         fifo_dir=/tmp/pt3/fifo
         mkdir -p $fifo_dir
         fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
-        fifo_tail=${fifo_dir}/tee_$$
+        fifo_tee=${fifo_dir}/tee_$$
+        fifo_rec=${fifo_dir}/rec_$$
         mkfifo -m 644 $fifo_ffmpeg
-        mkfifo -m 644 $fifo_tail
+        mkfifo -m 644 $fifo_tee
+        mkfifo -m 644 $fifo_rec
 
         if [ "$original_file" = "keep" ];then
-            job_file_path=${MC_DIR_TS}/${job_file_ts}
+            ffmpeg_input=$fifo_tee
         else
-            job_file_path=${MC_DIR_MP4}/${job_file_mkv}
+            ffmpeg_input=$fifo_rec
         fi
 
         nice -n 5 \
@@ -96,7 +98,7 @@ else
          matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
 
-        ffmpeg -y -i $fifo_tail \
+        ffmpeg -y -i $ffmpeg_input \
         -loglevel quiet \
         -threads 1 \
         -f mpegts \
@@ -105,11 +107,12 @@ else
         $fifo_ffmpeg &
         pid_ffmpeg=$!
 
-        touch ${MC_DIR_TS}/${job_file_ts}
-        tail --follow --retry --sleep-interval=0.5 ${MC_DIR_TS}/${job_file_ts} > $fifo_tail &
-        pid_tail=$!
+        if [ "$original_file" = "keep" ];then
+            tee ${MC_DIR_TS}/${job_file_ts} < $fifo_rec > $fifo_tee &
+            pid_tee=$!
+        fi
 
-        $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust ${MC_DIR_TS}/${job_file_ts} &
+        $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust $fifo_rec &
         pid_recpt1=$!
         (
             sleep $rec_time_adjust
@@ -127,10 +130,12 @@ else
         (
             sleep 10
 
-                kill -TERM $pid_tail
+            if [ "$original_file" = "keep" ];then
+                kill -TERM $pid_tee
                 sleep 1
-                kill -KILL $pid_tail
+                kill -KILL $pid_tee
                 sleep 5
+            fi
 
             kill -TERM $pid_ffmpeg
             sleep 1
@@ -145,11 +150,14 @@ else
         wait $pid_gst
 
         rm -f $fifo_ffmpeg
-        rm -f $fifo_tail
+        rm -f $fifo_tee
+        rm -f $fifo_rec
 
         if [ "$original_file" = "keep" ];then
+            job_file_path=${MC_DIR_TS}/${job_file_ts}
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
         else
+            job_file_path=${MC_DIR_MP4}/${job_file_mkv}
             thumb_file=${MC_DIR_THUMB}/${job_file_mkv}
             rm -f ${MC_DIR_TS}/${job_file_ts}
         fi
