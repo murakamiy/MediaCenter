@@ -54,30 +54,29 @@ else
 
         fifo_dir=/tmp/pt3/fifo
         mkdir -p $fifo_dir
-        fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
         fifo_tee=${fifo_dir}/tee_$$
         fifo_rec=${fifo_dir}/rec_$$
-        mkfifo -m 644 $fifo_ffmpeg
         mkfifo -m 644 $fifo_tee
         mkfifo -m 644 $fifo_rec
 
         if [ "$original_file" = "keep" ];then
-            ffmpeg_input=$fifo_tee
+            gst_input=$fifo_tee
         else
-            ffmpeg_input=$fifo_rec
+            gst_input=$fifo_rec
         fi
 
         nice -n 5 \
         gst-launch-1.0 -q \
-         filesrc location=$fifo_ffmpeg ! tsdemux name=demux \
+         filesrc location=$gst_input \
+         ! queue \
+           leaky=upstream \
+           max-size-buffers=0 \
+           max-size-time=0 \
+           max-size-bytes=500000000 \
+         ! tsdemux name=demux \
          demux. ! queue \
                 ! mpegvideoparse \
                 ! vaapidecode \
-                ! queue \
-                  leaky=upstream \
-                  max-size-buffers=0 \
-                  max-size-time=0 \
-                  max-size-bytes=500000000 \
                 ! vaapipostproc \
                   deinterlace-mode=auto \
                   deinterlace-method=bob \
@@ -89,23 +88,10 @@ else
                    min-qp=1 \
                 ! mux. \
          demux. ! queue \
-                  leaky=upstream \
-                  max-size-buffers=0 \
-                  max-size-time=0 \
-                  max-size-bytes=50000000 \
                 ! aacparse \
                 ! mux. \
          matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
-
-        ffmpeg -y -i $ffmpeg_input \
-        -loglevel quiet \
-        -threads 1 \
-        -f mpegts \
-        -vcodec copy \
-        -acodec libfdk_aac -b:a 256k \
-        $fifo_ffmpeg &
-        pid_ffmpeg=$!
 
         if [ "$original_file" = "keep" ];then
             tee ${MC_DIR_TS}/${job_file_ts} < $fifo_rec > $fifo_tee &
@@ -137,11 +123,6 @@ else
                 sleep 5
             fi
 
-            kill -TERM $pid_ffmpeg
-            sleep 1
-            kill -KILL $pid_ffmpeg
-            sleep 5
-
             kill -TERM $pid_gst
             sleep 1
             kill -KILL $pid_gst
@@ -149,7 +130,6 @@ else
 
         wait $pid_gst
 
-        rm -f $fifo_ffmpeg
         rm -f $fifo_tee
         rm -f $fifo_rec
 
