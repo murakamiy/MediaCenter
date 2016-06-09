@@ -141,7 +141,7 @@ else
             thumb_file=${MC_DIR_THUMB}/${job_file_mkv}
             rm -f ${MC_DIR_TS}/${job_file_ts}
         fi
-        ffmpeg -y -i $job_file_path -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+        ffmpeg -y -i $job_file_path -loglevel quiet -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
         if [ $? -eq 0 ];then
             mv ${thumb_file}.png $thumb_file
         else
@@ -167,9 +167,9 @@ else
         done
         ln $thumb_file "${foundby_dir}/${today}_${title}_${i}.png"
 
-        ffprobe -show_format $job_file_path
+        ffprobe -show_format $job_file_path > /dev/null 2>&1
         if [ $? -eq 0 ];then
-            duration=$(ffprobe -show_format $job_file_path | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
+            duration=$(ffprobe -show_format $job_file_path 2> /dev/null | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
             integrity=$(($rec_time - $duration))
             if [ "$integrity" -lt 60 ];then
                 python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1

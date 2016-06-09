@@ -12,7 +12,7 @@ fi
 lockfile-touch $lock_file &
 pid_lock=$!
 
-smb_copy_mp4 one
+smb_copy_mp4 one > /dev/null 2>&1
 
 kill -TERM $pid_lock
 lockfile-remove $lock_file
