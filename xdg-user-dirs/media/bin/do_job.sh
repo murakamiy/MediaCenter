@@ -54,25 +54,29 @@ else
 
         fifo_dir=/tmp/pt3/fifo
         mkdir -p $fifo_dir
-        fifo_tee=${fifo_dir}/tee_$$
         fifo_rec=${fifo_dir}/rec_$$
-        mkfifo -m 644 $fifo_tee
         mkfifo -m 644 $fifo_rec
 
         if [ "$original_file" = "keep" ];then
-            gst_input=$fifo_tee
+            gst_tee=" ! tee name=tee tee. ! queue ! filesink location=${MC_DIR_TS}/${job_file_ts} tee. "
         else
-            gst_input=$fifo_rec
+            gst_tee=
         fi
 
         nice -n 5 \
         gst-launch-1.0 -q \
-         filesrc location=$gst_input \
-         ! queue \
-           leaky=upstream \
+         filesrc location=$fifo_rec \
+         ! multiqueue \
            max-size-buffers=0 \
            max-size-time=0 \
-           max-size-bytes=500000000 \
+           max-size-bytes=400000000 \
+           $gst_tee \
+         ! queue \
+           leaky=downstream \
+           max-size-buffers=0 \
+           max-size-time=0 \
+           max-size-bytes=100000000 \
+         ! tsparse \
          ! tsdemux name=demux \
          demux. ! queue \
                 ! mpegvideoparse \
@@ -90,19 +94,13 @@ else
          demux. ! queue \
                 ! aacparse \
                 ! mux. \
-         matroskamux name=mux ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
+         matroskamux name=mux ! filesink async=false location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
-
-        if [ "$original_file" = "keep" ];then
-            tee ${MC_DIR_TS}/${job_file_ts} < $fifo_rec > $fifo_tee &
-            pid_tee=$!
-        fi
 
         $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust $fifo_rec &
         pid_recpt1=$!
         (
             sleep $rec_time_adjust
-            sleep 10
 
             kill -TERM $pid_recpt1
             sleep 1
@@ -116,13 +114,6 @@ else
         (
             sleep 10
 
-            if [ "$original_file" = "keep" ];then
-                kill -TERM $pid_tee
-                sleep 1
-                kill -KILL $pid_tee
-                sleep 5
-            fi
-
             kill -TERM $pid_gst
             sleep 1
             kill -KILL $pid_gst
@@ -130,7 +121,6 @@ else
 
         wait $pid_gst
 
-        rm -f $fifo_tee
         rm -f $fifo_rec
 
         if [ "$original_file" = "keep" ];then
