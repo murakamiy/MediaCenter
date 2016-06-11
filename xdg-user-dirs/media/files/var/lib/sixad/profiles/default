@@ -84,9 +84,9 @@ key_l2 42
 # alt
 key_r2 56
 # page down
-key_l1 109
+key_l1 104
 # page up
-key_r1 104
+key_r1 109
 # escape
 key_tri 1
 # enter

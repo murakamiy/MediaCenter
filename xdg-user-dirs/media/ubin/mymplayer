@@ -54,9 +54,14 @@ fi
 
 input=$1
 
-mplayer2 $media $delay $volume \
---volstep=10 \
---fs \
---vo=gl_nosw \
---vf=lavcdeint \
+# mplayer 1
+# -fs \
+# -volstep 10 \
+# -vf lavcdeint \
+# -vo gl_nosw \
+
+mpv $media $delay $volume \
+-fs \
+-vo opengl-hq \
+-vf yadif \
 $input

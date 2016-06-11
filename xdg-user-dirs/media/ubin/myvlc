@@ -7,16 +7,16 @@ LANG=C vlc \
 --video-filter=deinterlace \
 --deinterlace-mode=blend \
 --fullscreen \
---global-key-jump+long='Page Up' \
+--global-key-jump+long='Page Down' \
 --global-key-jump+medium=Up \
 --global-key-jump+short=Right \
---global-key-jump-long='Page Down' \
+--global-key-jump-long='Page Up' \
 --global-key-jump-medium=Down \
 --global-key-jump-short=Left \
 --global-key-quit=Esc \
 --global-key-vol-up=0 \
 --global-key-vol-down=9 \
---short-jump-size  20   \
---medium-jump-size 60  \
---long-jump-size   600  \
+--short-jump-size  10 \
+--medium-jump-size 60 \
+--long-jump-size   600 \
 $@
