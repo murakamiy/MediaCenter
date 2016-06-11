@@ -26,7 +26,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
         $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts &
         pid_rec=$!
 
-        arr=($(python $MC_BIN_EPGTIME $fifo_epg))
+        arr=($(pypy $MC_BIN_EPGTIME $fifo_epg))
         update=${arr[0]}
         update_time=${arr[1]}
         sys_time=${arr[2]}
@@ -43,7 +43,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
         $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     fi
     (
-        python $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        pypy $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
         /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_digital_dump=$!
@@ -65,7 +65,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
         epg_param=" -s "
     fi
     (
-        python $MC_BIN_EPGDUMP -e -d $epg_param -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        pypy $MC_BIN_EPGDUMP -e -d $epg_param -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
         /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_bs_cs_dump=$!
@@ -88,18 +88,18 @@ log 'starting smb_play'
 bash $MC_BIN_SMB_PLAY
 
 log 'starting aggregate'
-python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
+pypy ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 log 'end aggregate'
 
 if [ "$MC_RESERVE_SATELLITE" = "true" ];then
     wait $pid_epg_bs_cs
     wait $pid_epg_digital
     log 'starting find program'
-    python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+    pypy $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
 else
     wait $pid_epg_digital
     log 'starting find program'
-    python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+    pypy $MC_BIN_RESERVER "${prefix_digital}_*.xml"
 fi
 
 log 'starting rrd'

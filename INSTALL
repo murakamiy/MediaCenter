@@ -140,6 +140,7 @@ python-dbus
 python-pysqlite2
 python-qt4
 python-qt4-dev
+pypy
 rrdtool
 screen
 smartmontools

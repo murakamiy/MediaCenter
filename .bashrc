@@ -120,6 +120,9 @@ function vinfof() {
 function epgdumpy() {
     python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
 }
+function epgdumpypy() {
+    pypy /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
+}
 function seltitle() {
 xmlstarlet sel --encode utf-8 -t \
     -m '//programme' -n \
