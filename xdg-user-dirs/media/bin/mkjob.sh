@@ -26,7 +26,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
         $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts &
         pid_rec=$!
 
-        arr=($(pypy $MC_BIN_EPGTIME $fifo_epg))
+        arr=($(python $MC_BIN_EPGTIME $fifo_epg))
         update=${arr[0]}
         update_time=${arr[1]}
         sys_time=${arr[2]}
@@ -88,18 +88,18 @@ log 'starting smb_play'
 bash $MC_BIN_SMB_PLAY
 
 log 'starting aggregate'
-pypy ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
+python ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
 log 'end aggregate'
 
 if [ "$MC_RESERVE_SATELLITE" = "true" ];then
     wait $pid_epg_bs_cs
     wait $pid_epg_digital
     log 'starting find program'
-    pypy $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+    python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
 else
     wait $pid_epg_digital
     log 'starting find program'
-    pypy $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+    python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
 fi
 
 log 'starting rrd'
