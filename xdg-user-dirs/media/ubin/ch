@@ -4,17 +4,19 @@ channel_dir=/home/mc/xdg-user-dirs/media/job/channel
 
 function print_help() {
 cat<<EOF
-USAGE: ch [OPTION] [CHANNEL]
+USAGE: ch [OPTION]
+       ch -r [CHANNEL]
        -b  print bs channels 
        -c  print cs channels
        -d  print digital channels
+       -r  print recording option
        -h  print help message
 EOF
 exit
 }
 
 file=none
-while getopts 'bcdh' opt;do
+while getopts 'bcdhr:' opt;do
     case $opt in
         b)
             file=${channel_dir}/bs
@@ -24,6 +26,11 @@ while getopts 'bcdh' opt;do
             ;;
         d)
             file=${channel_dir}/digital
+            ;;
+        r)
+            cat ${channel_dir}/bs ${channel_dir}/cs ${channel_dir}/digital |
+            awk -v channel=$OPTARG '{ if ($1 == channel) { printf("--sid %s %s\n", $2, $1) } }'
+            exit
             ;;
         h)
             print_help
