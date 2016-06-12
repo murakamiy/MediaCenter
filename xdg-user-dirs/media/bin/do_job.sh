@@ -101,6 +101,7 @@ else
         pid_recpt1=$!
         (
             sleep $rec_time_adjust
+            sleep 10
 
             kill -TERM $pid_recpt1 > /dev/null 2>&1
             sleep 10
