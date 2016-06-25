@@ -60,8 +60,7 @@ input=$1
 # -vf lavcdeint \
 # -vo gl_nosw \
 
-mpv $media $delay $volume \
+mpv \
 -fs \
--vo opengl-hq \
 -vf yadif \
 $input
