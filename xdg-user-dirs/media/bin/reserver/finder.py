@@ -83,6 +83,8 @@ class TitleFinder(Finder):
     priority = 90
     allow_list = [
         u'__________',
+        u'アルスラーン戦記',
+        u'ジョジョの奇妙',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
