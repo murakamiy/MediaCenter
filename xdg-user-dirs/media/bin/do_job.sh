@@ -67,14 +67,12 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
         nice -n 5 \
         gst-launch-1.0 -q --eos-on-shutdown \
          udpsrc uri=udp://127.0.0.1:${port_no} \
-         ! queue \
-           leaky=downstream \
-           max-size-buffers=0 \
-           max-size-time=0 \
-           max-size-bytes=1000000 \
-         ! tsparse \
+         ! multiqueue \
+         ! video/mpegts \
          ! tsdemux name=demux \
-         demux. ! queue \
+         demux. \
+                ! multiqueue \
+                ! queue \
                 ! mpegvideoparse \
                 ! vaapidecode \
                 ! vaapipostproc \
@@ -87,7 +85,9 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
                    init-qp=34 \
                    min-qp=1 \
                 ! mux. \
-         demux. ! queue \
+         demux. \
+                ! multiqueue \
+                ! queue \
                 ! aacparse \
                 ! mux. \
          matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
