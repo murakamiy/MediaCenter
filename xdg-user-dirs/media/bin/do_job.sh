@@ -52,30 +52,26 @@ else
         now=$(awk 'BEGIN { print systime() }')
         rec_time_adjust=$(($end - $now - 20))
 
-        fifo_dir=/tmp/pt3/fifo
-        mkdir -p $fifo_dir
-        fifo_rec=${fifo_dir}/rec_$$
-        mkfifo -m 644 $fifo_rec
-
         if [ "$original_file" = "keep" ];then
-            gst_tee=" ! tee name=tee tee. ! queue ! filesink location=${MC_DIR_TS}/${job_file_ts} tee. "
+            rec_ts_file=${MC_DIR_TS}/${job_file_ts}
         else
-            gst_tee=
+            rec_ts_file=
         fi
 
+        port_no=$(python -c '
+import sys
+import random
+random.seed(sys.argv[1])
+print random.randint(60000, 61000)' ${rec_channel}_${start})
+
         nice -n 5 \
-        gst-launch-1.0 -q \
-         filesrc location=$fifo_rec \
-         ! multiqueue \
-           max-size-buffers=0 \
-           max-size-time=0 \
-           max-size-bytes=400000000 \
-           $gst_tee \
+        gst-launch-1.0 -q --eos-on-shutdown \
+         udpsrc uri=udp://127.0.0.1:${port_no} \
          ! queue \
            leaky=downstream \
            max-size-buffers=0 \
            max-size-time=0 \
-           max-size-bytes=100000000 \
+           max-size-bytes=1000000 \
          ! tsparse \
          ! tsdemux name=demux \
          demux. ! queue \
@@ -94,10 +90,10 @@ else
          demux. ! queue \
                 ! aacparse \
                 ! mux. \
-         matroskamux name=mux ! filesink async=false location=${MC_DIR_MP4}/${job_file_mkv} &
+         matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
 
-        $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust $fifo_rec &
+        $MC_BIN_REC --b25 --udp --port $port_no --sid ${ch_array[0]} $rec_channel $rec_time_adjust $rec_ts_file &
         pid_recpt1=$!
         (
             sleep $rec_time_adjust
@@ -113,16 +109,12 @@ else
 
         sync
         (
-            sleep 10
-
-            kill -TERM $pid_gst > /dev/null 2>&1
+            kill -SIGINT $pid_gst > /dev/null 2>&1
             sleep 10
             kill -KILL $pid_gst > /dev/null 2>&1
         ) &
 
         wait $pid_gst
-
-        rm -f $fifo_rec
 
         if [ "$original_file" = "keep" ];then
             job_file_path=${MC_DIR_TS}/${job_file_ts}
@@ -130,7 +122,6 @@ else
         else
             job_file_path=${MC_DIR_MP4}/${job_file_mkv}
             thumb_file=${MC_DIR_THUMB}/${job_file_mkv}
-            rm -f ${MC_DIR_TS}/${job_file_ts}
         fi
         ffmpeg -y -i $job_file_path -loglevel quiet -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
         if [ $? -eq 0 ];then
