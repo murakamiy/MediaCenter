@@ -64,14 +64,13 @@ import random
 random.seed(sys.argv[1])
 print random.randint(60000, 61000)' ${rec_channel}_${start})
 
+
         nice -n 5 \
         gst-launch-1.0 -q --eos-on-shutdown \
          udpsrc uri=udp://127.0.0.1:${port_no} \
-         ! multiqueue \
          ! video/mpegts \
          ! tsdemux name=demux \
          demux. \
-                ! multiqueue \
                 ! queue \
                 ! mpegvideoparse \
                 ! vaapidecode \
@@ -86,15 +85,17 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
                    min-qp=1 \
                 ! mux. \
          demux. \
-                ! multiqueue \
                 ! queue \
-                ! aacparse \
+                ! faad plc=true \
+                ! faac rate-control=ABR \
                 ! mux. \
          matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
 
         $MC_BIN_REC --b25 --udp --port $port_no --sid ${ch_array[0]} $rec_channel $rec_time_adjust $rec_ts_file &
         pid_recpt1=$!
+
+
         (
             sleep $rec_time_adjust
             sleep 10
@@ -103,8 +104,8 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
             sleep 10
             kill -KILL $pid_recpt1 > /dev/null 2>&1
         ) &
-
         wait $pid_recpt1
+
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
         sync
@@ -113,7 +114,6 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
             sleep 10
             kill -KILL $pid_gst > /dev/null 2>&1
         ) &
-
         wait $pid_gst
 
         if [ "$original_file" = "keep" ];then
