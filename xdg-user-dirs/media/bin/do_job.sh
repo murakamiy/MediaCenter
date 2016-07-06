@@ -77,17 +77,22 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
                 ! vaapipostproc \
                   deinterlace-mode=auto \
                   deinterlace-method=bob \
+                  scale-method=fast \
                   height=$encode_height \
                 ! vaapih264enc \
                    tune=high-compression \
                    rate-control=cqp \
                    init-qp=34 \
                    min-qp=1 \
+                ! queue \
                 ! mux. \
          demux. \
                 ! queue \
                 ! faad plc=true \
+                ! audioconvert \
+                ! 'audio/x-raw,channels=6' \
                 ! faac rate-control=ABR \
+                ! queue \
                 ! mux. \
          matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
