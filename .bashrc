@@ -20,8 +20,7 @@ HISTSIZE=2000
 HISTFILESIZE=2000
 HISTCONTROL=ignoredups
 HISTIGNORE=ls:ll:la:cd:bg:fg
-DISPLAY=:0
-export PATH PS1 PAGER EDITOR LANG HISTSIZE HISTFILESIZE HISTCONTROL HISTIGNORE DISPLAY
+export PATH PS1 PAGER EDITOR LANG HISTSIZE HISTFILESIZE HISTCONTROL HISTIGNORE
 export LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES LC_ALL
 source /etc/bash_completion
 #####################################################################################################
@@ -260,3 +259,6 @@ function wstat() {
 function xfce-logout() {
     bash /home/mc/xdg-user-dirs/media/bin/xfce4-session-logout.sh
 }
+if [ -z "$DISPLAY" -a $(tty) = "/dev/tty1" ];then
+    startx -- vt1 -keeptty
+fi

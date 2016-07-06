@@ -107,7 +107,6 @@ imagemagick
 intel-gpu-tools
 intel-microcode
 iotop
-kexec-tools
 libbluetooth-dev
 libdbus-1-dev
 libdbus-glib-1-dev
@@ -526,3 +525,13 @@ load-module module-alsa-sink
 [global]
    client NTLMv2 auth = no
 
+####################################################################################################
+# autologin tty
+####################################################################################################
+
+update-rc.d lightdm disable
+systemctl disable lightdm
+
+systemctl list-units | grep tty
+systemctl list-unit-files | grep tty
+systemctl edit getty@tty1.service
