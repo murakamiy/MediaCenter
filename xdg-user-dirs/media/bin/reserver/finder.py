@@ -97,7 +97,7 @@ class MovieFinder(Finder):
     def allow(self, pinfo):
         if pinfo.channel == 'BS_200' and \
            self.rectime < pinfo.rectime and \
-           pinfo.start.hour == 21:
+           20 <= pinfo.start.hour and pinfo.start.hour <= 21:
             return True
         return False
 
