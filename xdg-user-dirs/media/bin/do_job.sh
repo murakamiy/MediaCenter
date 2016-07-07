@@ -82,8 +82,8 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
                 ! vaapih264enc \
                    tune=high-compression \
                    rate-control=cqp \
-                   init-qp=34 \
-                   min-qp=1 \
+                   init-qp=32 \
+                   min-qp=32 \
                 ! queue \
                 ! mux. \
          demux. \
@@ -103,8 +103,8 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
 
         (
             sleep $rec_time_adjust
-            sleep 10
 
+            sleep 10
             kill -TERM $pid_recpt1 > /dev/null 2>&1
             sleep 10
             kill -KILL $pid_recpt1 > /dev/null 2>&1
@@ -115,8 +115,9 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
 
         sync
         (
-            kill -SIGINT $pid_gst > /dev/null 2>&1
             sleep 10
+            kill -SIGINT $pid_gst > /dev/null 2>&1
+            sleep 50
             kill -KILL $pid_gst > /dev/null 2>&1
         ) &
         wait $pid_gst
