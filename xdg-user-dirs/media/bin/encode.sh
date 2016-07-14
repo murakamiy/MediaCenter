@@ -12,11 +12,11 @@ function do_encode_ffmpeg() {
         -threads 2 \
         -s 1280x720 \
         -r 30000/1001 \
-        -vcodec libx264 \
+        -vcodec h264 \
         -profile:v high \
         -preset:v faster \
         -crf 25 -level 31 \
-        -acodec libfdk_aac -b:a 256k \
+        -acodec aac -b:a 256k \
         $output
 }
 
