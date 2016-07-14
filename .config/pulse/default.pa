@@ -1,0 +1,29 @@
+#!/usr/bin/pulseaudio -nF
+
+load-module module-alsa-sink device=hw:0,8
+
+### Load several protocols
+load-module module-esound-protocol-unix
+load-module module-native-protocol-unix
+
+### Honour intended role device property
+load-module module-intended-roles
+
+### Automatically suspend sinks/sources that become idle for too long
+load-module module-suspend-on-idle
+
+### If autoexit on idle is enabled we want to make sure we only quit
+### when no local session needs us anymore.
+load-module module-console-kit
+load-module module-systemd-login
+
+### Modules to allow autoloading of filters (such as echo cancellation)
+### on demand. module-filter-heuristics tries to determine what filters
+### make sense, and module-filter-apply does the heavy-lifting of
+### loading modules and rerouting streams.
+load-module module-filter-heuristics
+load-module module-filter-apply
+
+### Make some devices default
+set-default-sink alsa_output.hw_0_8
+#set-default-source input
