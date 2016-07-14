@@ -22,10 +22,11 @@ HISTCONTROL=ignoredups
 HISTIGNORE=ls:ll:la:cd:bg:fg
 export PATH PS1 PAGER EDITOR LANG HISTSIZE HISTFILESIZE HISTCONTROL HISTIGNORE
 export LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES LC_ALL
-source /etc/bash_completion
+source /usr/share/bash-completion/bash_completion
 #####################################################################################################
 # Alias
 #####################################################################################################
+alias vi='vim'
 alias ls='ls -F'
 alias la='ls -a'
 alias ll='ls -l'
@@ -260,5 +261,5 @@ function xfce-logout() {
     bash /home/mc/xdg-user-dirs/media/bin/xfce4-session-logout.sh
 }
 if [ -z "$DISPLAY" -a "$(tty)" = "/dev/tty1" ];then
-    startx -- vt1 -keeptty
+    startxfce4
 fi
