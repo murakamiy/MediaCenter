@@ -1,8 +1,6 @@
 #!/bin/bash
 
 echo 10 > /proc/sys/kernel/panic
-# echo noop > /sys/block/sda/queue/scheduler
-modprobe loop
 cmd=$(lsusb | grep 'SCM Microsystems, Inc.' | awk -F ':' '{ print $1 }' | awk '{ printf("chown root:media /dev/bus/usb/%s/%s", $2, $4) }')
 $cmd
 
