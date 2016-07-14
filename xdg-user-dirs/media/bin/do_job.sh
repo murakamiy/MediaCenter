@@ -58,7 +58,7 @@ else
             rec_ts_file=
         fi
 
-        port_no=$(python -c '
+        port_no=$(python2 -c '
 import sys
 import random
 random.seed(sys.argv[1])
@@ -160,7 +160,7 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
             duration=$(ffprobe -show_format $job_file_path 2> /dev/null | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
             integrity=$(($rec_time - $duration))
             if [ "$integrity" -lt 60 ];then
-                python ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
+                python2 ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
             else
                 log "failed: $title ts_duration=$duration rec_time=$rec_time"
             fi

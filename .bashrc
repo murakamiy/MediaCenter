@@ -117,7 +117,7 @@ function vinfof() {
     done
 }
 function epgdumpy() {
-    python /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
+    python2 /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
 }
 function epgdumpypy() {
     pypy /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@

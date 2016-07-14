@@ -43,7 +43,7 @@ if [ -n "$thumb_file" ];then
 
     if [ "$play_stat" = "true" ];then
         trap safe_finish 1 2 3 15
-        python ${MC_DIR_DB_RATING}/play.py ${MC_DIR_JOB_FINISHED}/${xml_file} >> ${MC_DIR_DB_RATING}/log 2>&1 &
+        python2 ${MC_DIR_DB_RATING}/play.py ${MC_DIR_JOB_FINISHED}/${xml_file} >> ${MC_DIR_DB_RATING}/log 2>&1 &
         pid_play=$!
     fi
 

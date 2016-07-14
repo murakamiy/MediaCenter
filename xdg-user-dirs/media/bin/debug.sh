@@ -233,9 +233,9 @@ case $command in
         prefix_digital=digital
         prefix_bs_cs=bs_cs
         if [ "$MC_RESERVE_SATELLITE" = "true" ];then
-            python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml" DRY_RUN
+            python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml" DRY_RUN
         else
-            python $MC_BIN_RESERVER "${prefix_digital}_*.xml" DRY_RUN
+            python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml" DRY_RUN
         fi
         ;;
     re_schedule)
@@ -253,9 +253,9 @@ case $command in
             prefix_digital=digital
             prefix_bs_cs=bs_cs
             if [ "$MC_RESERVE_SATELLITE" = "true" ];then
-                python $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+                python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
             else
-                python $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+                python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml"
             fi
         fi
         ;;

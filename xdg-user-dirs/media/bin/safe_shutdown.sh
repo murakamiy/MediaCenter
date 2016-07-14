@@ -26,7 +26,7 @@ for f in $(ls $MC_DIR_RESERVED | sort -t '-' --key=1,2 -n);do
         break
     fi
 done
-wakeup_time=$(python $MC_BIN_WAKEUP_TIME $next_job_time)
+wakeup_time=$(python2 $MC_BIN_WAKEUP_TIME $next_job_time)
 
 if [ "$0" = $MC_BIN_SAFE_SHUTDOWN_GUI ];then
     gui=true
