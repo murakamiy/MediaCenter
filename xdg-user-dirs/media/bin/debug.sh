@@ -108,16 +108,18 @@ case $command in
         shift
         if [ -n "$1" ];then
             file_list=$1
+            total=1
         else
             file_list=$(find $MC_DIR_ENCODE_HD -type f | sort)
+            total=$(find $MC_DIR_ENCODE_HD -type f | wc -l)
         fi
+        progress=0
         for f in $file_list;do
             base=$(basename $f | awk -F . '{ print $1 }')
             ext=$(basename $f | awk -F . '{ print $2 }')
 
             thumb_file=${MC_DIR_THUMB}/${base}.${ext}
-            echo "ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
-            ffmpeg -y -i $f -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+            bash $MC_BIN_THUMB $f ${thumb_file}.png
             if [ $? -eq 0 ];then
                 mv ${thumb_file}.png $thumb_file
             else
@@ -136,6 +138,8 @@ case $command in
             fi
             ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
             touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"
+
+            printf '%6d / %6d  %s\n' $((++progress)) $total $title
         done
         ;;
     mk_title_encode_mt)
@@ -160,17 +164,17 @@ case $command in
         ;;
     mk_title_ts)
         shift
+        total=$(find $MC_DIR_TS_HD -type f -name '*.ts' | wc -l)
+        progress=0
         for f in $(find $MC_DIR_TS_HD -type f -name '*.ts' | sort);do
             job_file_base=$(basename $f .ts)
             job_file_xml=${job_file_base}.xml
             job_file_ts=${job_file_base}.ts
             title=$(print_title ${MC_DIR_JOB_FINISHED}/${job_file_xml})
             foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_JOB_FINISHED}/${job_file_xml} | sed -e 's/Finder//')
-            echo $job_file_base $title $foundby
 
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
-            echo "ffmpeg -y -i ${MC_DIR_TS_HD}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
-            ffmpeg -y -i ${MC_DIR_TS_HD}/${job_file_ts} -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+            bash $MC_BIN_THUMB ${MC_DIR_TS_HD}/${job_file_ts} ${thumb_file}.png
             if [ $? -eq 0 ];then
                 mv ${thumb_file}.png $thumb_file
             else
@@ -185,6 +189,7 @@ case $command in
             done
             ln $thumb_file "${foundby_dir}/${title}_${i}.png"
 
+            printf '%6d / %6d  %s\n' $((++progress)) $total $title
         done
         ;;
     rsv)

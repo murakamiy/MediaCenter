@@ -129,7 +129,8 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
             job_file_path=${MC_DIR_MP4}/${job_file_mkv}
             thumb_file=${MC_DIR_THUMB}/${job_file_mkv}
         fi
-        ffmpeg -y -i $job_file_path -loglevel quiet -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
+
+        bash $MC_BIN_THUMB $job_file_path ${thumb_file}.png
         if [ $? -eq 0 ];then
             mv ${thumb_file}.png $thumb_file
         else

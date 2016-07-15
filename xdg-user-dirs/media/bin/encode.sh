@@ -37,9 +37,7 @@ if [ -n "$xml" ];then
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_ENCODE_FINISHED
 
         thumb_file=${MC_DIR_THUMB}/${base}.mp4
-        echo "ffmpeg -y -i ${MC_DIR_ENCODE_HD}/${base}.mp4 -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png"
-        ffmpeg -y -i ${MC_DIR_ENCODE_HD}/${base}.mp4 -f image2 -pix_fmt yuv420p -vframes 1 -ss 5 -s 320x180 -an -deinterlace ${thumb_file}.png > /dev/null 2>&1
-
+        bash $MC_BIN_THUMB ${MC_DIR_ENCODE_HD}/${base}.mp4 ${thumb_file}.png
         if [ $? -eq 0 ];then
             mv ${thumb_file}.png $thumb_file
         else
