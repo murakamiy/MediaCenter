@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LANG=C vlc \
+LANG=C cvlc \
 --overlay \
 --vout xcb_glx \
 --deinterlace=1 \

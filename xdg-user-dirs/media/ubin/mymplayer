@@ -61,6 +61,8 @@ input=$1
 # -vo gl_nosw \
 
 mpv \
--fs \
--vf yadif \
+--fullscreen \
+--deinterlace \
+--vo=vaapi \
+--hwdec=vaapi \
 $input
