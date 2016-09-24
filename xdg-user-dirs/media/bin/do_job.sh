@@ -1,11 +1,9 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
-export DISPLAY=:0
 
 job_file_base=$1
 job_file_xml=${job_file_base}.xml
 job_file_ts=${job_file_base}.ts
-job_file_mkv=${job_file_base}.mkv
 
 if [ ! -f ${MC_DIR_RESERVED}/${job_file_xml} ];then
     log "file not found: $job_file_xml"
@@ -20,15 +18,12 @@ rec_time=$(xmlsel -t -m //rec-time -v . ${MC_DIR_RESERVED}/${job_file_xml})
 channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
-original_file=$(xmlsel -t -m //original-file -v . ${MC_DIR_RESERVED}/${job_file_xml})
-encode_width=$(xmlsel -t -m //encode-width   -v . ${MC_DIR_RESERVED}/${job_file_xml})
-encode_height=$(xmlsel -t -m //encode-height -v . ${MC_DIR_RESERVED}/${job_file_xml})
-encode_bitrate=$(xmlsel -t -m //encode-bitrate -v . ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
 bash $MC_BIN_SMB_JOB &
 bash $MC_BIN_MIGRATE_JOB &
+bash $MC_BIN_DOWNSIZE_ENCODE &
 
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
 if [ $running -ge 4 ];then
@@ -51,89 +46,14 @@ else
 
         now=$(awk 'BEGIN { print systime() }')
         rec_time_adjust=$(($end - $now - 20))
+        rec_ts_file=${MC_DIR_TS}/${job_file_ts}
 
-        if [ "$original_file" = "keep" ];then
-            rec_ts_file=${MC_DIR_TS}/${job_file_ts}
-        else
-            rec_ts_file=
-        fi
-
-        port_no=$(python2 -c '
-import sys
-import random
-random.seed(sys.argv[1])
-print random.randint(60000, 61000)' ${rec_channel}_${start})
-
-
-        nice -n 5 \
-        gst-launch-1.0 -q --eos-on-shutdown \
-         udpsrc uri=udp://127.0.0.1:${port_no} \
-         ! video/mpegts \
-         ! tsdemux name=demux \
-         demux. \
-                ! queue \
-                  max-size-buffers=1000 \
-                  max-size-time=0 \
-                  max-size-bytes=0 \
-                  leaky=upstream \
-                ! mpegvideoparse \
-                ! vaapidecode \
-                ! vaapipostproc \
-                  deinterlace-mode=auto \
-                  deinterlace-method=bob \
-                  scale-method=fast \
-                  height=$encode_height \
-                ! vaapih264enc \
-                   tune=high-compression \
-                   rate-control=cqp \
-                   init-qp=32 \
-                   min-qp=20 \
-                ! mux. \
-         demux. \
-                ! queue \
-                  max-size-buffers=0 \
-                  max-size-time=0 \
-                  max-size-bytes=0 \
-                ! faad plc=true \
-                ! audioconvert \
-                ! 'audio/x-raw,channels=6' \
-                ! faac rate-control=ABR \
-                ! mux. \
-         matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
-        pid_gst=$!
-
-        $MC_BIN_REC --b25 --udp --port $port_no --sid ${ch_array[0]} $rec_channel $rec_time_adjust $rec_ts_file &
-        pid_recpt1=$!
-
-
-        (
-            sleep $rec_time_adjust
-
-            sleep 10
-            kill -TERM $pid_recpt1 > /dev/null 2>&1
-            sleep 10
-            kill -KILL $pid_recpt1 > /dev/null 2>&1
-        ) &
-        wait $pid_recpt1
+        $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust $rec_ts_file
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
 
-        sync
-        (
-            sleep 10
-            kill -SIGINT $pid_gst > /dev/null 2>&1
-            sleep 50
-            kill -KILL $pid_gst > /dev/null 2>&1
-        ) &
-        wait $pid_gst
-
-        if [ "$original_file" = "keep" ];then
-            job_file_path=${MC_DIR_TS}/${job_file_ts}
-            thumb_file=${MC_DIR_THUMB}/${job_file_ts}
-        else
-            job_file_path=${MC_DIR_MP4}/${job_file_mkv}
-            thumb_file=${MC_DIR_THUMB}/${job_file_mkv}
-        fi
+        job_file_path=${MC_DIR_TS}/${job_file_ts}
+        thumb_file=${MC_DIR_THUMB}/${job_file_ts}
 
         bash $MC_BIN_THUMB $job_file_path ${thumb_file}.png
         if [ $? -eq 0 ];then
@@ -167,6 +87,7 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
             integrity=$(($rec_time - $duration))
             if [ "$integrity" -lt 60 ];then
                 python2 ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
+                cp ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_DOWNSIZE_ENCODE_RESERVED
             else
                 log "failed: $title ts_duration=$duration rec_time=$rec_time"
             fi
@@ -174,10 +95,7 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
             log "failed: $title ts_duration=$duration rec_time=$rec_time"
         fi
 
-        if [ "$original_file" = "keep" ];then
-            stat --format=%s ${MC_DIR_TS}/${job_file_ts}  > ${MC_DIR_FILE_SIZE}/${job_file_ts}
-        fi
-        stat --format=%s ${MC_DIR_MP4}/${job_file_mkv} > ${MC_DIR_FILE_SIZE}/${job_file_mkv}
+        stat --format=%s ${MC_DIR_TS}/${job_file_ts}  > ${MC_DIR_FILE_SIZE}/${job_file_ts}
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         log "rec end: $title $(hard_ware_info)"
