@@ -291,7 +291,7 @@ media:x:1001:mc
 # sudoers
 ####################################################################################################
 
-%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/bin/sixad-task,/usr/sbin/service
+%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/bin/sixad-task
 
 ####################################################################################################
 # crontab
