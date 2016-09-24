@@ -60,9 +60,11 @@ input=$1
 # -vf lavcdeint \
 # -vo gl_nosw \
 
+# --video-unscaled \
+
 mpv \
 --fullscreen \
---deinterlace \
+--deinterlace=yes \
 --vo=vaapi \
 --hwdec=vaapi \
 $input
