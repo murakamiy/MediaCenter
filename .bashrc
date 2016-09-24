@@ -67,7 +67,6 @@ alias cdjob='cd /home/mc/xdg-user-dirs/media/job'
 alias cdvideo='cd /home/mc/xdg-user-dirs/media/video'
 alias cdfile='cd /home/mc/xdg-user-dirs/media/files'
 alias scr='screen -r'
-alias tom='sudo service mediatomb restart'
 #####################################################################################################
 # Function
 #####################################################################################################
@@ -137,7 +136,7 @@ xmlstarlet sel --encode utf-8 -t \
     --var 'channel=@channel' \
     -m '..//channel' -i '@id=$channel' -v '@id' -o '	' -v 'display-name[1]' -o '	' \
     $@ | xmlstarlet unesc |
-python -c '
+python2 -c '
 import datetime
 import sys
 for line in sys.stdin:
@@ -179,7 +178,7 @@ function selcategory() {
     xmlstarlet sel --encode utf-8 -t -m "//programme" \
         -m "category[contains(., '$category')]" \
         -v 'normalize-space(../title)' -o '	' -v '../@start' -n $@ |
-    python -c '
+    python2 -c '
 import datetime
 import sys
 for line in sys.stdin:
