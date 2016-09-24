@@ -72,6 +72,10 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
          ! tsdemux name=demux \
          demux. \
                 ! queue \
+                  max-size-buffers=1000 \
+                  max-size-time=0 \
+                  max-size-bytes=0 \
+                  leaky=upstream \
                 ! mpegvideoparse \
                 ! vaapidecode \
                 ! vaapipostproc \
@@ -83,16 +87,17 @@ print random.randint(60000, 61000)' ${rec_channel}_${start})
                    tune=high-compression \
                    rate-control=cqp \
                    init-qp=32 \
-                   min-qp=32 \
-                ! queue \
+                   min-qp=20 \
                 ! mux. \
          demux. \
                 ! queue \
+                  max-size-buffers=0 \
+                  max-size-time=0 \
+                  max-size-bytes=0 \
                 ! faad plc=true \
                 ! audioconvert \
                 ! 'audio/x-raw,channels=6' \
                 ! faac rate-control=ABR \
-                ! queue \
                 ! mux. \
          matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
         pid_gst=$!
