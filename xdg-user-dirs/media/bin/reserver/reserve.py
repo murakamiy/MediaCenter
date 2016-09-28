@@ -107,7 +107,7 @@ def priority_sort(x, y):
     return ret
 
 class ReserveMaker:
-    def __init__(self, finder, random_finder, dry_run):
+    def __init__(self, finder, random_finder, dry_run, re_schedule):
         self.finder = finder
         self.random_finder = random_finder
         self.now = datetime.now()
@@ -115,6 +115,7 @@ class ReserveMaker:
         self.now += five_minute
         self.logfd = open(LOG_FILE, "a")
         self.dry_run = dry_run
+        self.re_schedule = re_schedule
         self.include_channel = None
         self.exclude_channel = None
         cron = map(int, CRON_TIME.split(":"))
@@ -197,7 +198,7 @@ class ReserveMaker:
 
         all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)
         encode_list = self.reserve_encode(encode_span_list, all_rinfo_list)
-        if self.dry_run == False:
+        if self.dry_run == False and self.re_schedule == False:
             self.update_rrd(all_rinfo_list, encode_list)
         all_rinfo_list = self.create_reserve(all_rinfo_list)
         self.do_reserve(all_rinfo_list)
@@ -613,6 +614,8 @@ class ReserveMaker:
         encode_height_element.text = str(pinfo.encode_height)
         encode_bitrate_element = Element("encode-bitrate")
         encode_bitrate_element.text = pinfo.encode_bitrate
+        do_encode_element = Element("do-encode")
+        do_encode_element.text = str(pinfo.do_encode)
 
         reserved_element = Element("record")
         reserved_element.append(el)
@@ -631,5 +634,6 @@ class ReserveMaker:
         reserved_element.append(encode_width_element)
         reserved_element.append(encode_height_element)
         reserved_element.append(encode_bitrate_element)
+        reserved_element.append(do_encode_element)
 
         return ReserveInfo(pinfo, reserved_element, "echo '%s' | %s" % (do_job_command, at_command))

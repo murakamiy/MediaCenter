@@ -18,6 +18,7 @@ rec_time=$(xmlsel -t -m //rec-time -v . ${MC_DIR_RESERVED}/${job_file_xml})
 channel=$(xmlsel -t -m //programme -v @channel ${MC_DIR_RESERVED}/${job_file_xml})
 broadcasting=$(xmlsel -t -m '//broadcasting' -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
+do_encode=$(xmlsel -t -m //do-encode -v . ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
@@ -87,7 +88,9 @@ else
             integrity=$(($rec_time - $duration))
             if [ "$integrity" -lt 60 ];then
                 python2 ${MC_DIR_DB_RATING}/create.py ${MC_DIR_RECORD_FINISHED}/${job_file_xml} >> ${MC_DIR_DB_RATING}/log 2>&1
-                cp ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_DOWNSIZE_ENCODE_RESERVED
+                if [ "$do_encode" = "True" ];then
+                    cp ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_DOWNSIZE_ENCODE_RESERVED
+                fi
             else
                 log "failed: $title ts_duration=$duration rec_time=$rec_time"
             fi

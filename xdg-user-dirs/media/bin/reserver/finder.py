@@ -26,6 +26,7 @@ class FindresCheif:
             pinfo.encode_width = found_by.encode_width
             pinfo.encode_height = found_by.encode_height
             pinfo.encode_bitrate = found_by.encode_bitrate
+            pinfo.do_encode = found_by.do_encode
             return pinfo
 
 class Finder:
@@ -40,6 +41,7 @@ class Finder:
     encode_width = 640
     encode_height = 360
     encode_bitrate = '500k'
+    do_encode = True
     def __init__(self):
         if self.allow_list != None and len(self.allow_list) > 0:
             self.allow_pattern = self.create_pattern(self.allow_list)
@@ -74,6 +76,7 @@ class DateTimeFinder(Finder):
 
 class NarutoFinder(Finder):
     priority = 90
+    do_encode = False
     def allow(self, pinfo):
         if re.search('NARUTO', pinfo.title):
             return True
@@ -103,6 +106,7 @@ class MovieFinder(Finder):
 
 class AnimeFinder(Finder):
     priority = 50
+    do_encode = False
     channel_list = ("14", "15", "16", "17", "18", "26")
     def allow(self, pinfo):
         if pinfo.channel in self.channel_list and '国内アニメ' in pinfo.category_list and \
@@ -215,6 +219,7 @@ class RandomFinder(Finder):
         pinfo.encode_width = self.encode_width
         pinfo.encode_height = self.encode_height
         pinfo.encode_bitrate = self.encode_bitrate
+        pinfo.do_encode = self.do_encode
 
         if pinfo.channel not in ('CS_340', 'CS_341', 'CS_343'):
             pinfo.priority -= 20

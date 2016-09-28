@@ -6,9 +6,12 @@ import finder
 args = sys.argv[1:]
 xml_globs = []
 dry_run = False
+re_schedule = False
 for a in args:
     if re.search('^DRY_RUN$', a):
         dry_run = True
+    elif re.search('^RE_SCHEDULE$', a):
+        re_schedule = True
     else:
         xml_globs.append(a)
 
@@ -28,7 +31,7 @@ finders_list.append(finder.NatureFinder())
 finders_list.append(finder.NarutoFinder())
 
 cheif = finder.FindresCheif(finders_list)
-r = reserve.ReserveMaker(cheif, None, dry_run)
+r = reserve.ReserveMaker(cheif, None, dry_run, re_schedule)
 # r = reserve.ReserveMaker(cheif, finder.RandomFinder(), dry_run)
 # r.set_exclude_channel(("BS_234", "BS_291", "BS_292", "BS_294", "BS_295", "BS_296", "BS_297", "BS_298"))
 r.reserve(xml_globs)

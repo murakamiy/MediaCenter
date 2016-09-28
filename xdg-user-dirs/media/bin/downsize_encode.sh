@@ -69,7 +69,7 @@ if [ -n "$xml" ];then
      ! tsdemux name=demux \
      demux. \
             ! queue \
-              max-size-buffers=2000 \
+              max-size-buffers=10000 \
               max-size-time=0 \
               max-size-bytes=0 \
             ! mpegvideoparse \
@@ -87,7 +87,7 @@ if [ -n "$xml" ];then
             ! mux. \
      demux. \
             ! queue \
-              max-size-buffers=2000 \
+              max-size-buffers=10000 \
               max-size-time=0 \
               max-size-bytes=0 \
             ! faad plc=true \

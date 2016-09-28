@@ -258,10 +258,16 @@ case $command in
             prefix_digital=digital
             prefix_bs_cs=bs_cs
             if [ "$MC_RESERVE_SATELLITE" = "true" ];then
-                python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml"
+                python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml" "${prefix_bs_cs}_*.xml" RE_SCHEDULE
             else
-                python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml"
+                python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml" RE_SCHEDULE
             fi
+
+            for f in $(find $MC_DIR_RESERVED -type f -name '*.xml');do
+                temp_file=$(mktemp)
+                xmlstarlet format --encode utf-8 $f > $temp_file
+                /bin/mv $temp_file $f
+            done
         fi
         ;;
 esac
