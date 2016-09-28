@@ -4,6 +4,6 @@ echo 10 > /proc/sys/kernel/panic
 cmd=$(lsusb | grep 'SCM Microsystems, Inc.' | awk -F ':' '{ print $1 }' | awk '{ printf("chown root:media /dev/bus/usb/%s/%s", $2, $4) }')
 $cmd
 
-cpupower frequency-set --governor performance --min 1Ghz --max 2Ghz
+cpupower frequency-set --max 1.8Ghz
 
 exit 0

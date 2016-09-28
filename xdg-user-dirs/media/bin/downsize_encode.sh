@@ -62,7 +62,7 @@ if [ -n "$xml" ];then
 
     time_start=$(awk 'BEGIN { print systime() }')
 
-    nice -n 5 \
+    nice -n 10 \
     gst-launch-1.0 -q \
      filesrc location=$input_ts_file \
      ! video/mpegts \
@@ -72,7 +72,6 @@ if [ -n "$xml" ];then
               max-size-buffers=2000 \
               max-size-time=0 \
               max-size-bytes=0 \
-              leaky=upstream \
             ! mpegvideoparse \
             ! vaapidecode \
             ! vaapipostproc \
@@ -88,7 +87,7 @@ if [ -n "$xml" ];then
             ! mux. \
      demux. \
             ! queue \
-              max-size-buffers=0 \
+              max-size-buffers=2000 \
               max-size-time=0 \
               max-size-bytes=0 \
             ! faad plc=true \
