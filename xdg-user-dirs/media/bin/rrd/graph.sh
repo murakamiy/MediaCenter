@@ -15,8 +15,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/cpu.png \
 --upper-limit 100 \
 --lower-limit 0 \
 --rigid \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:USER=$db_file:CPU_USER:AVERAGE \
 DEF:NICE=$db_file:CPU_NICE:AVERAGE \
 DEF:IOWAIT=$db_file:CPU_IOWAIT:AVERAGE \
@@ -61,8 +61,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/io_raid.png \
 --upper-limit 10 \
 --lower-limit -10 \
 --rigid \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:HD_1_W=$db_file:HD_ARRAY_1_WRITE:AVERAGE \
 DEF:HD_2_W=$db_file:HD_ARRAY_2_WRITE:AVERAGE \
 DEF:HD_ALL_W=$db_file:HD_RAID_WRITE:AVERAGE \
@@ -133,8 +133,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/io.png \
 --upper-limit 10 \
 --lower-limit -10 \
 --rigid \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:HD_R=$db_file:HD_READ:AVERAGE \
 DEF:HD2_R=$db_file:HD2_READ:AVERAGE \
 DEF:HD_W=$db_file:HD_WRITE:AVERAGE \
@@ -192,8 +192,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/temp.png \
 --upper-limit 100 \
 --lower-limit 30 \
 --rigid \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:LOAD_AVERAGE=$db_file:LOAD_AVERAGE:AVERAGE \
 DEF:TEMP_CPU=$db_file:TEMP_CPU:AVERAGE \
 DEF:TEMP_MOTHER_BORD_1=$db_file:TEMP_MOTHER_BORD_1:AVERAGE \
@@ -240,8 +240,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/mem.png \
 --end "$end_param" \
 --x-grid $x_grid \
 --upper-limit 8000 \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:USED=$db_file:MEMORY_USED:AVERAGE \
 DEF:FREE=$db_file:MEMORY_FREE:AVERAGE \
 DEF:SHARED=$db_file:MEMORY_SHARED:AVERAGE \
@@ -290,8 +290,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/du.png \
 --end "$end_param" \
 --x-grid $x_grid \
 --upper-limit 50  \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:DISK_USAGE=$db_file:DISK_USAGE:AVERAGE \
 VDEF:DISK_USAGE_MAX=DISK_USAGE,MAXIMUM \
 COMMENT:" " \
@@ -312,8 +312,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/gpu.png \
 --end "$end_param" \
 --x-grid $x_grid \
 --upper-limit 100  \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:GPU_RENDER=$db_file:GPU_RENDER:AVERAGE \
 DEF:GPU_BITSTREAM=$db_file:GPU_BITSTREAM:AVERAGE \
 VDEF:GPU_RENDER_MAX=GPU_RENDER,MAXIMUM \
@@ -340,8 +340,8 @@ LANG=C rrdtool graph ${png_dir}/${cycle}/rec.png \
 --upper-limit 2.5 \
 --lower-limit -2.5 \
 --rigid \
---width 700 \
---height 300 \
+--width $width \
+--height $height \
 DEF:T_Prefer=$db_file:T_Prefer:MAX \
 DEF:T_Random=$db_file:T_Random:MAX \
 DEF:S_Prefer=$db_file:S_Prefer:MAX \
@@ -369,6 +369,8 @@ start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m/%d", systime() - 60 *
 start_param=$(awk 'BEGIN { printf("%s\n", strftime("%m/%d/%Y 00:00", systime() - 60 * 60 * 24)) }')
 end_param='start+24h'
 x_grid='HOUR:1:HOUR:1:HOUR:1:0:%H'
+width=700
+height=300
 
 db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
@@ -394,6 +396,8 @@ BEGIN {
 }')
 end_param='start+1WEEK'
 x_grid='HOUR:12:HOUR:12:DAY:1:0:%d'
+width=2500
+height=300
 
 db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
@@ -414,6 +418,8 @@ start_string=$(awk 'BEGIN { printf("%s\n", strftime("%Y/%m", systime() - 60 * 60
 start_param=$(awk 'BEGIN { printf("%s\n", strftime("%Y%m01", systime() - 60 * 60 * 24)) }')
 end_param='start+1MONTH'
 x_grid='DAY:1:DAY:1:DAY:1:0:%d'
+width=10000
+height=300
 
 db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
