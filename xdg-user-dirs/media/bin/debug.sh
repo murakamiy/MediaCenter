@@ -59,8 +59,8 @@ case $command in
             size=$(ls -sh $ts_file | awk '{ print $1 }')
             time=$(xmlsel -t -m "//rec-time" -v '.' $xml_file)
             time=$(( $time / 60 ))
-            echo "${time}min $size $title $ts_file"
-        done
+            echo "$ts_file ${time}min $size $title"
+        done | sort | column -t
         ;;
     encode)
         for f in $(find $MC_DIR_ENCODE_HD -type f);do
@@ -77,8 +77,8 @@ case $command in
             elif [ -n "$tag" ];then
                 title=$tag
             fi
-            echo "$size $title $f"
-        done
+            echo "$f $size $title"
+        done | sort | column -t
         ;;
     rec)
         (
