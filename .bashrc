@@ -175,20 +175,33 @@ function selcategory() {
     done
     shift $((OPTIND - 1))
 
-    xmlstarlet sel --encode utf-8 -t -m "//programme" \
+    xmlstarlet sel --encode utf-8 -t \
+        -m '//programme' \
         -m "category[contains(., '$category')]" \
-        -v 'normalize-space(../title)' -o '	' -v '../@start' -n $@ |
-    python2 -c '
+        -n \
+        -v ../title -o '	' \
+        -v '../@start' -o '	' \
+        -v '../@stop' -o '	' \
+        --var 'channel=../@channel' \
+        -m '../..//channel' -i '@id=$channel' \
+        -v '@id' -o '	' \
+        -v 'display-name[1]' \
+        $@ | xmlstarlet unesc |
+python2 -c '
 import datetime
 import sys
 for line in sys.stdin:
-    arr = line.split("\t")
-    if arr:
-        d_arr = arr[1].split()
-        d = datetime.datetime.strptime(d_arr[0], "%Y%m%d%H%M%S")
-        t = arr[0]
-        print d,t
-' | sort -u
+    arr = line.rstrip().split("\t")
+    if arr and 5 <= len(arr):
+        start = datetime.datetime.strptime(arr[1].split()[0], "%Y%m%d%H%M%S")
+        end   = datetime.datetime.strptime(arr[2].split()[0], "%Y%m%d%H%M%S")
+        start_date = start.strftime("%m/%d")
+        start_time = start.strftime("%H:%M")
+        end_time = end.strftime("%H:%M")
+
+        print "%s\t%s\t%s\t%s\t%s\t%s" % (start_date, start_time, end_time, arr[3], arr[4], arr[0])
+
+' | column -t -s '	'
 
 )
 }
