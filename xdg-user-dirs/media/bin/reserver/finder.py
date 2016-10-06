@@ -107,7 +107,7 @@ class MovieFinder(Finder):
 class AnimeFinder(Finder):
     priority = 50
     do_encode = False
-    channel_list = ("14", "15", "16", "17", "18", "26")
+    channel_list = ("14", "15", "16", "17", "18", "26", "BS_211")
     def allow(self, pinfo):
         if pinfo.channel in self.channel_list and '国内アニメ' in pinfo.category_list and \
            (pinfo.start.hour >= 23 or pinfo.start.hour <= 4):
