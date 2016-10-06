@@ -57,7 +57,7 @@ if [ -n "$xml" ];then
      ! tsdemux name=demux \
      demux. \
             ! queue \
-              max-size-buffers=5000 \
+              max-size-buffers=1000 \
               max-size-time=0 \
               max-size-bytes=0 \
             ! mpegvideoparse \
@@ -77,7 +77,7 @@ if [ -n "$xml" ];then
             ! mux. \
      demux. \
             ! queue \
-              max-size-buffers=5000 \
+              max-size-buffers=1000 \
               max-size-time=0 \
               max-size-bytes=0 \
             ! aacparse \
@@ -121,12 +121,16 @@ if [ -n "$xml" ];then
         duration=$(ffprobe -show_format ${MC_DIR_MP4}/${job_file_mkv} 2> /dev/null | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
         integrity=$(($rec_time - $duration))
         if [ "$integrity" -lt 180 ];then
-            time_end=$(awk 'BEGIN { print systime() }')
-            (( took = (time_end - time_start) / 60 ))
+
+            if [ "$original_file" = "release" ];then
+                /bin/rm $input_ts_file
+            fi
 
             /bin/rm ${MC_DIR_ENCODING}/${job_file_xml}
             stat --format=%s ${MC_DIR_MP4}/${job_file_mkv} > ${MC_DIR_FILE_SIZE}/${job_file_mkv}
 
+            time_end=$(awk 'BEGIN { print systime() }')
+            (( took = (time_end - time_start) / 60 ))
             log "d_encode end: $took min $title $(hard_ware_info)"
         else
             log "d_encode failed: $title $(hard_ware_info)"
