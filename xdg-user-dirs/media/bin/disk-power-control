@@ -9,6 +9,7 @@ USAGE : $(basename $0) OPTIONS
         -s set standby timeout
         -S put hard disk arrays to standby mode
         -u wakeup hard disk device
+        -m unmount hard disk
 EOF
 exit 1
 }
@@ -104,7 +105,22 @@ function wakeup() {
     done
 }
 
-while getopts 'hwsSu' opt;do
+function unmount_disk() {
+
+    wakeup
+    wait_for_storage_device
+    flush_disk_cache_soft
+
+    for d in $(mount | grep ^/dev/ | awk '{ if (!($3 == "/" || $3 == "/boot")) print $1 }' | sort -u);do
+        umount --all-targets --recursive $d
+    done
+
+    for d in $(print_all_storage_device);do
+        flush_disk_cache_hard $d
+    done
+}
+
+while getopts 'hwsSum' opt;do
     case $opt in
         h)
             usage
@@ -124,6 +140,10 @@ while getopts 'hwsSu' opt;do
             ;;
         u)
             wakeup
+            exit
+            ;;
+        m)
+            unmount_disk
             exit
             ;;
     esac
