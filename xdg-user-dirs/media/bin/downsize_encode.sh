@@ -48,7 +48,7 @@ if [ -n "$xml" ];then
     nice -n 5 \
     gst-launch-1.0 -q \
      filesrc location=$input_ts_file \
-     ! video/mpegts \
+     ! tsparse \
      ! tsdemux name=demux \
      demux. \
             ! queue \
@@ -75,10 +75,9 @@ if [ -n "$xml" ];then
               max-size-buffers=1000 \
               max-size-time=0 \
               max-size-bytes=0 \
-            ! faad plc=true \
-            ! audioconvert \
-            ! 'audio/x-raw,channels=6' \
-            ! faac rate-control=ABR \
+            ! aacparse \
+            ! avdec_aac \
+            ! avenc_aac \
             ! mux. \
      matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
     pid_gst=$!
