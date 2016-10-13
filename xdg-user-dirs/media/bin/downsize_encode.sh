@@ -45,14 +45,9 @@ if [ -n "$xml" ];then
 
     time_start=$(awk 'BEGIN { print systime() }')
 
-    fifo_dir=/tmp/pt3/fifo
-    mkdir -p $fifo_dir
-    fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
-    mkfifo -m 644 $fifo_ffmpeg
-
     nice -n 5 \
     gst-launch-1.0 -q \
-     filesrc location=$fifo_ffmpeg \
+     filesrc location=$input_ts_file \
      ! video/mpegts \
      ! tsdemux name=demux \
      demux. \
@@ -80,30 +75,17 @@ if [ -n "$xml" ];then
               max-size-buffers=1000 \
               max-size-time=0 \
               max-size-bytes=0 \
-            ! aacparse \
+            ! faad plc=true \
+            ! audioconvert \
+            ! 'audio/x-raw,channels=6' \
+            ! faac rate-control=ABR \
             ! mux. \
      matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
     pid_gst=$!
 
-    nice -n 5 \
-    ffmpeg -y -analyzeduration 2M \
-    -loglevel quiet \
-    -dual_mono_mode sub \
-    -i $input_ts_file \
-    -threads 1 \
-    -vcodec copy \
-    -acodec aac \
-    -f mpegts $fifo_ffmpeg &
-    pid_ffmpeg=$!
-
 
     (
         sleep $((rec_time * 2))
-
-        sleep 10
-        kill -TERM $pid_ffmpeg > /dev/null 2>&1
-        sleep 10
-        kill -KILL $pid_ffmpeg > /dev/null 2>&1
 
         sleep 10
         kill -TERM $pid_gst > /dev/null 2>&1
@@ -111,10 +93,7 @@ if [ -n "$xml" ];then
         kill -KILL $pid_gst > /dev/null 2>&1
     ) &
 
-    wait $pid_ffmpeg
     wait $pid_gst
-
-    rm -f $fifo_ffmpeg
 
     ffprobe -show_format ${MC_DIR_MP4}/${job_file_mkv} > /dev/null 2>&1
     if [ $? -eq 0 ];then
