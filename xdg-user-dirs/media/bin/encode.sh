@@ -6,7 +6,7 @@ function do_encode_ffmpeg() {
     local input=${MC_DIR_TS_HD}/${base}.ts
     local output=${MC_DIR_ENCODE_HD}/${base}.mp4
 
-    nice -n 10 \
+    nice -n 5 \
     ffmpeg -y -i $input -f mp4 \
         -loglevel quiet \
         -threads 2 \

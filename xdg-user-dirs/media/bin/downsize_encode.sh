@@ -45,20 +45,26 @@ if [ -n "$xml" ];then
 
     time_start=$(awk 'BEGIN { print systime() }')
 
-    nice -n 5 \
-    gst-launch-1.0 -q \
-     filesrc location=$input_ts_file \
+    fifo_dir=/tmp/pt3/fifo
+    mkdir -p $fifo_dir
+    fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
+    mkfifo -m 644 $fifo_ffmpeg
+
+    nice -n 10 \
+    gst-launch-1.0 -q filesrc location=$fifo_ffmpeg \
+     ! queue \
+       max-size-buffers=0 \
+       max-size-time=0 \
+       max-size-bytes=100000000 \
      ! tsparse \
      ! tsdemux name=demux \
      demux. \
             ! queue \
-              max-size-buffers=1000 \
-              max-size-time=0 \
-              max-size-bytes=0 \
             ! mpegvideoparse \
-            ! vaapidecode \
+            ! vaapidecodebin \
+              deinterlace-method=none \
             ! vaapipostproc \
-              deinterlace-mode=auto \
+              deinterlace-mode=interlaced \
               deinterlace-method=bob \
               scale-method=fast \
               height=$encode_height \
@@ -72,9 +78,6 @@ if [ -n "$xml" ];then
             ! mux. \
      demux. \
             ! queue \
-              max-size-buffers=1000 \
-              max-size-time=0 \
-              max-size-bytes=0 \
             ! aacparse \
             ! avdec_aac \
             ! avenc_aac \
@@ -82,9 +85,24 @@ if [ -n "$xml" ];then
      matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
     pid_gst=$!
 
+    nice -n 10 \
+    ffmpeg -y \
+    -loglevel quiet \
+    -i $input_ts_file \
+    -threads 1 \
+    -vcodec copy \
+    -acodec copy \
+    -f mpegts $fifo_ffmpeg &
+    pid_ffmpeg=$!
+
 
     (
         sleep $((rec_time * 2))
+
+        sleep 10
+        kill -TERM $pid_ffmpeg > /dev/null 2>&1
+        sleep 10
+        kill -KILL $pid_ffmpeg > /dev/null 2>&1
 
         sleep 10
         kill -TERM $pid_gst > /dev/null 2>&1
@@ -92,7 +110,10 @@ if [ -n "$xml" ];then
         kill -KILL $pid_gst > /dev/null 2>&1
     ) &
 
+    wait $pid_ffmpeg
     wait $pid_gst
+
+    rm -f $fifo_ffmpeg
 
     ffprobe -show_format ${MC_DIR_MP4}/${job_file_mkv} > /dev/null 2>&1
     if [ $? -eq 0 ];then
