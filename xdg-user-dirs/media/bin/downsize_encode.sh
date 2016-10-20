@@ -51,11 +51,12 @@ if [ -n "$xml" ];then
     mkfifo -m 644 $fifo_ffmpeg
 
     nice -n 10 \
-    gst-launch-1.0 -q filesrc location=$fifo_ffmpeg \
+    gst-launch-1.0 -q --eos-on-shutdown \
+       filesrc location=$fifo_ffmpeg \
      ! queue \
        max-size-buffers=0 \
        max-size-time=0 \
-       max-size-bytes=100000000 \
+       max-size-bytes=50000000 \
      ! tsparse \
      ! tsdemux name=demux \
      demux. \
@@ -91,13 +92,13 @@ if [ -n "$xml" ];then
     -i $input_ts_file \
     -threads 1 \
     -vcodec copy \
-    -acodec copy \
+    -acodec aac -b:a 256k \
     -f mpegts $fifo_ffmpeg &
     pid_ffmpeg=$!
 
 
     (
-        sleep $((rec_time * 2))
+        sleep $((rec_time))
 
         sleep 10
         kill -TERM $pid_ffmpeg > /dev/null 2>&1
@@ -105,6 +106,8 @@ if [ -n "$xml" ];then
         kill -KILL $pid_ffmpeg > /dev/null 2>&1
 
         sleep 10
+        kill -INT  $pid_gst > /dev/null 2>&1
+        sleep 60
         kill -TERM $pid_gst > /dev/null 2>&1
         sleep 10
         kill -KILL $pid_gst > /dev/null 2>&1
