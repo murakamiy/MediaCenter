@@ -53,10 +53,6 @@ if [ -n "$xml" ];then
     nice -n 10 \
     gst-launch-1.0 -q --eos-on-shutdown \
        filesrc location=$fifo_ffmpeg \
-     ! queue \
-       max-size-buffers=0 \
-       max-size-time=0 \
-       max-size-bytes=50000000 \
      ! tsparse \
      ! tsdemux name=demux \
      demux. \
@@ -86,14 +82,13 @@ if [ -n "$xml" ];then
      matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
     pid_gst=$!
 
-    nice -n 10 \
-    ffmpeg -y \
-    -loglevel quiet \
-    -i $input_ts_file \
-    -threads 1 \
-    -vcodec copy \
-    -acodec aac -b:a 256k \
-    -f mpegts $fifo_ffmpeg &
+    dd if=$input_ts_file bs=50M iflag=skip_bytes skip=50000000 |
+    gst-launch-1.0 -q fdsrc \
+     ! queue \
+       max-size-buffers=0 \
+       max-size-time=0 \
+       max-size-bytes=120000000 \
+     ! filesink location=$fifo_ffmpeg &
     pid_ffmpeg=$!
 
 
@@ -101,16 +96,16 @@ if [ -n "$xml" ];then
         sleep $((rec_time))
 
         sleep 10
-        kill -TERM $pid_ffmpeg > /dev/null 2>&1
-        sleep 10
-        kill -KILL $pid_ffmpeg > /dev/null 2>&1
-
-        sleep 10
         kill -INT  $pid_gst > /dev/null 2>&1
         sleep 60
         kill -TERM $pid_gst > /dev/null 2>&1
         sleep 10
         kill -KILL $pid_gst > /dev/null 2>&1
+
+        sleep 10
+        kill -TERM $pid_ffmpeg > /dev/null 2>&1
+        sleep 10
+        kill -KILL $pid_ffmpeg > /dev/null 2>&1
     ) &
 
     wait $pid_ffmpeg
