@@ -45,50 +45,19 @@ if [ -n "$xml" ];then
 
     time_start=$(awk 'BEGIN { print systime() }')
 
-    fifo_dir=/tmp/pt3/fifo
-    mkdir -p $fifo_dir
-    fifo_ffmpeg=${fifo_dir}/ffmpeg_$$
-    mkfifo -m 644 $fifo_ffmpeg
 
-    nice -n 10 \
-    gst-launch-1.0 -q --eos-on-shutdown \
-       filesrc location=$fifo_ffmpeg \
-     ! tsparse \
-     ! tsdemux name=demux \
-     demux. \
-            ! queue \
-            ! mpegvideoparse \
-            ! vaapidecodebin \
-              deinterlace-method=none \
-            ! vaapipostproc \
-              deinterlace-mode=interlaced \
-              deinterlace-method=bob \
-              scale-method=fast \
-              height=$encode_height \
-            ! videorate \
-              max-rate=30 \
-            ! vaapih264enc \
-               tune=high-compression \
-               rate-control=cqp \
-               init-qp=32 \
-               min-qp=20 \
-            ! mux. \
-     demux. \
-            ! queue \
-            ! aacparse \
-            ! avdec_aac \
-            ! avenc_aac \
-            ! mux. \
-     matroskamux name=mux min-index-interval=10000000000 ! filesink location=${MC_DIR_MP4}/${job_file_mkv} &
-    pid_gst=$!
-
-    dd if=$input_ts_file bs=50M iflag=skip_bytes skip=50000000 |
-    gst-launch-1.0 -q fdsrc \
-     ! queue \
-       max-size-buffers=0 \
-       max-size-time=0 \
-       max-size-bytes=120000000 \
-     ! filesink location=$fifo_ffmpeg &
+    nice -10 ffmpeg -y -loglevel quiet \
+    -vaapi_device /dev/dri/renderD128 \
+    -hwaccel vaapi -hwaccel_output_format vaapi \
+    -i $input_ts_file \
+    -f matroska \
+    -threads 1 \
+    -vf 'format=nv12|vaapi,hwupload,scale_vaapi=w=640:h=360' \
+    -vcodec h264_vaapi \
+    -profile 100 -level 30 -qp 30 \
+    -aspect 16:9 \
+    -acodec aac \
+    ${MC_DIR_MP4}/${job_file_mkv} &
     pid_ffmpeg=$!
 
 
@@ -96,22 +65,15 @@ if [ -n "$xml" ];then
         sleep $((rec_time))
 
         sleep 10
-        kill -INT  $pid_gst > /dev/null 2>&1
+        kill -INT  $pid_ffmpeg > /dev/null 2>&1
         sleep 60
-        kill -TERM $pid_gst > /dev/null 2>&1
-        sleep 10
-        kill -KILL $pid_gst > /dev/null 2>&1
-
-        sleep 10
         kill -TERM $pid_ffmpeg > /dev/null 2>&1
         sleep 10
         kill -KILL $pid_ffmpeg > /dev/null 2>&1
     ) &
 
     wait $pid_ffmpeg
-    wait $pid_gst
 
-    rm -f $fifo_ffmpeg
 
     ffprobe -show_format ${MC_DIR_MP4}/${job_file_mkv} > /dev/null 2>&1
     if [ $? -eq 0 ];then
