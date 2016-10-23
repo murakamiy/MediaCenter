@@ -23,7 +23,6 @@ now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
 bash $MC_BIN_SMB_JOB &
-bash $MC_BIN_MIGRATE_JOB &
 bash $MC_BIN_DOWNSIZE_ENCODE &
 
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)

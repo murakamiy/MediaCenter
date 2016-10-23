@@ -75,9 +75,10 @@ function smb_copy_mp4() {
 
     local f
     touch $MC_SMB_PUT_STAT
-    cd $MC_DIR_MP4
+    cd $MC_DIR_TS
 
-    for f in $(find . -type f -size +10M -printf '%TY%Tm%Td %TT %f\n' | sort | awk '{ print $3}');do
+    find . -type f -name '*.mkv' -mtime -5 -size +10M -printf '%f\n' | sort > $MC_SMB_PUT_TARGET
+    for f in $(cat $MC_SMB_PUT_TARGET);do
 
         grep -q $f $MC_SMB_PUT_STAT
         put_finished=$?
@@ -87,7 +88,7 @@ function smb_copy_mp4() {
             continue
         fi
 
-        smb_delete_old_file $(($MC_SMB_DISK_SIZE_GB * 1 / 5))
+        smb_delete_old_file $(($MC_SMB_DISK_SIZE_GB * 1 / 2))
 
         ext=$(basename $f | awk -F . '{ print $2 }')
         xml=${MC_DIR_JOB_FINISHED}/$(basename $f .${ext}).xml
@@ -116,7 +117,9 @@ function smb_copy_mp4() {
     done
 
     if [ "$1" = "all" ];then
-        echo > $MC_SMB_PUT_STAT
+        temp_file=$(mktemp)
+        cp $MC_SMB_PUT_STAT $temp_file
+        grep -f $MC_SMB_PUT_TARGET $temp_file > $MC_SMB_PUT_STAT
     fi
     smb_update_wtime
 }

@@ -49,7 +49,7 @@ case $command in
         done
         ;;
     ts)
-        for f in $(find $MC_DIR_TS $MC_DIR_TS_HD);do
+        for f in $(find $MC_DIR_TS);do
             xml_file=$MC_DIR_JOB_FINISHED/$(basename $f .ts).xml
             if [ ! -f $xml_file ];then
                 continue
@@ -63,7 +63,7 @@ case $command in
         done | sort | column -t
         ;;
     encode)
-        for f in $(find $MC_DIR_ENCODE_HD -type f);do
+        for f in $(find $MC_DIR_ENCODE -type f);do
             base=$(basename $f | awk -F . '{ print $1 }')
             ext=$(basename $f | awk -F . '{ print $2 }')
             size=$(ls -sh $f | awk '{ print $1 }')
@@ -110,8 +110,8 @@ case $command in
             file_list=$1
             total=1
         else
-            file_list=$(find $MC_DIR_ENCODE_HD -type f | sort)
-            total=$(find $MC_DIR_ENCODE_HD -type f | wc -l)
+            file_list=$(find $MC_DIR_ENCODE -type f | sort)
+            total=$(find $MC_DIR_ENCODE -type f | wc -l)
         fi
         progress=0
         for f in $file_list;do
@@ -164,9 +164,9 @@ case $command in
         ;;
     mk_title_ts)
         shift
-        total=$(find $MC_DIR_TS_HD -type f -name '*.ts' | wc -l)
+        total=$(find $MC_DIR_TS -type f -name '*.ts' | wc -l)
         progress=0
-        for f in $(find $MC_DIR_TS_HD -type f -name '*.ts' | sort);do
+        for f in $(find $MC_DIR_TS -type f -name '*.ts' | sort);do
             job_file_base=$(basename $f .ts)
             job_file_xml=${job_file_base}.xml
             job_file_ts=${job_file_base}.ts
@@ -174,7 +174,7 @@ case $command in
             foundby=$(xmlsel -t -m //foundby -v . ${MC_DIR_JOB_FINISHED}/${job_file_xml} | sed -e 's/Finder//')
 
             thumb_file=${MC_DIR_THUMB}/${job_file_ts}
-            bash $MC_BIN_THUMB ${MC_DIR_TS_HD}/${job_file_ts} ${thumb_file}.png
+            bash $MC_BIN_THUMB ${MC_DIR_TS}/${job_file_ts} ${thumb_file}.png
             if [ $? -eq 0 ];then
                 mv ${thumb_file}.png $thumb_file
             else

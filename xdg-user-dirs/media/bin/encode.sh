@@ -3,8 +3,8 @@ source $(dirname $0)/00.conf
 
 function do_encode_ffmpeg() {
     local base=$1
-    local input=${MC_DIR_TS_HD}/${base}.ts
-    local output=${MC_DIR_ENCODE_HD}/${base}.mp4
+    local input=${MC_DIR_TS}/${base}.ts
+    local output=${MC_DIR_ENCODE}/${base}.mp4
 
     nice -n 5 \
     ffmpeg -y -i $input -f mp4 \
@@ -37,14 +37,14 @@ if [ -n "$xml" ];then
         mv ${MC_DIR_ENCODING}/${base}.xml $MC_DIR_ENCODE_FINISHED
 
         thumb_file=${MC_DIR_THUMB}/${base}.mp4
-        bash $MC_BIN_THUMB ${MC_DIR_ENCODE_HD}/${base}.mp4 ${thumb_file}.png
+        bash $MC_BIN_THUMB ${MC_DIR_ENCODE}/${base}.mp4 ${thumb_file}.png
         if [ $? -eq 0 ];then
             mv ${thumb_file}.png $thumb_file
         else
             cp $MC_FILE_THUMB $thumb_file
         fi
 
-        mp4tags -c "$title" ${MC_DIR_ENCODE_HD}/${base}.mp4
+        mp4tags -c "$title" ${MC_DIR_ENCODE}/${base}.mp4
 
         ln -f $thumb_file "${MC_DIR_TITLE_ENCODE}/${title}.png"
         touch -t 200001010000 "${MC_DIR_TITLE_ENCODE}/${title}.png"

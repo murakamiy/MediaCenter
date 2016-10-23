@@ -20,7 +20,7 @@ if [ -n "$thumb_file" ];then
     echo $png_file | grep -q $MC_DIR_TITLE_TS
     if [ $? -eq 0 ];then
         play_stat=true
-        for dir in "$MC_DIR_TS_HD $MC_DIR_TS $MC_DIR_MP4_HD $MC_DIR_MP4";do
+        for dir in "$MC_DIR_TS";do
             video_file=$(find $dir -type f -name $thumb_file | sort | head -n 1)
             if [ -n "$video_file" ];then
                 break
@@ -29,7 +29,7 @@ if [ -n "$thumb_file" ];then
     else
         echo $png_file | grep -q $MC_DIR_TITLE_ENCODE
         if [ $? -eq 0 ];then
-            video_file=$(find $MC_DIR_ENCODE_HD -type f -name $thumb_file | sort | head -n 1)
+            video_file=$(find $MC_DIR_ENCODE -type f -name $thumb_file | sort | head -n 1)
         else
             zenity --info --display=:0.0 --text="<span font_desc='40'>something wrong 1\n\n $png_file</span>"
             exit

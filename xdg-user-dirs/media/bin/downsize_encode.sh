@@ -37,11 +37,7 @@ if [ -n "$xml" ];then
 
     log "d_encode start: $title $(hard_ware_info)"
 
-    if [ -f ${MC_DIR_TS}/${job_file_ts} ];then
-        input_ts_file=${MC_DIR_TS}/${job_file_ts}
-    elif [ -f ${MC_DIR_TS_HD}/${job_file_ts} ];then
-        input_ts_file=${MC_DIR_TS_HD}/${job_file_ts}
-    fi
+    input_ts_file=${MC_DIR_TS}/${job_file_ts}
 
     time_start=$(awk 'BEGIN { print systime() }')
 
@@ -57,7 +53,7 @@ if [ -n "$xml" ];then
     -profile 100 -level 30 -qp 30 \
     -aspect 16:9 \
     -acodec aac \
-    ${MC_DIR_MP4}/${job_file_mkv} &
+    ${MC_DIR_TS}/${job_file_mkv} &
     pid_ffmpeg=$!
 
 
@@ -75,9 +71,9 @@ if [ -n "$xml" ];then
     wait $pid_ffmpeg
 
 
-    ffprobe -show_format ${MC_DIR_MP4}/${job_file_mkv} > /dev/null 2>&1
+    ffprobe -show_format ${MC_DIR_TS}/${job_file_mkv} > /dev/null 2>&1
     if [ $? -eq 0 ];then
-        duration=$(ffprobe -show_format ${MC_DIR_MP4}/${job_file_mkv} 2> /dev/null | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
+        duration=$(ffprobe -show_format ${MC_DIR_TS}/${job_file_mkv} 2> /dev/null | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
         integrity=$(($rec_time - $duration))
         if [ "$integrity" -lt 180 ];then
 
@@ -86,7 +82,7 @@ if [ -n "$xml" ];then
             fi
 
             /bin/rm ${MC_DIR_ENCODING}/${job_file_xml}
-            stat --format=%s ${MC_DIR_MP4}/${job_file_mkv} > ${MC_DIR_FILE_SIZE}/${job_file_mkv}
+            stat --format=%s ${MC_DIR_TS}/${job_file_mkv} > ${MC_DIR_FILE_SIZE}/${job_file_mkv}
 
             time_end=$(awk 'BEGIN { print systime() }')
             (( took = (time_end - time_start) / 60 ))

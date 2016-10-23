@@ -7,5 +7,3 @@ smb_copy_mp4 all
 smb_move_old_files
 smb_put_log
 smb_delete_empty_dir
-
-find $MC_DIR_MP4 -ctime +5 -delete

@@ -6,86 +6,43 @@ cat << EOF
 USAGE : $(basename $0) OPTIONS
         -h print help
         -w wait until all storage device are presented
-        -s set standby timeout
-        -S put hard disk arrays to standby mode
-        -u wakeup hard disk device
         -m unmount hard disk
+        -l print device file (large hard disk)
+        -s print device file (small hard disk)
 EOF
 exit 1
 }
 
-function print_device_hd() {
-    if [ -h /dev/disk/by-id/$MC_DEVICE_HD ];then
-        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD
+function print_device_small() {
+    if [ -h /dev/disk/by-id/$MC_DEVICE_HD_SMALL ];then
+        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD_SMALL
     fi
 }
 
-function print_device_hd2() {
-    if [ -h /dev/disk/by-id/$MC_DEVICE_HD2 ];then
-        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD2
-    fi
-}
-
-function print_device_hd_array() {
-    device_list=(
-        $MC_DEVICE_HD_ARRAY_1
-        $MC_DEVICE_HD_ARRAY_2
-    )
-    for d in ${device_list[@]};do
-        if [ -h /dev/disk/by-id/$d ];then
-            $MC_BIN_REALPATH /dev/disk/by-id/$d
-        fi
-    done
-}
-
-function print_device_hd_array_md() {
-    if [ -b $MC_DEVICE_HD_ARRAY ];then
-        echo $MC_DEVICE_HD_ARRAY
+function print_device_large() {
+    if [ -h /dev/disk/by-id/$MC_DEVICE_HD_LARGE ];then
+        $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD_LARGE
     fi
 }
 
 function print_all_storage_device() {
     (
-        print_device_hd
-        print_device_hd2
-        print_device_hd_array
+        print_device_small
+        print_device_large
     ) | sort
 }
 
 function wait_for_storage_device() {
     for i in $(seq 60);do
         echo "wait for storage device $i"
-        count=$( (print_all_storage_device; print_device_hd_array_md) | wc -l)
-        if [ $count -eq 5 ];then
+        count=$( (print_all_storage_device) | wc -l)
+        if [ $count -eq 2 ];then
             echo "wait for storage device $i all device found"
             return 0
         fi
         sleep 1
     done
     return 1
-}
-
-function set_standby_timeout() {
-    for d in $(print_device_hd);do
-        hdparm -B 128 $d
-        hdparm -S $(($MC_STORAGE_STANDBY_TIMEOUT / 5)) $d
-    done
-    for d in $(print_device_hd2; print_device_hd_array);do
-        hdparm -S $(($MC_STORAGE_STANDBY_TIMEOUT / 5)) $d
-    done
-}
-
-function put_into_standby_mode() {
-
-    flush_disk_cache_soft
-    for d in $(print_device_hd2; print_device_hd_array);do
-        flush_disk_cache_hard $d
-    done
-    sleep 5
-
-    for d in $(print_device_hd2; print_device_hd_array);do
-        hdparm -y $d
-    done
 }
 
 function flush_disk_cache_soft() {
@@ -99,15 +56,8 @@ function flush_disk_cache_hard() {
     hdparm -F $1
 }
 
-function wakeup() {
-    for d in $(print_device_hd; print_device_hd2; print_device_hd_array_md);do
-        ls $(mount | grep "^$d" | awk '{ print $3 }') > /dev/null
-    done
-}
-
 function unmount_disk() {
 
-    wakeup
     wait_for_storage_device
     flush_disk_cache_soft
 
@@ -120,7 +70,7 @@ function unmount_disk() {
     done
 }
 
-while getopts 'hwsSum' opt;do
+while getopts 'hwmls' opt;do
     case $opt in
         h)
             usage
@@ -130,20 +80,16 @@ while getopts 'hwsSum' opt;do
             wait_for_storage_device
             exit
             ;;
-        s)
-            set_standby_timeout
-            exit
-            ;;
-        S)
-            put_into_standby_mode
-            exit
-            ;;
-        u)
-            wakeup
-            exit
-            ;;
         m)
             unmount_disk
+            exit
+            ;;
+        l)
+            print_device_large
+            exit
+            ;;
+        s)
+            print_device_small
             exit
             ;;
     esac

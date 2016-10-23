@@ -114,7 +114,6 @@ done
 
 wait $pid_smb
 wait $pid_mig_array
-bash $MC_BIN_MIGRATE_MP4
 
 find $MC_DIR_TITLE_TS -type d -delete
 

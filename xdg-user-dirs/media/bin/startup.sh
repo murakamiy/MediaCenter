@@ -23,9 +23,4 @@ sudo $MC_BIN_SIXAD start
 # bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) &
 # bash $MC_BIN_RRD_GPU &
 
-echo -n > ${MC_DIR_LOG}/disk-power.log
-$MC_BIN_DISK_CONTROL -w >> ${MC_DIR_LOG}/disk-power.log 2>&1
-$MC_BIN_DISK_CONTROL -s >> ${MC_DIR_LOG}/disk-power.log 2>&1
-$MC_BIN_DISK_CONTROL -S >> ${MC_DIR_LOG}/disk-power.log 2>&1
-
 log "end"
