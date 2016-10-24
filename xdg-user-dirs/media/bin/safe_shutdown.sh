@@ -54,9 +54,11 @@ if [ -n "$running" ];then
     return
 fi
 
-used=$(df -h | grep ^/dev/sdb | awk '{ print $3 }')
-write_s=$(echo $(cat /sys/fs/ext4/sdb1/session_write_kbytes) / 1024 / 1024 | bc)
-write_t=$(echo $(cat /sys/fs/ext4/sdb1/lifetime_write_kbytes) / 1024 / 1024 | bc)
+dev=$($MC_BIN_DISK_CONTROL -l)
+dev_base=$(sed -e 's@/dev/@@' <<< $dev)
+used=$(df -h | grep "^$dev" | awk '{ print $3 }')
+write_s=$(echo $(cat /sys/fs/ext4/$dev_base/session_write_kbytes) / 1024 / 1024 | bc)
+write_t=$(echo $(cat /sys/fs/ext4/$dev_base/lifetime_write_kbytes) / 1024 / 1024 | bc)
 log "disk used=$used session=${write_s}G total=${write_t}G"
 
 if [ $wakeup_time -ne -1 ];then
