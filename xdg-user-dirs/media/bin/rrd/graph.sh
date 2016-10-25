@@ -380,8 +380,8 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
-db_file=${rrd_dir}/gpu.rrd
-create_graph_gpu
+# db_file=${rrd_dir}/gpu.rrd
+# create_graph_gpu
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
 
@@ -407,8 +407,8 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
-db_file=${rrd_dir}/gpu.rrd
-create_graph_gpu
+# db_file=${rrd_dir}/gpu.rrd
+# create_graph_gpu
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
 
@@ -429,8 +429,8 @@ create_graph_temp
 create_graph_mem
 create_graph_du
 
-db_file=${rrd_dir}/gpu.rrd
-create_graph_gpu
+# db_file=${rrd_dir}/gpu.rrd
+# create_graph_gpu
 db_file=${rrd_dir}/rec.rrd
 create_graph_rec
 
