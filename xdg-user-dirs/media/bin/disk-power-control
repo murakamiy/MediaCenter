@@ -9,6 +9,7 @@ USAGE : $(basename $0) OPTIONS
         -m unmount hard disk
         -l print device file (large hard disk)
         -s print device file (small hard disk)
+        -o optimize hard disk parameter
 EOF
 exit 1
 }
@@ -70,7 +71,22 @@ function unmount_disk() {
     done
 }
 
-while getopts 'hwmls' opt;do
+function optimize_param() {
+
+    wait_for_storage_device
+
+    small_hd=$(print_device_small)
+    large_hd=$(print_device_large)
+
+    # set Advanced Power Management feature to the highest I/O performance
+    hdparm -B 254 $small_hd
+
+    # set standby (spindown) timeout to 10 minutes
+    hdparm -S 120 $small_hd
+    hdparm -S 120 $large_hd
+}
+
+while getopts 'hwmlso' opt;do
     case $opt in
         h)
             usage
@@ -90,6 +106,10 @@ while getopts 'hwmls' opt;do
             ;;
         s)
             print_device_small
+            exit
+            ;;
+        o)
+            optimize_param
             exit
             ;;
     esac

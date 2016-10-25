@@ -23,4 +23,6 @@ sudo $MC_BIN_SIXAD start
 # bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) &
 # bash $MC_BIN_RRD_GPU &
 
+$MC_BIN_DISK_CONTROL -o
+
 log "end"
