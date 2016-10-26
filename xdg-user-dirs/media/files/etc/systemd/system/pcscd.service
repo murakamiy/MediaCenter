@@ -1,0 +1,9 @@
+[Unit]
+Description=PC/SC Smart Card Daemon
+
+[Service]
+ExecStart=/usr/bin/pcscd --foreground
+ExecReload=/usr/bin/pcscd --hotplug
+
+[Install]
+WantedBy=multi-user.target
