@@ -6,8 +6,11 @@ function do_encode_ffmpeg() {
     local input=${MC_DIR_TS}/${base}.ts
     local output=${MC_DIR_ENCODE}/${base}.mp4
 
+    fifo=${MC_DIR_FIFO}/x264_$$
+    mkfifo -m 644 $fifo
+
     nice -n 5 \
-    ffmpeg -y -i $input -f mp4 \
+    ffmpeg -y -i $fifo -f mp4 \
         -loglevel quiet \
         -threads 2 \
         -s 1280x720 \
@@ -17,7 +20,16 @@ function do_encode_ffmpeg() {
         -preset:v faster \
         -crf 25 -level 31 \
         -acodec aac -b:a 256k \
-        $output
+        $output &
+    pid_ffmpeg=$!
+
+    dd if=$input of=$fifo ibs=100M obs=512 &
+    pid_read=$!
+
+    wait $pid_read
+    wait $pid_ffmpeg
+
+    rm -f $fifo
 }
 
 xml=$(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort | head -n 1)

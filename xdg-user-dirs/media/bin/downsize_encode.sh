@@ -36,29 +36,38 @@ if [ -n "$xml" ];then
     rec_time=$(xmlsel -t -m //rec-time -v .             ${MC_DIR_ENCODING}/${job_file_xml})
 
     log "d_encode start: $title $(hard_ware_info)"
+    time_start=$(awk 'BEGIN { print systime() }')
 
     input_ts_file=${MC_DIR_TS}/${job_file_ts}
-
-    time_start=$(awk 'BEGIN { print systime() }')
+    fifo=${MC_DIR_FIFO}/vaapi_$$
+    mkfifo -m 644 $fifo
 
 
     nice -10 ffmpeg -y -loglevel quiet \
     -vaapi_device /dev/dri/renderD128 \
     -hwaccel vaapi -hwaccel_output_format vaapi \
-    -i $input_ts_file \
+    -i $fifo \
     -f matroska \
     -threads 1 \
     -vf 'format=nv12|vaapi,hwupload,scale_vaapi=w=640:h=360' \
     -vcodec h264_vaapi \
-    -profile 100 -level 30 -qp 30 \
+    -profile 100 -level 31 -qp 25 \
     -aspect 16:9 \
     -acodec aac \
     ${MC_DIR_TS}/${job_file_mkv} &
     pid_ffmpeg=$!
 
+    dd if=$input_ts_file of=$fifo ibs=200M obs=512 &
+    pid_read=$!
+
 
     (
         sleep $((rec_time))
+
+        sleep 10
+        kill -TERM $pid_read > /dev/null 2>&1
+        sleep 10
+        kill -KILL $pid_read > /dev/null 2>&1
 
         sleep 10
         kill -INT  $pid_ffmpeg > /dev/null 2>&1
@@ -68,7 +77,10 @@ if [ -n "$xml" ];then
         kill -KILL $pid_ffmpeg > /dev/null 2>&1
     ) &
 
+    wait $pid_read
     wait $pid_ffmpeg
+
+    rm -f $fifo
 
 
     ffprobe -show_format ${MC_DIR_TS}/${job_file_mkv} > /dev/null 2>&1
