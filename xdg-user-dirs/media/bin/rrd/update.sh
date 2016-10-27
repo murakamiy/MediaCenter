@@ -11,27 +11,14 @@ BEGIN {
     CPU_IOWAIT = 0
     CPU_STEAL = 0
     CPU_IDLE = 0
-    SSD_READ = 0
-    SSD_WRITE = 0
-    HD_ARRAY_1_READ = 0
-    HD_ARRAY_1_WRITE = 0
-    HD_ARRAY_2_READ = 0
-    HD_ARRAY_2_WRITE = 0
-    HD_ARRAY_3_READ = 0
-    HD_ARRAY_3_WRITE = 0
-    HD_RAID_READ = 0
-    HD_RAID_WRITE = 0
     HD_READ = 0
     HD_WRITE = 0
     HD2_READ = 0
     HD2_WRITE = 0
 
     cpu_line = 0
-    hd_array_1_line = 0
-    hd_array_2_line = 0
     hd_line = 0
     hd2_line = 0
-    hd_raid_line = 0
 }
 
 /^avg-cpu: / {
@@ -42,20 +29,8 @@ BEGIN {
     hd_line = 1
     next
 }
-/^ata-WDC_WD25EZRX-00MMMB0_WD-WCAWZ1234078/ {
+/^ata-WDC_WD60EFRX-68L0BN1_WD-WX11D6651KFD/ {
     hd2_line = 1
-    next
-}
-/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0637164/ {
-    hd_array_1_line = 1
-    next
-}
-/^ata-WDC_WD30EZRX-00D8PB0_WD-WMC4N0640397/ {
-    hd_array_2_line = 1
-    next
-}
-/^md-name-MediaCenter/ {
-    hd_raid_line = 1
     next
 }
 
@@ -74,47 +49,22 @@ BEGIN {
         HD2_READ = $2
         HD2_WRITE = $3
     }
-    else if (hd_array_1_line == 1) {
-        hd_array_1_line = 0
-        HD_ARRAY_1_READ = $2
-        HD_ARRAY_1_WRITE = $3
-    }
-    else if (hd_array_2_line == 1) {
-        hd_array_2_line = 0
-        HD_ARRAY_2_READ = $2
-        HD_ARRAY_2_WRITE = $3
-    }
     else if (hd_line == 1) {
         hd_line = 0
         HD_READ = $2
         HD_WRITE = $3
     }
-    else if (hd_raid_line == 1) {
-        hd_raid_line = 0
-        HD_RAID_READ = $2
-        HD_RAID_WRITE = $3
-    }
 }
 
 END {
 
-    printf("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n",
+    printf("%s %s %s %s %s %s %s %s %s %s\n",
             CPU_USER,
             CPU_NICE,
             CPU_SYSTEM,
             CPU_IOWAIT,
             CPU_STEAL,
             CPU_IDLE,
-            SSD_READ,
-            SSD_WRITE,
-            HD_ARRAY_1_READ,
-            HD_ARRAY_1_WRITE,
-            HD_ARRAY_2_READ,
-            HD_ARRAY_2_WRITE,
-            HD_ARRAY_3_READ,
-            HD_ARRAY_3_WRITE,
-            HD_RAID_READ,
-            HD_RAID_WRITE,
             HD_READ,
             HD_WRITE,
             HD2_READ,
@@ -127,23 +77,23 @@ CPU_SYSTEM=${iostat_arr[2]}
 CPU_IOWAIT=${iostat_arr[3]}
 CPU_STEAL=${iostat_arr[4]}
 CPU_IDLE=${iostat_arr[5]}
-SSD_READ=${iostat_arr[6]}
-SSD_WRITE=${iostat_arr[7]}
-HD_ARRAY_1_READ=${iostat_arr[8]}
-HD_ARRAY_1_WRITE=${iostat_arr[9]}
-HD_ARRAY_2_READ=${iostat_arr[10]}
-HD_ARRAY_2_WRITE=${iostat_arr[11]}
-HD_ARRAY_3_READ=${iostat_arr[12]}
-HD_ARRAY_3_WRITE=${iostat_arr[13]}
-HD_RAID_READ=${iostat_arr[14]}
-HD_RAID_WRITE=${iostat_arr[15]}
-HD_READ=${iostat_arr[16]}
-HD_WRITE=${iostat_arr[17]}
-HD2_READ=${iostat_arr[18]}
-HD2_WRITE=${iostat_arr[19]}
+SSD_READ=0
+SSD_WRITE=0
+HD_ARRAY_1_READ=0
+HD_ARRAY_1_WRITE=0
+HD_ARRAY_2_READ=0
+HD_ARRAY_2_WRITE=0
+HD_ARRAY_3_READ=0
+HD_ARRAY_3_WRITE=0
+HD_RAID_READ=0
+HD_RAID_WRITE=0
+HD_READ=${iostat_arr[6]}
+HD_WRITE=${iostat_arr[7]}
+HD2_READ=${iostat_arr[8]}
+HD2_WRITE=${iostat_arr[9]}
 
 LOAD_AVERAGE=$(uptime | awk -F 'load average: ' '{ print $2 }' | awk -F , '{ print $1 }')
-DISK_USAGE=$(LANG=C df -P | grep '/mnt/hd$' | awk '{ printf("%d\n", $(NF - 1)) }')
+DISK_USAGE=$(LANG=C df -P | grep '/mnt/hd_small$' | awk '{ printf("%d\n", $(NF - 1)) }')
 
 mem_arr=($(free -m | grep '^Mem:' | awk '
 {
@@ -182,22 +132,9 @@ BEGIN {
     VOLT_VBAT = 0
     FAN1 = 0
     FAN2 = 0
-
-    mother_board_1_line = 0
-    mother_board_2_line = 0
-}
-
-/^soc_dts0-virtual-0/ {
-    mother_board_1_line = 1
-    mother_board_2_line = 0
-}
-/^soc_dts1-virtual-0/ {
-    mother_board_1_line = 0
-    mother_board_2_line = 1
 }
 
 {
-
     if (match($0, "^Core 0:") != 0) {
         TEMP_CPU = $3
     }
@@ -207,13 +144,12 @@ BEGIN {
     else if (match($1, "fan1:") != 0) {
         FAN2 = $2
     }
-    else if (mother_board_1_line == 1 && match($1, "temp1:") != 0) {
+    else if (match($1, "SYSTIN:") != 0) {
         TEMP_MOTHER_BORD_1 = $2
     }
-    else if (mother_board_2_line == 1 && match($1, "temp1:") != 0) {
+    else if (match($1, "CPUTIN:") != 0) {
         TEMP_MOTHER_BORD_2 = $2
     }
-
 }
 
 END {

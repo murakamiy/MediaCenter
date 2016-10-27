@@ -374,7 +374,6 @@ height=300
 
 db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
-create_graph_io_raid
 create_graph_io
 create_graph_temp
 create_graph_mem
@@ -401,7 +400,6 @@ height=300
 
 db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
-create_graph_io_raid
 create_graph_io
 create_graph_temp
 create_graph_mem
@@ -423,7 +421,6 @@ height=300
 
 db_file=${rrd_dir}/stat.rrd
 create_graph_cpu
-create_graph_io_raid
 create_graph_io
 create_graph_temp
 create_graph_mem
