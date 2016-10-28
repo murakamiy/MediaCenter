@@ -126,7 +126,6 @@ class BoxingFinder(Finder):
         return False
 
 class MoterSportsFinder(Finder):
-    original_file = FILE_RELEASE
     priority = 30
     def allow(self, pinfo):
         if 'モータースポーツ' in pinfo.category_list:
