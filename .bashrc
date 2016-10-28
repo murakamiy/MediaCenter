@@ -71,10 +71,10 @@ alias scr='screen -r'
 # Function
 #####################################################################################################
 function vlog() {
-    less $(find /home/mc/xdg-user-dirs/media/job/log/ -type f -not -name '*.log' -not -name '*.error' | sort | tail -n 1)
+    view $(find /home/mc/xdg-user-dirs/media/job/log/ -type f -not -name '*.log' -not -name '*.error' | sort | tail -n 1)
 }
 function vlogy() {
-    less $(find /home/mc/xdg-user-dirs/media/job/log/ -type f -not -name '*.log' -not -name '*.error' | sort | tail -n 2 | head -n 1)
+    view $(find /home/mc/xdg-user-dirs/media/job/log/ -type f -not -name '*.log' -not -name '*.error' | sort | tail -n 2 | head -n 1)
 }
 function m() {
     mount | grep ^/ | sort
