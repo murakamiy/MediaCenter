@@ -119,6 +119,10 @@ sensors_arr=($(LANG=C sensors -A | awk '
 BEGIN {
 
     TEMP_CPU = 0
+    TEMP_CPU_0 = 0
+    TEMP_CPU_1 = 0
+    TEMP_CPU_2 = 0
+    TEMP_CPU_3 = 0
     TEMP_MOTHER_BORD_1 = 0
     TEMP_MOTHER_BORD_2 = 0
     VOLT_IN0 = 0
@@ -136,12 +140,21 @@ BEGIN {
 
 {
     if (match($0, "^Core 0:") != 0) {
-        TEMP_CPU = $3
+        TEMP_CPU_0 = $3
     }
-    else if (match($1, "fan2:") != 0) {
-        FAN1 = $2
+    else if (match($0, "^Core 1:") != 0) {
+        TEMP_CPU_1 = $3
+    }
+    else if (match($0, "^Core 2:") != 0) {
+        TEMP_CPU_2 = $3
+    }
+    else if (match($0, "^Core 3:") != 0) {
+        TEMP_CPU_3 = $3
     }
     else if (match($1, "fan1:") != 0) {
+        FAN1 = $2
+    }
+    else if (match($1, "fan2:") != 0) {
         FAN2 = $2
     }
     else if (match($1, "SYSTIN:") != 0) {
@@ -153,6 +166,7 @@ BEGIN {
 }
 
 END {
+    TEMP_CPU = (TEMP_CPU_0 + TEMP_CPU_1 + TEMP_CPU_2 + TEMP_CPU_3) / 4
 
     printf("%.1f %.1f %.1f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %d %d\n",
             TEMP_CPU,
