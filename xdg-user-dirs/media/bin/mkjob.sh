@@ -43,7 +43,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
         $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     fi
     (
-        pypy $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        nice -n 5 pypy $MC_BIN_EPGDUMP -e -c ${array[$i]} -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
         /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_digital_dump=$!
@@ -65,7 +65,7 @@ for ((i = 0; i < ${#array[@]}; i++));do
         epg_param=" -s "
     fi
     (
-        pypy $MC_BIN_EPGDUMP -e -d $epg_param -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
+        nice -n 5 pypy $MC_BIN_EPGDUMP -e -d $epg_param -i ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts -o ${MC_DIR_EPG}/${prefix}_${array[$i]}.xml
         /bin/rm ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
     ) &
     pid_epg_bs_cs_dump=$!

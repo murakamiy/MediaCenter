@@ -43,7 +43,7 @@ if [ -n "$xml" ];then
     mkfifo -m 644 $fifo
 
 
-    nice -10 ffmpeg -y -loglevel quiet \
+    nice -n 10 ffmpeg -y -loglevel quiet \
     -vaapi_device /dev/dri/renderD128 \
     -hwaccel vaapi -hwaccel_output_format vaapi \
     -i $fifo \
