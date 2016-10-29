@@ -6,12 +6,12 @@ log "start: $(hard_ware_info)"
 touch ${MC_DIR_RECORDING}/mkjob.xml
 trash-empty
 
-rec_time=60
 prefix_digital=digital
 prefix_bs_cs=bs_cs
 
 log 'starting epgdump_py digital'
 array=($(awk '{ print $1 }' $MC_FILE_CHANNEL_DIGITAL))
+rec_time=60
 prefix=$prefix_digital
 for ((i = 0; i < ${#array[@]}; i++));do
     if [ $i -eq 0 ];then
@@ -56,6 +56,7 @@ pid_epg_digital=$!
 if [ "$MC_RESERVE_SATELLITE" = "true" ];then
 log 'starting epgdump_py bs cs'
 array=(BS_101 CS_296 CS_363)
+rec_time=120
 prefix=$prefix_bs_cs
 for ((i = 0; i < ${#array[@]}; i++));do
     $MC_BIN_REC ${array[$i]} $rec_time ${MC_DIR_TMP}/${prefix}_${array[$i]}.ts
