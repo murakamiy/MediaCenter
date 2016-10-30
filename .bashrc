@@ -154,7 +154,7 @@ for line in sys.stdin:
 }
 function seltime() {
     xmlstarlet sel --encode utf-8 -t -m '//programme' -v '@channel' -o ' ' -v '@start' -o ' ' -v '@stop' -n $@ |
-    python -c '
+    python2 -c '
 import datetime
 import sys
 for line in sys.stdin:
