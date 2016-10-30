@@ -163,6 +163,7 @@ class NatureFinder(Finder):
     allow_list = [
         u'プラネットアース',
         u'BBC　EARTH',
+        u'ワイルドライフ',
     ]
     def allow(self, pinfo):
         if not '自然・動物・環境' in pinfo.category_list:
