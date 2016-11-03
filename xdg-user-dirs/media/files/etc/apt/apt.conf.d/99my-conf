@@ -1,3 +1,0 @@
-APT::Default-Release "testing";
-APT::Get::Install-Recommends "false";
-APT::Get::Install-Suggests "false";

@@ -1,8 +1,0 @@
-Package: systemd
-Pin: origin ""
-Pin-Priority: -1
-
-
-Package: *systemd*
-Pin: origin ""
-Pin-Priority: -1
