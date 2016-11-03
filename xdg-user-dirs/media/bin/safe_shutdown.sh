@@ -2,9 +2,10 @@
 source $(dirname $0)/00.conf
 
 function do_shutdown() {
+    touch $MC_STAT_POWEROFF
+    xfce4-session-logout --logout
     sudo $MC_BIN_SIXAD stop
 #     bash $MC_BIN_DEBUG invk
-    touch $MC_STAT_POWEROFF
     $MC_BIN_DISK_CONTROL -m
     sleep 5
     sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
