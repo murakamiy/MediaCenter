@@ -1,3 +1,0 @@
-# "Sony PLAYSTATION3 Controller"
-
-ACTION=="add", KERNELS=="input*", SUBSYSTEMS=="input", ATTRS{name}=="Lite-On Tech IBM USB Travel Keyboard with UltraNav", RUN+="/home/mc/xdg-user-dirs/media/bin/ibm-usb-keyboard.sh"
