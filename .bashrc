@@ -269,10 +269,7 @@ function wstat() {
         }' | sort -n | column -t
     fi
 }
-function xfce-logout() {
-    bash /home/mc/xdg-user-dirs/media/bin/xfce4-session-logout.sh
-}
+
 if [ -z "$DISPLAY" -a "$(tty)" = "/dev/tty1" ];then
     bash /home/mc/xdg-user-dirs/media/bin/play-station-controller.sh &
-    startxfce4
 fi

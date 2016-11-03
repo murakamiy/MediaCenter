@@ -6,7 +6,7 @@ function do_shutdown() {
 #     bash $MC_BIN_DEBUG invk
     touch $MC_STAT_POWEROFF
     $MC_BIN_DISK_CONTROL -m
-    sleep 30
+    sleep 5
     sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
 }
 
