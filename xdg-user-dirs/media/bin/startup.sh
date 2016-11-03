@@ -1,11 +1,6 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
-if [ -f $MC_SESSION_RESTART ];then
-    /bin/rm -f $MC_SESSION_RESTART
-    exit
-fi
-
 log "start"
 
 mkdir -p $MC_DIR_TMP
