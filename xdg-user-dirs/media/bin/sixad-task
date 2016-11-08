@@ -5,4 +5,5 @@ if [ "$1" = "start" ];then
     /usr/bin/sixad --start > /tmp/sixad-task 2>&1 &
 elif [ "$1" = "stop" ];then
     /usr/bin/sixad --stop
+    /usr/bin/hciconfig hci0 down
 fi

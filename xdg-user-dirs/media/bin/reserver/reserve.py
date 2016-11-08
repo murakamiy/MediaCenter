@@ -569,7 +569,7 @@ class ReserveMaker:
     def do_create_reserve(self, pinfo, el):
         rec_command = "rec %s %d %s" % (pinfo.channel, pinfo.rectime - 10, pinfo.file_ts)
         do_job_command = "exec bash %s %s" % (BIN_DO_JOB, pinfo.file_base)
-        at_command = "at -t %s > /dev/null 2>&1" % (pinfo.start.strftime("%Y%m%d%H%M"))
+        at_command = "at -M -t %s > /dev/null 2>&1" % (pinfo.start.strftime("%Y%m%d%H%M"))
 
         attr = {"type" : "start"}
         epoch_start_element = Element("epoch", attr)

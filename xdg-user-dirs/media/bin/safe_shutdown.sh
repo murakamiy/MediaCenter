@@ -3,12 +3,14 @@ source $(dirname $0)/00.conf
 
 function do_shutdown() {
     touch $MC_STAT_POWEROFF
-    xfce4-session-logout --logout
     sudo $MC_BIN_SIXAD stop
-#     bash $MC_BIN_DEBUG invk
     $MC_BIN_DISK_CONTROL -m
-    sleep 5
-    sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
+
+    time=$(awk 'BEGIN { print strftime("%Y%m%d%H%M", systime() + 60 + 10) }')
+cat << EOF | at -M -t $time
+xfce4-session-logout --logout
+sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
+EOF
 }
 
 function do_safe_shutdown() {
@@ -73,7 +75,14 @@ if [ $wakeup_time -ne -1 ];then
         fi
 
         echo -e "computer will be shutdown in $timeout seconds.\nto cancel shutdown type\n\n\nmd abort\n\n" | write mc
-        zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup: $next_wakeup_time\n\nShutDown ?</span>"
+
+        xrandr -display :0 > /dev/null 2>&1
+        if [ $? -eq 0 ];then
+            zenity --question --no-wrap --timeout=$timeout --display=:0.0 --text="<span font_desc='40'>next wakeup: $next_wakeup_time\n\nShutDown ?</span>"
+        else
+            sleep $timeout
+        fi
+
         if [ $? -ne 1 ];then
             if [ -e $MC_ABORT_SHUTDOWN ];then
                 /bin/rm $MC_ABORT_SHUTDOWN
