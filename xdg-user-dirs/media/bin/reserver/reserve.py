@@ -391,7 +391,7 @@ class ReserveMaker:
                 if e[0] <= r.pinfo.start:
                     e[0] = r.pinfo.start
                     encode_command = "exec bash %s" % (BIN_ENCODE)
-                    at_command = "at -t %s > /dev/null 2>&1" % (e[0].strftime("%Y%m%d%H%M"))
+                    at_command = "at -M -t %s > /dev/null 2>&1" % (e[0].strftime("%Y%m%d%H%M"))
                     e.append("echo '%s' | %s" % (encode_command, at_command))
                     break
         return encode_span_list
