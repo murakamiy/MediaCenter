@@ -6,10 +6,17 @@ function do_encode_ffmpeg() {
     local input=${MC_DIR_TS}/${base}.ts
     local output=${MC_DIR_ENCODE}/${base}.mp4
 
+    if [ $(($(date +%d) % 2)) -eq 0 ];then
+        cpu_list=0,1
+    else
+        cpu_list=2,3
+    fi
+
     fifo=${MC_DIR_FIFO}/x264_$$
     mkfifo -m 644 $fifo
 
     nice -n 5 \
+    taskset --cpu-list $cpu_list \
     ffmpeg -y -i $fifo -f mp4 \
         -loglevel quiet \
         -threads 2 \
@@ -32,8 +39,9 @@ function do_encode_ffmpeg() {
     rm -f $fifo
 }
 
+encording=$(find $MC_DIR_ENCODING -type f -name '*.xml')
 xml=$(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort | head -n 1)
-if [ -n "$xml" ];then
+if [ -z "$encording" -a -n "$xml" ];then
     time_start=$(awk 'BEGIN { print systime() }')
     base=$(basename $xml .xml)
     title=$(print_title $xml)
