@@ -271,5 +271,5 @@ function wstat() {
 }
 
 if [ -z "$DISPLAY" -a "$(tty)" = "/dev/tty1" ];then
-    bash /home/mc/xdg-user-dirs/media/bin/play-station-controller.sh &
+    bash /home/mc/xdg-user-dirs/media/bin/play-station-controller.sh login_session &
 fi

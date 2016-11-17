@@ -12,11 +12,6 @@ done
 
 /bin/rm $MC_STAT_POWEROFF
 /bin/rm $MC_ABORT_SHUTDOWN
-sudo $MC_BIN_SIXAD start
-
-# LANG=C pidstat -dl 60 >> /home/mc/xdg-user-dirs/media/job/state/pidstat/$(date +%Y%m%d) &
-# bash $($MC_BIN_REALPATH /home/mc/work/invoke.sh) &
-# bash $MC_BIN_RRD_GPU &
 
 $MC_BIN_DISK_CONTROL -o
 

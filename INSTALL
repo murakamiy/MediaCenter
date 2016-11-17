@@ -297,7 +297,7 @@ media:x:1001:mc
 # sudoers
 ####################################################################################################
 
-%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/home/mc/xdg-user-dirs/media/bin/sixad-task
+%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/usr/bin/bluetoothctl,/usr/bin/hciconfig
 
 ####################################################################################################
 # crontab
@@ -364,7 +364,13 @@ autologin-user-timeout=0
 
 application -> setting -> mime type editor -> png -> PNGHandler
 
+application -> setting -> keybord -> disable key repeat
+
+application -> setting -> keybord -> add -> play-station-controller.sh logout_session
+
 screen saver off
+
+rm ~/.cache/sessions/* && chmod 500 ~/.cache/sessions
 
 ####################################################################################################
 # init database, setting files

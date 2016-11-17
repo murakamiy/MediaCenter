@@ -63,6 +63,8 @@ input=$1
 # --video-unscaled \
 
 mpv \
+--input-ar-delay 2000 \
+--input-ar-rate 1 \
 --fullscreen \
 --deinterlace=yes \
 --vo=vaapi \
