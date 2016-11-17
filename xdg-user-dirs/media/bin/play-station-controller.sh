@@ -1,4 +1,5 @@
 #!/bin/bash
+source $(dirname $0)/00.conf
 
 case $1 in
     login_session)
