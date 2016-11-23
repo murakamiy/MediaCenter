@@ -8,9 +8,11 @@ else
     sleep_time=$((60 * 30))
 fi
 
-zenity --info --no-wrap --timeout=30 --display=:0.0 --text="<span font_desc='40'>battry level $battery_level%</span>" &
+if [ -n "$battery_level" ];then
+    zenity --info --no-wrap --timeout=30 --display=:0.0 --text="<span font_desc='40'>battry level $battery_level%</span>" &
 
-while true;do
-    sleep $sleep_time
-    echo disconnect | sudo /usr/bin/bluetoothctl
-done &
+    while true;do
+        sleep $sleep_time
+        echo disconnect | sudo /usr/bin/bluetoothctl
+    done &
+fi
