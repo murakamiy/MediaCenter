@@ -5,7 +5,7 @@ log "start"
 
 mkdir -p $MC_DIR_TMP
 mkdir -p $MC_DIR_FIFO
-for f in $(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING $MC_DIR_PLAY -type f -name '*.xml');do
+for f in $(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING $MC_DIR_ENCODING_CPU $MC_DIR_ENCODING_GPU $MC_DIR_PLAY -type f -name '*.xml');do
     log "failed: $f"
     /bin/mv $f $MC_DIR_FAILED
 done

@@ -48,7 +48,7 @@ if [ -n "$running" ];then
 fi
 fi
 
-running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING -type f -name '*.xml' -printf '%f ')
+running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING $MC_DIR_ENCODING_CPU $MC_DIR_ENCODING_GPU -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo job is running
     echo $running
