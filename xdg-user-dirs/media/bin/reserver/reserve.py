@@ -19,8 +19,9 @@ DIR_TS = os.environ["MC_DIR_TS"]
 DIR_RESERVED = os.environ["MC_DIR_RESERVED"]
 DIR_RRD = os.environ["MC_DIR_RRD"]
 DIR_ENCODE = os.environ["MC_DIR_ENCODE_RESERVED"]
+DIR_DOWNSIZE_ENCODE = os.environ["MC_DIR_DOWNSIZE_ENCODE_RESERVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
-BIN_ENCODE = os.environ["MC_BIN_ENCODE"]
+BIN_NET_ENCODE = os.environ["MC_BIN_NET_ENCODE"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
 
@@ -179,8 +180,7 @@ class ReserveMaker:
 
         span_list = self.create_span(isdb_set)
         span_list = self.optimize_span(span_list)
-        encode_len = len(glob(DIR_ENCODE + '/' + '*.xml'))
-        (span_list, encode_span_list) = self.create_encode_span(encode_len, span_list)
+        encode_span = self.create_encode_span(span_list)
 
         all_rinfo_list = []
         for isdb in isdb_set:
@@ -197,12 +197,12 @@ class ReserveMaker:
             all_rinfo_list.extend(rinfo_list)
 
         all_rinfo_list.sort(cmp=timeline_channel_sort, reverse=False)
-        encode_list = self.reserve_encode(encode_span_list, all_rinfo_list)
+        encode_span = self.reserve_encode(encode_span, all_rinfo_list)
         if self.dry_run == False and self.re_schedule == False:
-            self.update_rrd(all_rinfo_list, encode_list)
+            self.update_rrd(all_rinfo_list, encode_span)
         all_rinfo_list = self.create_reserve(all_rinfo_list)
         self.do_reserve(all_rinfo_list)
-        self.do_reserve_encode(encode_list)
+        self.do_reserve_encode(encode_span)
 
     def remove_border_strech(self, rinfo_list):
         new_list = []
@@ -361,53 +361,48 @@ class ReserveMaker:
         for s in span_list_m2:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m2
-    def create_encode_span(self, count, span_list):
-        encode_span_list = []
+    def create_encode_span(self, span_list):
+        longest_span = None
+        count = len(glob(DIR_ENCODE + '/' + '*.xml')) + len(glob(DIR_DOWNSIZE_ENCODE + '/' + '*.xml'))
         if count == 0:
-            return (span_list, encode_span_list)
+            return longest_span
         encode_time = timedelta(0, 60 * 60 * 2, 0)
         one_day = timedelta(0, 60 * 60 * 22, 0)
-        while 0 < count:
-            for s in span_list:
-                if self.now.month in (7, 8) and 8 < s[0].hour:
-                    continue
-                if len(s) == 2 and encode_time <= s[1] - s[0] and s[0] - self.now < one_day:
-                    s.append(True)
-                    break
-            count -= 1
-        span_list_ret = []
         for s in span_list:
-            if len(s) == 2:
-                span_list_ret.append(s)
-            else:
-                encode_span_list.append(s)
-        self.log("span_list_modified:")
-        for s in span_list_ret:
-            self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
-        return (span_list_ret, encode_span_list)
-    def reserve_encode(self, encode_span_list, rinfo_list):
-        for e in encode_span_list:
-            for r in rinfo_list:
-                if e[0] <= r.pinfo.start:
-                    e[0] = r.pinfo.start
-                    encode_command = "exec bash %s" % (BIN_ENCODE)
-                    at_command = "at -M -t %s > /dev/null 2>&1" % (e[0].strftime("%Y%m%d%H%M"))
-                    e.append("echo '%s' | %s" % (encode_command, at_command))
-                    break
-        return encode_span_list
-    def do_reserve_encode(self, encode_list):
-        self.log("reserved encode:")
-        for e in encode_list:
-            if len(e) == 4:
-                if self.dry_run == False:
-                    os.system(e[3])
-                self.log(" %s %s %s" %
-                            (
-                                e[0].strftime('%d %H:%M'),
-                                e[1].strftime('%H:%M'),
-                                "ENCODE_JOB"
-                            )
-                        )
+            if 8 < s[0].hour:
+                continue
+            if one_day < s[0] - self.now:
+                continue
+            recording_time = s[1] - s[0]
+            if recording_time < encode_time:
+                continue
+            if longest_span == None:
+                longest_span = list(s)
+                longest_span.append(recording_time)
+            elif longest_span[2] < recording_time:
+                longest_span = list(s)
+                longest_span.append(recording_time)
+        return longest_span
+    def reserve_encode(self, encode_span, rinfo_list):
+        if encode_span == None:
+            return encode_span
+        for r in rinfo_list:
+            if encode_span[0] <= r.pinfo.start:
+                encode_span[0] = r.pinfo.start
+                encode_command = "exec bash %s %d" % (BIN_NET_ENCODE, int(time.mktime(encode_span[1].timetuple())))
+                at_command = "at -M -t %s > /dev/null 2>&1" % (encode_span[0].strftime("%Y%m%d%H%M"))
+                encode_span.append("echo '%s' | %s" % (encode_command, at_command))
+                break
+        return encode_span
+    def do_reserve_encode(self, encode_span):
+        if encode_span != None and len(encode_span) == 4:
+            if self.dry_run == False:
+                os.system(encode_span[3])
+            self.log("reserved encode:")
+            self.log(" %s %s %s" % (
+                        encode_span[0].strftime('%d %H:%M'),
+                        encode_span[1].strftime('%H:%M'),
+                        "ENCODE_JOB"))
     def set_dry_run(self, dry_run):
         self.dry_run = dry_run
     def set_include_channel(self, channel):
@@ -502,7 +497,7 @@ class ReserveMaker:
             self.log("parse failed %s" % (xml_file))
             return None
         return tree
-    def update_rrd(self, rinfo_list, encode_list):
+    def update_rrd(self, rinfo_list, encode_span):
         if not rinfo_list:
             return
         begin = None
@@ -525,9 +520,8 @@ class ReserveMaker:
             s_prefer = 0
             s_random = 0
             encode = 0
-            for e in encode_list:
-                if e[0] <= now and now < e[1]:
-                    encode = 1
+            if encode_span != None and encode_span[0] <= now and now < encode_span[1]:
+                encode = 1
             for r in rinfo_list:
                 if r.pinfo.start <= now and now < r.pinfo.end:
                     if r.pinfo.broadcasting == 'Digital':

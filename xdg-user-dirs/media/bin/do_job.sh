@@ -22,8 +22,8 @@ do_encode=$(xmlsel -t -m //do-encode -v . ${MC_DIR_RESERVED}/${job_file_xml})
 now=$(awk 'BEGIN { print systime() }')
 ((now = now - 120))
 
-bash $MC_BIN_SMB_JOB &
-bash $MC_BIN_DOWNSIZE_ENCODE &
+# bash $MC_BIN_SMB_JOB &
+# bash $MC_BIN_DOWNSIZE_ENCODE &
 
 running=$(find $MC_DIR_RECORDING -type f -name '*.xml' | wc -l)
 if [ $running -ge 4 ];then

@@ -35,6 +35,7 @@ function gpu_encode() {
 
         /bin/mv $xml $MC_DIR_ENCODING_GPU
 
+        bash $MC_BIN_SMB_JOB &
         kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE} | awk '{ print $2 }') > /dev/null 2>&1
         kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_send}:${MC_PORT_NO_GPU_SEND} | awk '{ print $2 }') > /dev/null 2>&1
 

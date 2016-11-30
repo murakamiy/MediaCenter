@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export EN_DIR_ROOT=/home/en/encode
+export EN_DIR_XML=${EN_DIR_ROOT}/xml
+
+export EN_PORT_NO_GPU_RECIEVE=50001
+export EN_PORT_NO_GPU_SEND=50002
+export EN_PORT_NO_CPU_RECIEVE=50003
+export EN_PORT_NO_CPU_SEND=50004
+
+function xmlsel() {
+    xmlstarlet sel --encode utf-8 $@ | xmlstarlet unesc
+}
