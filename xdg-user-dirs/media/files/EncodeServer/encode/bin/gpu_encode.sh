@@ -18,7 +18,7 @@ ffmpeg -y \
 -probesize 100M \
 -hwaccel cuvid \
 -c:v mpeg2_cuvid \
--i tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
+-i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
 -vf "scale_npp=w=${encode_width}:h=${encode_height}:interp_algo=super" \
 -preset:v 5 \
 -profile:v 2 \

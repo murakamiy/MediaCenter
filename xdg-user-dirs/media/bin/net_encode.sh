@@ -47,12 +47,6 @@ function gpu_encode() {
         sleep 2
 
         (
-#             gst-launch-1.0 -q fdsrc \
-#             ! queue \
-#               max-size-buffers=10000 \
-#               max-size-time=0 \
-#               max-size-bytes=0 \
-#             ! fdsink |
             dd if=${input_ts_file} ibs=500M obs=1M |
             dd iflag=fullblock ibs=100M obs=1M |
             dd iflag=fullblock ibs=10M obs=1M |
@@ -81,8 +75,6 @@ function gpu_encode() {
             fi
 
             mkvpropedit $job_file_mkv_abs --attachment-name record_description --add-attachment ${MC_DIR_ENCODING_GPU}/${job_file_xml}
-#             mkvmerge --identify /home/mc/xdg-user-dirs/media/video/ts/20161127-0328-16.mkv
-#             mkvextract attachments /home/mc/xdg-user-dirs/media/video/ts/20161127-0328-16.mkv 1:output.xml
 
             /bin/rm ${MC_DIR_ENCODING_GPU}/${job_file_xml}
 
@@ -186,10 +178,9 @@ fi
 
 wol $(cat ~/.mac_address)
 wake=false
-sleep 20
-for ((i = 0; i < 10; i++));do
+for ((i = 0; i < 20; i++));do
     sleep 3
-    ssh -o ConnectTimeout=2 en@EncodeServer ls > /dev/null 2>&1
+    ssh -o ConnectTimeout=1 en@EncodeServer ls > /dev/null 2>&1
     if [ $? -eq 0 ];then
         wake=true
         break

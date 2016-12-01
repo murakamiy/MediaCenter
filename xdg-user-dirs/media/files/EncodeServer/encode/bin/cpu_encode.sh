@@ -6,12 +6,12 @@ ip_addr_send=$(getent ahostsv4 MediaCenter | head -n 1 | awk '{ print $1 }')
 
 kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE} | awk '{ print $2 }') > /dev/null 2>&1
 
+nice \
 ffmpeg -y \
 -loglevel quiet \
 -analyzeduration 30M \
 -probesize 100M \
--i tcp://${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE}?listen \
--threads 3 \
+-i async:tcp://${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE}?listen \
 -vf yadif=mode=0:parity=-1:deint=1,scale=w=1280:h=720 \
 -preset:v fast \
 -profile:v high \
