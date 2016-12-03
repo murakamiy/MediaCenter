@@ -3,6 +3,8 @@
 echo 10 > /proc/sys/kernel/panic
 cpupower frequency-set --max 1.8Ghz
 
+/usr/bin/hciconfig hci0 up
+
 sudo -u mc /home/mc/xdg-user-dirs/media/bin/startup.sh &
 
 exit 0

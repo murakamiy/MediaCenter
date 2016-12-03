@@ -1,3 +1,2 @@
 # Set bluetooth power up
-ACTION=="add", KERNEL=="hci0", RUN+="/usr/bin/hciconfig %k up"
 ACTION=="add", SUBSYSTEMS=="input", ATTRS{name}=="PLAYSTATION(R)3 Controller", RUN+="/usr/bin/rm -f /tmp/play-station-controller"
