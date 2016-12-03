@@ -105,7 +105,19 @@ function smb_copy_mp4() {
 
         smbclient -A ~/.smbauth -D ${smb_dir} -c "mkdir __NEW" $MC_SMB_SERVER
         smbclient -A ~/.smbauth -D ${smb_dir}/__NEW -c "mkdir $foundby" $MC_SMB_SERVER
-        nice -n 5 smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put $f \"$remote\"" $MC_SMB_SERVER
+
+        gst-launch-1.0 -q \
+          filesrc \
+          location=${f} \
+          blocksize=200000000 \
+        ! queue \
+          silent=true \
+          max-size-buffers=1 \
+          max-size-bytes=0 \
+          max-size-time=0 \
+        ! fdsink \
+          blocksize=50000 |
+        smbclient -A ~/.smbauth -D ${smb_dir}/__NEW/${foundby} -c "put - \"$remote\"" $MC_SMB_SERVER
 
         python2 ${MC_DIR_DB_RATING}/smb.py $xml "$remote" >> ${MC_DIR_DB_RATING}/log 2>&1
         echo $f >> $MC_SMB_PUT_STAT

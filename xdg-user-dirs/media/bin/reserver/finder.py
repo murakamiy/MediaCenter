@@ -76,7 +76,6 @@ class DateTimeFinder(Finder):
 
 class NarutoFinder(Finder):
     priority = 90
-    do_encode = False
     def allow(self, pinfo):
         if pinfo.channel == '18' and re.search('NARUTO', pinfo.title):
             return True
@@ -105,7 +104,6 @@ class MovieFinder(Finder):
 
 class AnimeFinder(Finder):
     priority = 50
-    do_encode = False
     channel_list = ("14", "15", "16", "17", "18", "26", "BS_211")
     def allow(self, pinfo):
         if pinfo.channel in self.channel_list and '国内アニメ' in pinfo.category_list and \
