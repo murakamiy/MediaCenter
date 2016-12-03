@@ -4,6 +4,7 @@ source $(dirname $0)/00.conf
 function do_shutdown() {
     touch $MC_STAT_POWEROFF
     echo disconnect | sudo /usr/bin/bluetoothctl
+    sleep 5
     sudo /usr/bin/hciconfig hci0 down
     $MC_BIN_DISK_CONTROL -m
 
