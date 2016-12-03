@@ -36,8 +36,6 @@ function gpu_encode() {
         /bin/mv $xml $MC_DIR_ENCODING_GPU
 
         bash $MC_BIN_SMB_JOB &
-        kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE} | awk '{ print $2 }') > /dev/null 2>&1
-        kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_send}:${MC_PORT_NO_GPU_SEND} | awk '{ print $2 }') > /dev/null 2>&1
 
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
@@ -46,20 +44,19 @@ function gpu_encode() {
         ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml | at -M now"
         sleep 2
 
-        (
-            gst-launch-1.0 -q \
-              filesrc \
-              location=${input_ts_file} \
-              blocksize=500000000 \
-            ! queue \
-              silent=true \
-              max-size-buffers=1 \
-              max-size-bytes=0 \
-              max-size-time=0 \
-            ! fdsink \
-              blocksize=50000 |
-            ffmpeg -loglevel quiet -i - -vcodec copy -acodec copy -f mpegts tcp://${ip_addr_send}:${MC_PORT_NO_GPU_SEND}
-        ) &
+        gst-launch-1.0 -q \
+          filesrc \
+          location=${input_ts_file} \
+          blocksize=499712000 \
+        ! queue \
+          silent=true \
+          max-size-buffers=1 \
+          max-size-bytes=0 \
+          max-size-time=0 \
+        ! tcpclientsink \
+          host=${ip_addr_send} \
+          port=${MC_PORT_NO_GPU_SEND} \
+          blocksize=4096000 &
         pid_ffmpeg_send=$!
 
         (
@@ -130,29 +127,25 @@ function cpu_encode() {
 
         /bin/mv $xml $MC_DIR_ENCODING_CPU
 
-        kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_recive}:${MC_PORT_NO_CPU_RECIEVE} | awk '{ print $2 }') > /dev/null 2>&1
-        kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_send}:${MC_PORT_NO_CPU_SEND} | awk '{ print $2 }') > /dev/null 2>&1
-
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_CPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
 
         ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh | at -M now"
         sleep 2
 
-        (
-            gst-launch-1.0 -q \
-              filesrc \
-              location=${input_ts_file} \
-              blocksize=100000000 \
-            ! queue \
-              silent=true \
-              max-size-buffers=1 \
-              max-size-bytes=0 \
-              max-size-time=0 \
-            ! fdsink \
-              blocksize=50000 |
-            ffmpeg -loglevel quiet -i - -vcodec copy -acodec copy -f mpegts tcp://${ip_addr_send}:${MC_PORT_NO_CPU_SEND}
-        ) &
+        gst-launch-1.0 -q \
+          filesrc \
+          location=${input_ts_file} \
+          blocksize=98304000 \
+        ! queue \
+          silent=true \
+          max-size-buffers=1 \
+          max-size-bytes=0 \
+          max-size-time=0 \
+        ! tcpclientsink \
+          host=${ip_addr_send} \
+          port=${MC_PORT_NO_CPU_SEND} \
+          blocksize=4096000 &
         pid_ffmpeg_send=$!
 
         (
