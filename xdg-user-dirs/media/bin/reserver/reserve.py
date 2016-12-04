@@ -369,7 +369,7 @@ class ReserveMaker:
         encode_time = timedelta(0, 60 * 60 * 2, 0)
         one_day = timedelta(0, 60 * 60 * 22, 0)
         for s in span_list:
-            if 8 < s[0].hour:
+            if 8 < s[1].hour:
                 continue
             if one_day < s[0] - self.now:
                 continue
