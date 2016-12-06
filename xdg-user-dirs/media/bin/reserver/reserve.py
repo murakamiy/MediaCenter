@@ -373,6 +373,8 @@ class ReserveMaker:
                 continue
             if one_day < s[0] - self.now:
                 continue
+            if one_day < s[1] - self.now:
+                continue
             recording_time = s[1] - s[0]
             if recording_time < encode_time:
                 continue
