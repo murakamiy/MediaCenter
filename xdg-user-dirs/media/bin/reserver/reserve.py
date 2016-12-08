@@ -369,8 +369,6 @@ class ReserveMaker:
         encode_time = timedelta(0, 60 * 60 * 2, 0)
         one_day = timedelta(0, 60 * 60 * 22, 0)
         for s in span_list:
-            if 8 < s[1].hour:
-                continue
             if one_day < s[0] - self.now:
                 continue
             if one_day < s[1] - self.now:
@@ -384,6 +382,10 @@ class ReserveMaker:
             elif longest_span[2] < recording_time:
                 longest_span = list(s)
                 longest_span.append(recording_time)
+
+        while 6 < longest_span[1].hour and encode_time < longest_span[2]:
+            longest_span[1] = longest_span[1] - longest_span[2] / 5
+            longest_span[2] = longest_span[1] - longest_span[0]
         return longest_span
     def reserve_encode(self, encode_span, rinfo_list):
         if encode_span == None:
