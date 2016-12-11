@@ -373,6 +373,8 @@ class ReserveMaker:
                 continue
             if one_day < s[1] - self.now:
                 continue
+            if 6 < s[0].hour and s[0].hour < 23:
+                continue
             recording_time = s[1] - s[0]
             if recording_time < encode_time:
                 continue
@@ -383,7 +385,7 @@ class ReserveMaker:
                 longest_span = list(s)
                 longest_span.append(recording_time)
 
-        while 6 < longest_span[1].hour and encode_time < longest_span[2]:
+        while longest_span != None and 6 < longest_span[1].hour and encode_time < longest_span[2]:
             longest_span[1] = longest_span[1] - longest_span[2] / 5
             longest_span[2] = longest_span[1] - longest_span[0]
         return longest_span
