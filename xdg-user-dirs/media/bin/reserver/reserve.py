@@ -373,7 +373,7 @@ class ReserveMaker:
                 continue
             if one_day < s[1] - self.now:
                 continue
-            if 6 < s[0].hour and s[0].hour < 23:
+            if 6 <= s[0].hour and s[0].hour <= 22:
                 continue
             recording_time = s[1] - s[0]
             if recording_time < encode_time:
