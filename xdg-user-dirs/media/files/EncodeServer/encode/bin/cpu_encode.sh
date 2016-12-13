@@ -15,7 +15,7 @@ ffmpeg -y \
 -vf yadif=mode=0:parity=-1:deint=1,scale=w=1280:h=720 \
 -preset:v fast \
 -profile:v high \
--level 32 \
+-level 40 \
 -crf 24 \
 -c:v libx264 \
 -c:a aac \

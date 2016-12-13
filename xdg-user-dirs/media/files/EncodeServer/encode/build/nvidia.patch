@@ -1,0 +1,17 @@
+--- PKGBUILD	2016-12-04 12:23:24.291986158 +0900
++++ PKGBUILD	2016-12-04 12:23:56.078653743 +0900
+@@ -75,7 +75,13 @@
+     --enable-netcdf \
+     --enable-shared \
+     --enable-version3 \
+-    --enable-x11grab
++    --enable-x11grab \
++    --enable-nonfree \
++    --enable-cuda \
++    --enable-cuvid \
++    --enable-libnpp \
++    --extra-cflags="-march=native -I/opt/cuda/include" \
++    --extra-ldflags="-L/opt/cuda/lib64"
+ 
+   make
+   make tools/qt-faststart
