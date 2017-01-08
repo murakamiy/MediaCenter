@@ -84,8 +84,9 @@ function gpu_encode() {
             /bin/rm ${MC_DIR_ENCODING_GPU}/${job_file_xml}
 
             time_end=$(awk 'BEGIN { print systime() }')
-            (( took = (time_end - time_start) / 60 ))
-            log "gpu_encode end: $took min $title $(hard_ware_info)"
+            (( took = (time_end - time_start) ))
+            size=$(ls -sh $job_file_mkv_abs | awk '{ print $1 }')
+            log "gpu_encode end: $took sec $size $title $(hard_ware_info)"
         else
             log "gpu_encode failed: $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_GPU}/${job_file_xml} $MC_DIR_FAILED
@@ -169,8 +170,9 @@ function cpu_encode() {
             /bin/mv ${MC_DIR_ENCODING_CPU}/${job_file_xml} $MC_DIR_ENCODE_FINISHED
 
             time_end=$(awk 'BEGIN { print systime() }')
-            (( took = (time_end - time_start) / 60 ))
-            log "cpu_encode end: $took min $title $(hard_ware_info)"
+            (( took = (time_end - time_start) ))
+            size=$(ls -sh $job_file_mkv_abs | awk '{ print $1 }')
+            log "cpu_encode end: $took sec $size $title $(hard_ware_info)"
         else
             log "cpu_encode failed: $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_CPU}/${job_file_xml} $MC_DIR_FAILED
