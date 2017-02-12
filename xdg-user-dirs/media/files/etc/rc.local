@@ -3,7 +3,15 @@
 echo 10 > /proc/sys/kernel/panic
 cpupower frequency-set --max 1.8Ghz
 
-/usr/bin/hciconfig hci0 up
+(
+    sleep 10
+    /usr/bin/hciconfig hci0 up
+    python /home/mc/xdg-user-dirs/media/bin/bluetooth_wakeup.py
+    sleep 30
+    systemctl restart systemd-networkd.service
+    sleep 10
+    systemctl restart httpd.service
+) &
 
 sudo -u mc /home/mc/xdg-user-dirs/media/bin/startup.sh &
 
