@@ -77,16 +77,11 @@ done &
 pid_epg_bs_cs=$!
 fi
 
-bash $MC_BIN_MIGRATE &
-pid_mig_array=$!
-bash $MC_BIN_SMB &
-pid_smb=$!
+bash $MC_BIN_MIGRATE
+bash $MC_BIN_MIGRATE_WEBDAV
 
 log 'starting title'
 find $MC_DIR_TITLE_TS_NEW -type f -ctime +7 -delete
-
-log 'starting smb_play'
-bash $MC_BIN_SMB_PLAY
 
 log 'starting aggregate'
 python2 ${MC_DIR_DB_RATING}/aggregate.py >> ${MC_DIR_DB_RATING}/log 2>&1
@@ -103,18 +98,12 @@ else
     python2 $MC_BIN_RESERVER "${prefix_digital}_*.xml"
 fi
 
-log 'starting rrd'
-bash $MC_BIN_RRD
-
 log 'starting xml format'
 for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
     temp_file=$(mktemp)
     xmlstarlet format --encode utf-8 $f > $temp_file
     /bin/mv $temp_file $f
 done
-
-wait $pid_smb
-wait $pid_mig_array
 
 find $MC_DIR_TITLE_TS -type d -delete
 

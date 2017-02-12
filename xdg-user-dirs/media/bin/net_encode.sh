@@ -13,12 +13,14 @@ function gpu_encode() {
         job_file_xml=${job_file_base}.xml
         job_file_ts=${job_file_base}.ts
         job_file_mkv=${job_file_base}.mkv
-        job_file_mkv_abs=${MC_DIR_TS}/${job_file_mkv}
+        job_file_mkv_abs=${MC_DIR_ENCODE_DOWNSIZE}/${job_file_mkv}
         input_ts_file=${MC_DIR_TS}/${job_file_ts}
         duration=$(ffprobe -show_format $input_ts_file 2> /dev/null | grep ^duration= | awk -F = '{ printf("%d\n", $2) }')
         title=$(print_title                                         ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml})
         original_file=$(xmlsel -t -m //original-file -v .           ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml})
         rec_time=$(xmlsel -t -m //rec-time -v .                     ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml})
+        foundby=$(xmlsel -t -m //foundby -v .                       ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
+        filename_web=${title}_$(date +%m%d).mkv
 
         if [ -z "$duration" ];then
             /bin/mv ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml} $MC_DIR_FAILED
@@ -34,8 +36,6 @@ function gpu_encode() {
         fi
 
         /bin/mv $xml $MC_DIR_ENCODING_GPU
-
-        bash $MC_BIN_SMB_JOB &
 
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
@@ -80,6 +80,8 @@ function gpu_encode() {
             fi
 
             mkvpropedit $job_file_mkv_abs --attachment-name record_description --add-attachment ${MC_DIR_ENCODING_GPU}/${job_file_xml}
+            mkdir -p ${MC_DIR_WEBDAV_MC_CONTENTS}/${foundby}
+            ln $job_file_mkv_abs "${MC_DIR_WEBDAV_MC_CONTENTS}/${foundby}/${filename_web}"
 
             /bin/rm ${MC_DIR_ENCODING_GPU}/${job_file_xml}
 
@@ -187,6 +189,8 @@ if [ -z "$time_limit" ];then
     exit
 fi
 
+python $MC_BIN_BLUETOOTH_WAKEUP
+sleep 30
 wol $(cat ~/.mac_address)
 wake=false
 for ((i = 0; i < 20; i++));do
