@@ -49,6 +49,13 @@ if [ -n "$running" ];then
 fi
 fi
 
+running=$(netstat -n --tcp | grep ESTABLISHED | awk '{ split($4, arr, ":"); if (80 == arr[2]) print $4 }')
+if [ -n "$running" ];then
+    echo playing movie remote
+    echo $running
+    return
+fi
+
 running=$(find $MC_DIR_RECORDING $MC_DIR_RECORD_FINISHED $MC_DIR_ENCODING $MC_DIR_ENCODING_CPU $MC_DIR_ENCODING_GPU -type f -name '*.xml' -printf '%f ')
 if [ -n "$running" ];then
     echo job is running

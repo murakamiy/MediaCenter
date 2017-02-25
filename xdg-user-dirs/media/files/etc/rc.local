@@ -4,12 +4,18 @@ echo 10 > /proc/sys/kernel/panic
 cpupower frequency-set --max 1.8Ghz
 
 (
-    sleep 10
+    hci_stat_dir=/home/mc/xdg-user-dirs/media/job/state/hci
+    hci_stat_file=${hci_stat_dir}/hci0
+    if [ ! -f $hci_stat_file ];then
+        inotifywait -e create $hci_stat_dir
+    fi
+    ( sleep 30; rm -f $hci_stat_file ) &
+
     /usr/bin/hciconfig hci0 up
     python /home/mc/xdg-user-dirs/media/bin/bluetooth_wakeup.py
-    sleep 30
+    dhcpcd --oneshot
     systemctl restart systemd-networkd.service
-    sleep 10
+    systemctl start systemd-networkd-wait-online.service
     systemctl restart httpd.service
 ) &
 
