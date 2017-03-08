@@ -85,7 +85,7 @@ class TitleFinder(Finder):
     priority = 90
     allow_list = [
         u'__________',
-        u'ジョジョの奇妙',
+        u'BORUTO',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -146,8 +146,9 @@ class CultureFinder(Finder):
     original_file = FILE_RELEASE
     priority = 30
     allow_list = [
-        u'スーパープレゼンテーション',
         u'THE NAKED',
+        u'秘境ハンター',
+        u'THE ISLAND',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
@@ -218,10 +219,7 @@ class RandomFinder(Finder):
         pinfo.encode_bitrate = self.encode_bitrate
         pinfo.do_encode = self.do_encode
 
-        if pinfo.channel not in ('CS_340', 'CS_341', 'CS_343'):
-            pinfo.priority -= 20
-
-        if not '自然・動物・環境' in pinfo.category_list:
+        if pinfo.channel != 'CS_341':
             pinfo.priority -= 20
 
         return pinfo
