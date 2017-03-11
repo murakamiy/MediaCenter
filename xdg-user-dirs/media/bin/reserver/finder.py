@@ -210,6 +210,8 @@ class RandomFinder(Finder):
             return None
         if 'ショッピング・通販' in pinfo.category_list:
             return None
+        if pinfo.channel not in ('CS_340', 'CS_341'):
+            return None
 
         pinfo.found_by = self.__class__.__name__
         pinfo.priority = random.choice((1,2,3,4,5)) + 10.0 * pinfo.rectime / self.rectime_max
@@ -218,9 +220,6 @@ class RandomFinder(Finder):
         pinfo.encode_height = self.encode_height
         pinfo.encode_bitrate = self.encode_bitrate
         pinfo.do_encode = self.do_encode
-
-        if pinfo.channel != 'CS_341':
-            pinfo.priority -= 20
 
         return pinfo
 
