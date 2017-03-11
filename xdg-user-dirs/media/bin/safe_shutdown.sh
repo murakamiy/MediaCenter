@@ -5,7 +5,7 @@ function do_shutdown() {
     touch $MC_STAT_POWEROFF
     echo disconnect | sudo /usr/bin/bluetoothctl
     sleep 5
-    sudo /usr/bin/hciconfig hci0 down
+    echo power off | sudo bluetoothctl
     $MC_BIN_DISK_CONTROL -m
 
     time=$(awk 'BEGIN { print strftime("%Y%m%d%H%M", systime() + 60 + 10) }')

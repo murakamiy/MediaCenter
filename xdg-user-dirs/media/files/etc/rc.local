@@ -11,7 +11,7 @@ cpupower frequency-set --max 1.8Ghz
     fi
     ( sleep 30; rm -f $hci_stat_file ) &
 
-    /usr/bin/hciconfig hci0 up
+    echo power on | sudo bluetoothctl
     python /home/mc/xdg-user-dirs/media/bin/bluetooth_wakeup.py
     dhcpcd --oneshot
     systemctl restart systemd-networkd.service

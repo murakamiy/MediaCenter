@@ -297,7 +297,7 @@ media:x:1001:mc
 # sudoers
 ####################################################################################################
 
-%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/usr/bin/bluetoothctl,/usr/bin/hciconfig
+%media ALL=(ALL) PASSWD: ALL, NOPASSWD: /home/mc/xdg-user-dirs/media/ubin/wakeuptool,/home/mc/xdg-user-dirs/media/bin/disk-power-control,/usr/sbin/smartctl,/bin/date,/usr/bin/bluetoothctl
 
 ####################################################################################################
 # crontab
@@ -488,9 +488,9 @@ hdparm -I /dev/sdb
 
 sixad --stop
 service bluetooth restart
-hciconfig hci0 up
 
 bluetoothctl
+    power on
     agent on
     default-agent
     discoverable on
