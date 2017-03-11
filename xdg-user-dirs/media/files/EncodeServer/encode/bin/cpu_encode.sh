@@ -1,10 +1,8 @@
 #!/bin/bash
 source $(dirname $0)/config
 
-ip_addr_recive=$(getent ahostsv4 EncodeServer | head -n 1 | awk '{ print $1 }')
-ip_addr_send=$(getent ahostsv4 MediaCenter | head -n 1 | awk '{ print $1 }')
-
-kill -KILL $(ps -ef | grep ffmpeg | grep ${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE} | awk '{ print $2 }') > /dev/null 2>&1
+ip_addr_recive=$(nslookup EncodeServer | grep Address: | tail -n 1 | awk '{ print $2 }')
+ip_addr_send=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
 
 nice \
 ffmpeg -y \

@@ -2,6 +2,7 @@
 
 export EN_DIR_ROOT=/home/en/encode
 export EN_DIR_XML=${EN_DIR_ROOT}/xml
+export EN_DIR_LOG=${EN_DIR_ROOT}/log
 
 export EN_PORT_NO_GPU_RECIEVE=50001
 export EN_PORT_NO_GPU_SEND=50002

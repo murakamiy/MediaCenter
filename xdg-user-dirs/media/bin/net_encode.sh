@@ -4,10 +4,36 @@ source $(dirname $0)/00.conf
 function gpu_encode() {
     time_limit=$1
 
-    ip_addr_recive=$(getent ahostsv4 MediaCenter | head -n 1 | awk '{ print $1 }')
-    ip_addr_send=$(getent ahostsv4 EncodeServer | head -n 1 | awk '{ print $1 }')
+    ip_addr_recive=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
+    ip_addr_send=$(nslookup EncodeServer | grep Address: | tail -n 1 | awk '{ print $2 }')
+    volume_info_dir=${MC_DIR_TMP}/volume_info
+    mkdir -p $volume_info_dir
+    find $volume_info_dir -type f -delete
 
-    for xml in $(find $MC_DIR_DOWNSIZE_ENCODE_RESERVED -type f -name '*.xml' | sort);do
+    xml_list=$(mktemp)
+    find $MC_DIR_DOWNSIZE_ENCODE_RESERVED -type f -name '*.xml' | sort > $xml_list
+    xml_count=$(cat $xml_list | wc -l)
+    if [ ! $xml_count -gt 0 ];then
+        return
+    fi
+
+    (
+        for xml in $(cat $xml_list);do
+
+            job_file_base=$(basename $xml .xml)
+            job_file_ts=${job_file_base}.ts
+            input_ts_file=${MC_DIR_TS}/${job_file_ts}
+
+            max_volume=$(ffmpeg -i $input_ts_file -vn -af volumedetect -f null /dev/null 2>&1 |
+            grep 'max_volume:' | awk -F 'max_volume:' '{ print $2 }' |
+            awk '{ print $1 }' | sort -n | tail -n 1 |
+            awk '{ if ($1 < 0) print $1 * -1; else print 0 }')
+            echo $max_volume > ${volume_info_dir}/${job_file_ts}
+        done
+    ) &
+    inotifywait -e create $volume_info_dir
+
+    for xml in $(cat $xml_list);do
 
         job_file_base=$(basename $xml .xml)
         job_file_xml=${job_file_base}.xml
@@ -25,6 +51,7 @@ function gpu_encode() {
         if [ -z "$duration" ];then
             /bin/mv ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml} $MC_DIR_FAILED
             log "gpu_encode failed: $title $(hard_ware_info)"
+            /bin/mv $xml $MC_DIR_FAILED
             continue
         fi
 
@@ -37,12 +64,20 @@ function gpu_encode() {
 
         /bin/mv $xml $MC_DIR_ENCODING_GPU
 
+        ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_gpu_encoder.sh"
+
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
 
+        if [ -f ${volume_info_dir}/${job_file_ts} ];then
+            volume_adjust=$(cat ${volume_info_dir}/${job_file_ts})
+        else
+            volume_adjust=0
+        fi
+
         scp ${MC_DIR_ENCODING_GPU}/${job_file_xml} en@${ip_addr_send}:${EN_DIR_XML}
-        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml | at -M now"
-        sleep 2
+        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml $volume_adjust | at -M now"
+        sleep 3
 
         gst-launch-1.0 -q \
           filesrc \
@@ -100,8 +135,8 @@ function gpu_encode() {
 function cpu_encode() {
     time_limit=$1
 
-    ip_addr_recive=$(getent ahostsv4 MediaCenter | head -n 1 | awk '{ print $1 }')
-    ip_addr_send=$(getent ahostsv4 EncodeServer | head -n 1 | awk '{ print $1 }')
+    ip_addr_recive=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
+    ip_addr_send=$(nslookup EncodeServer | grep Address: | tail -n 1 | awk '{ print $2 }')
 
     for xml in $(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort);do
 
@@ -130,11 +165,13 @@ function cpu_encode() {
 
         /bin/mv $xml $MC_DIR_ENCODING_CPU
 
+        ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_cpu_encoder.sh"
+
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_CPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
 
         ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh | at -M now"
-        sleep 2
+        sleep 3
 
         gst-launch-1.0 -q \
           filesrc \
@@ -207,10 +244,12 @@ if [ "$wake" = "false" ];then
     exit
 fi
 
-gpu_encode $time_limit &
+ssh en@EncodeServer "bash ${EN_DIR_BIN}/init.sh"
+
+(gpu_encode $time_limit) &
 pid_gpu_encode=$!
 
-cpu_encode $time_limit &
+(cpu_encode $time_limit) &
 pid_cpu_encode=$!
 
 wait $pid_gpu_encode
