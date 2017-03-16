@@ -86,6 +86,7 @@ class TitleFinder(Finder):
     allow_list = [
         u'__________',
         u'BORUTO',
+        u'青の祓魔師',
     ]
     def allow(self, pinfo):
         if re.search(self.allow_pattern, pinfo.title):
