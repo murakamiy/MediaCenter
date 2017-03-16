@@ -1,7 +1,42 @@
 #!/bin/bash
 source $(dirname $0)/00.conf
 
+function router_wakeup() {
+(
+    retcode=1
+    router_addr=$(ip route | grep ^default | awk '{ print $3 }')
+
+    if [ -n "$router_addr" ];then
+        ping -w 1 -qc 1 $router_addr > /dev/null 2>&1
+        if [ $? -eq 0 ];then
+            retcode=0
+        fi
+    fi
+
+    if [ $retcode -ne 0 ];then
+
+        python $MC_BIN_BLUETOOTH_WAKEUP
+        sleep 10
+        for ((i = 1; i <= 20; i++));do
+
+            router_addr=$(ip route | grep ^default | awk '{ print $3 }')
+            if [ -n "$router_addr" ];then
+                ping -w 1 -qc 1 $router_addr > /dev/null 2>&1
+                if [ $? -eq 0 ];then
+                    retcode=0
+                    break
+                fi
+            fi
+            sleep 2
+        done
+    fi
+
+    return $retcode
+)
+}
+
 function gpu_encode() {
+(
     time_limit=$1
 
     ip_addr_recive=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
@@ -32,6 +67,11 @@ function gpu_encode() {
         done
     ) &
     inotifywait -e create $volume_info_dir
+    router_wakeup
+    if [ $? -ne 0 ];then
+        log "router is halted"
+        return
+    fi
 
     for xml in $(cat $xml_list);do
 
@@ -64,6 +104,13 @@ function gpu_encode() {
 
         /bin/mv $xml $MC_DIR_ENCODING_GPU
 
+        scp ${MC_DIR_ENCODING_GPU}/${job_file_xml} en@${ip_addr_send}:${EN_DIR_XML}
+        ssh en@EncodeServer "ls ${EN_DIR_XML}/${job_file_xml}"
+        if [ $? -ne 0 ];then
+            log "gpu_encode failed: scp $job_file_xml $title $(hard_ware_info)"
+            break
+        fi
+
         ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_gpu_encoder.sh"
 
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
@@ -75,7 +122,6 @@ function gpu_encode() {
             volume_adjust=0
         fi
 
-        scp ${MC_DIR_ENCODING_GPU}/${job_file_xml} en@${ip_addr_send}:${EN_DIR_XML}
         ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml $volume_adjust | at -M now"
         sleep 3
 
@@ -125,14 +171,17 @@ function gpu_encode() {
             size=$(ls -sh $job_file_mkv_abs | awk '{ print $1 }')
             log "gpu_encode end: $took sec $size $title $(hard_ware_info)"
         else
-            log "gpu_encode failed: $title $(hard_ware_info)"
+            log "gpu_encode failed: $job_file_xml $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_GPU}/${job_file_xml} $MC_DIR_FAILED
+            break
         fi
 
     done
+)
 }
 
 function cpu_encode() {
+(
     time_limit=$1
 
     ip_addr_recive=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
@@ -218,7 +267,10 @@ function cpu_encode() {
         fi
 
     done
+)
 }
+
+log "start_encode"
 
 time_limit=$1
 if [ -z "$time_limit" ];then
@@ -226,8 +278,12 @@ if [ -z "$time_limit" ];then
     exit
 fi
 
-python $MC_BIN_BLUETOOTH_WAKEUP
-sleep 30
+router_wakeup
+if [ $? -ne 0 ];then
+    log "router wakeup failed"
+    exit
+fi
+
 wol $(cat ~/.mac_address)
 wake=false
 for ((i = 0; i < 20; i++));do
@@ -246,10 +302,10 @@ fi
 
 ssh en@EncodeServer "bash ${EN_DIR_BIN}/init.sh"
 
-(gpu_encode $time_limit) &
+gpu_encode $time_limit &
 pid_gpu_encode=$!
 
-(cpu_encode $time_limit) &
+cpu_encode $time_limit &
 pid_cpu_encode=$!
 
 wait $pid_gpu_encode
@@ -257,3 +313,5 @@ wait $pid_cpu_encode
 
 ssh en@EncodeServer "echo exec bash ${EN_DIR_BIN}/shutdown.sh | at -M now"
 bash $MC_BIN_SAFE_SHUTDOWN
+
+log "end_encode"
