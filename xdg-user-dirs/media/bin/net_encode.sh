@@ -41,39 +41,10 @@ function gpu_encode() {
 
     ip_addr_recive=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
     ip_addr_send=$(nslookup EncodeServer | grep Address: | tail -n 1 | awk '{ print $2 }')
-    volume_info_dir=${MC_DIR_TMP}/volume_info
-    mkdir -p $volume_info_dir
-    find $volume_info_dir -type f -delete
+    rectime_max=$((60 * 60 * 6))
+    count=0
 
-    xml_list=$(mktemp)
-    find $MC_DIR_DOWNSIZE_ENCODE_RESERVED -type f -name '*.xml' | sort > $xml_list
-    xml_count=$(cat $xml_list | wc -l)
-    if [ ! $xml_count -gt 0 ];then
-        return
-    fi
-
-    (
-        for xml in $(cat $xml_list);do
-
-            job_file_base=$(basename $xml .xml)
-            job_file_ts=${job_file_base}.ts
-            input_ts_file=${MC_DIR_TS}/${job_file_ts}
-
-            max_volume=$(ffmpeg -i $input_ts_file -vn -af volumedetect -f null /dev/null 2>&1 |
-            grep 'max_volume:' | awk -F 'max_volume:' '{ print $2 }' |
-            awk '{ print $1 }' | sort -n | tail -n 1 |
-            awk '{ if ($1 < 0) print $1 * -1; else print 0 }')
-            echo $max_volume > ${volume_info_dir}/${job_file_ts}
-        done
-    ) &
-    inotifywait -e create $volume_info_dir
-    router_wakeup
-    if [ $? -ne 0 ];then
-        log "router is halted"
-        return
-    fi
-
-    for xml in $(cat $xml_list);do
+    for xml in $(find $MC_DIR_DOWNSIZE_ENCODE_RESERVED -type f -name '*.xml' | sort);do
 
         job_file_base=$(basename $xml .xml)
         job_file_xml=${job_file_base}.xml
@@ -88,6 +59,12 @@ function gpu_encode() {
         foundby=$(xmlsel -t -m //foundby -v .                       ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
         filename_web=${title}_$(date +%m%d).mkv
 
+        if [ -f ${MC_DIR_VOLUME_INFO}/${job_file_ts} ];then
+            volume_adjust=$(cat ${MC_DIR_VOLUME_INFO}/${job_file_ts})
+        else
+            continue
+        fi
+
         if [ -z "$duration" ];then
             /bin/mv ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml} $MC_DIR_FAILED
             log "gpu_encode failed: $title $(hard_ware_info)"
@@ -95,10 +72,14 @@ function gpu_encode() {
             continue
         fi
 
+        if [ $duration -gt $rectime_max ];then
+            duration=$rectime_max
+        fi
         time_start=$(awk 'BEGIN { print systime() }')
         estimated_time=$(( duration / 5 * 1 ))
         estimated_time_epoch=$(( time_start + estimated_time ))
-        if [ $estimated_time_epoch -gt $time_limit ];then
+        if [ $count -gt 0 -a $estimated_time_epoch -gt $time_limit ];then
+            log "gpu_encode exceed time limit"
             break
         fi
 
@@ -115,15 +96,10 @@ function gpu_encode() {
 
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
-
-        if [ -f ${volume_info_dir}/${job_file_ts} ];then
-            volume_adjust=$(cat ${volume_info_dir}/${job_file_ts})
-        else
-            volume_adjust=0
-        fi
+        sleep 1
 
         ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml $volume_adjust | at -M now"
-        sleep 3
+        sleep 1
 
         gst-launch-1.0 -q \
           filesrc \
@@ -161,8 +137,8 @@ function gpu_encode() {
             fi
 
             mkvpropedit $job_file_mkv_abs --attachment-name record_description --add-attachment ${MC_DIR_ENCODING_GPU}/${job_file_xml}
-            mkdir -p ${MC_DIR_WEBDAV_MC_CONTENTS}/${foundby}
-            ln $job_file_mkv_abs "${MC_DIR_WEBDAV_MC_CONTENTS}/${foundby}/${filename_web}"
+            mkdir -p ${MC_DIR_WEBDAV_CONTENTS}/${foundby}
+            ln $job_file_mkv_abs "${MC_DIR_WEBDAV_CONTENTS}/${foundby}/${filename_web}"
 
             /bin/rm ${MC_DIR_ENCODING_GPU}/${job_file_xml}
 
@@ -176,6 +152,7 @@ function gpu_encode() {
             break
         fi
 
+        ((count++))
     done
 )
 }
@@ -186,6 +163,8 @@ function cpu_encode() {
 
     ip_addr_recive=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $2 }')
     ip_addr_send=$(nslookup EncodeServer | grep Address: | tail -n 1 | awk '{ print $2 }')
+    rectime_max=$((60 * 60 * 6))
+    count=0
 
     for xml in $(find $MC_DIR_ENCODE_RESERVED -type f -name '*.xml' | sort);do
 
@@ -205,10 +184,14 @@ function cpu_encode() {
             continue
         fi
 
+        if [ $duration -gt $rectime_max ];then
+            duration=$rectime_max
+        fi
         time_start=$(awk 'BEGIN { print systime() }')
         estimated_time=$(( duration / 5 * 4 ))
         estimated_time_epoch=$(( time_start + estimated_time ))
-        if [ $estimated_time_epoch -gt $time_limit ];then
+        if [ $count -gt 0 -a $estimated_time_epoch -gt $time_limit ];then
+            log "cpu_encode exceed time limit"
             break
         fi
 
@@ -218,9 +201,10 @@ function cpu_encode() {
 
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_CPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!
+        sleep 1
 
         ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh | at -M now"
-        sleep 3
+        sleep 1
 
         gst-launch-1.0 -q \
           filesrc \
@@ -266,6 +250,7 @@ function cpu_encode() {
             /bin/mv ${MC_DIR_ENCODING_CPU}/${job_file_xml} $MC_DIR_FAILED
         fi
 
+        ((count++))
     done
 )
 }
