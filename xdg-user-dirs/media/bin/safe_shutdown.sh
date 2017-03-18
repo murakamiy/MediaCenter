@@ -3,6 +3,10 @@ source $(dirname $0)/00.conf
 
 function do_shutdown() {
     touch $MC_STAT_POWEROFF
+
+    for p in $(ps -ef | grep $MC_BIN_HTTP_CACHE | awk '{ print $2 }' );do
+        kill $p
+    done
     echo disconnect | sudo /usr/bin/bluetoothctl
     sleep 5
     echo power off | sudo bluetoothctl

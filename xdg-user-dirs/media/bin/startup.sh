@@ -15,4 +15,8 @@ rm -f $MC_ABORT_SHUTDOWN
 
 $MC_BIN_DISK_CONTROL -o
 
+bash $MC_BIN_CREATE_VOLUME_INFO &
+bash $MC_BIN_HTTP_CACHE &
+nice bash $MC_BIN_REC_DISPATCH &
+
 log "end"
