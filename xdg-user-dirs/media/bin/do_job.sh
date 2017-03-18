@@ -10,6 +10,7 @@ if [ ! -f ${MC_DIR_RESERVED}/${job_file_xml} ];then
     exit
 fi
 
+rec_dispatch_wait=${MC_DIR_REC_DISPATCH_WAIT}/${job_file_base}
 title=$(print_title ${MC_DIR_RESERVED}/${job_file_xml})
 start=$(xmlsel -t -m "//epoch[@type='start']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
 end=$(xmlsel -t -m "//epoch[@type='stop']" -v '.' ${MC_DIR_RESERVED}/${job_file_xml})
@@ -48,6 +49,8 @@ else
         rec_time_adjust=$(($end - $now - 20))
         rec_ts_file=${MC_DIR_TS}/${job_file_ts}
 
+        touch $rec_dispatch_wait
+        inotifywait -e delete_self $rec_dispatch_wait
         $MC_BIN_REC --b25 --sid ${ch_array[0]} $rec_channel $rec_time_adjust $rec_ts_file
 
         mv ${MC_DIR_RECORDING}/${job_file_xml} $MC_DIR_RECORD_FINISHED
