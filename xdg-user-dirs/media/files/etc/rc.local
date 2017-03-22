@@ -1,6 +1,11 @@
 #!/bin/bash
 
 echo 10 > /proc/sys/kernel/panic
+
+echo 50   > /proc/sys/vm/dirty_background_ratio
+echo 80   > /proc/sys/vm/dirty_ratio
+echo 6000 > /proc/sys/vm/dirty_expire_centisecs
+
 cpupower frequency-set --max 1.8Ghz
 
 (

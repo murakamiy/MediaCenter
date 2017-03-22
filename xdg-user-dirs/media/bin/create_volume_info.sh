@@ -17,5 +17,6 @@ for xml in $(find $MC_DIR_DOWNSIZE_ENCODE_RESERVED -type f -name '*.xml' | sort)
         awk '{ if ($1 < 0) print $1 * -1; else print 0 }')
 
         echo $max_volume > ${MC_DIR_VOLUME_INFO}/${job_file_ts}
+        vmtouch -q -e $input_ts_file
     fi
 done

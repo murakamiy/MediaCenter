@@ -152,6 +152,9 @@ function gpu_encode() {
             break
         fi
 
+        vmtouch -q -e $job_file_mkv_abs
+        vmtouch -q -e $input_ts_file
+
         ((count++))
     done
 )
@@ -249,6 +252,9 @@ function cpu_encode() {
             log "cpu_encode failed: $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_CPU}/${job_file_xml} $MC_DIR_FAILED
         fi
+
+        vmtouch -q -e $job_file_mkv_abs
+        vmtouch -q -e $input_ts_file
 
         ((count++))
     done

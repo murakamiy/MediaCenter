@@ -101,6 +101,7 @@ else
         fi
 
         stat --format=%s ${MC_DIR_TS}/${job_file_ts}  > ${MC_DIR_FILE_SIZE}/${job_file_ts}
+        vmtouch -q -e $job_file_path
 
         mv ${MC_DIR_RECORD_FINISHED}/${job_file_xml} $MC_DIR_JOB_FINISHED
         log "rec end: $title $(hard_ware_info)"
