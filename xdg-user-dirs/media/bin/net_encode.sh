@@ -59,8 +59,13 @@ function gpu_encode() {
         foundby=$(xmlsel -t -m //foundby -v .                       ${MC_DIR_DOWNSIZE_ENCODE_RESERVED}/${job_file_xml} | sed -e 's/Finder//')
         filename_web=${title}_$(date +%m%d).mkv
 
-        if [ -f ${MC_DIR_VOLUME_INFO}/${job_file_ts} ];then
+        if [ -f ${MC_DIR_VOLUME_INFO}/${job_file_ts} -a -f ${MC_DIR_FRAME_INFO}/${job_file_ts} ];then
             volume_adjust=$(cat ${MC_DIR_VOLUME_INFO}/${job_file_ts})
+            frame_count=$(cat ${MC_DIR_FRAME_INFO}/${job_file_ts} | wc -l)
+            skip_duration=0
+            if [ $frame_count -lt 300 ];then
+                skip_duration=15
+            fi
         else
             continue
         fi
@@ -98,7 +103,7 @@ function gpu_encode() {
         pid_ffmpeg_recieve=$!
         sleep 1
 
-        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml $volume_adjust | at -M now"
+        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml $volume_adjust $skip_duration | at -M now"
         sleep 1
 
         gst-launch-1.0 -q \
@@ -149,7 +154,6 @@ function gpu_encode() {
         else
             log "gpu_encode failed: $job_file_xml $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_GPU}/${job_file_xml} $MC_DIR_FAILED
-            break
         fi
 
         vmtouch -q -e $job_file_mkv_abs

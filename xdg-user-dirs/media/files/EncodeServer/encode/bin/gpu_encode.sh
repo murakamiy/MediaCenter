@@ -3,6 +3,7 @@ source $(dirname $0)/config
 
 xml=$1
 volume_adjust=$2
+skip_duration=$3
 
 job_file_base=$(basename $xml .xml)
 job_file_xml=${job_file_base}.xml
@@ -18,7 +19,13 @@ else
     volume_adjust_param="-af volume=${volume_adjust}dB"
 fi
 
-ffmpeg -y \
+if [ -z "$skip_duration" -o "$skip_duration" = "0" ];then
+    seek_param=
+else
+    seek_param="-ss $skip_duration"
+fi
+
+ffmpeg -y $seek_param \
 -loglevel warning \
 -analyzeduration 30M \
 -probesize 100M \
