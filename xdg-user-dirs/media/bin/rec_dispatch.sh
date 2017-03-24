@@ -16,4 +16,5 @@ while true;do
         sleep 0.1
         rm -f $f
     done
+    sleep 1
 done

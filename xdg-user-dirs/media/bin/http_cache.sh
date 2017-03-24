@@ -8,6 +8,7 @@ while true;do
 
     open=$(inotifywait --fromfile $webdav_video_file -e open --format "%w")
     vmtouch -qt $open
+    sleep 10
 
 done &
 
@@ -15,5 +16,6 @@ while true;do
 
     close=$(inotifywait --fromfile $webdav_video_file -e close --format "%w")
     vmtouch -qe $close
+    sleep 10
 
 done &
