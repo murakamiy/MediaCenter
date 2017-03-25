@@ -11,14 +11,14 @@ function has_free_space() {
     if [ -z "$used" ];then
         return 0
     fi
-    if [ $used -lt 70 ];then
+    if [ $used -lt 50 ];then
         return 0
     fi
     return 1
 }
 
 function order_of_deletion() {
-    find $MC_DIR_ENCODE_DOWNSIZE -type f -printf '%P %p\n' | sort -k 1 | awk '{ print $2 }'
+    find $MC_DIR_ENCODE_DOWNSIZE -type f -printf '%TY%Tm%Td%TH%TM %p\n' | sort -k 1 | awk '{ print $2 }'
 }
 
 function do_migrate() {
@@ -44,9 +44,8 @@ function do_migrate() {
         total_size=$(($total_size + $size))
         total_count=$(($total_count + 1))
 
-        rm -f $video_file
         inode=$(stat --format='%i' $video_file)
-        find $MC_DIR_WEBDAV_MC_CONTENTS -inum $inode -delete
+        find $MC_DIR_ENCODE_DOWNSIZE $MC_DIR_WEBDAV_CONTENTS -inum $inode -delete
 
         if [ ! -f $ts_file ];then
             rm -f $png_thumb $xml
@@ -57,7 +56,7 @@ function do_migrate() {
         fi
     done
 
-    rmdir $MC_DIR_WEBDAV_MC_CONTENTS/*
+    rmdir $MC_DIR_WEBDAV_CONTENTS/*
     if [ $total_count -ne 0 ];then
         log "hd delete $total_count files $(($total_size / 1024 / 1024))MB $last_date"
     fi
