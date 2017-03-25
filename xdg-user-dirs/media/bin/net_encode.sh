@@ -210,7 +210,7 @@ function cpu_encode() {
         pid_ffmpeg_recieve=$!
         sleep 1
 
-        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh | at -M now"
+        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh $job_file_xml | at -M now"
         sleep 1
 
         gst-launch-1.0 -q \
@@ -253,7 +253,7 @@ function cpu_encode() {
             size=$(ls -sh $job_file_mkv_abs | awk '{ print $1 }')
             log "cpu_encode end: $took sec $size $title $(hard_ware_info)"
         else
-            log "cpu_encode failed: $title $(hard_ware_info)"
+            log "cpu_encode failed: $job_file_xml $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_CPU}/${job_file_xml} $MC_DIR_FAILED
         fi
 
