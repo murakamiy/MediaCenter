@@ -62,9 +62,9 @@ function gpu_encode() {
         if [ -f ${MC_DIR_VOLUME_INFO}/${job_file_ts} -a -f ${MC_DIR_FRAME_INFO}/${job_file_ts} ];then
             volume_adjust=$(cat ${MC_DIR_VOLUME_INFO}/${job_file_ts})
             frame_count=$(cat ${MC_DIR_FRAME_INFO}/${job_file_ts} | wc -l)
-            skip_duration=0
+            skip_duration=10
             if [ $frame_count -lt 300 ];then
-                skip_duration=15
+                skip_duration=20
             fi
         else
             continue
