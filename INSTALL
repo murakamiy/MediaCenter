@@ -491,7 +491,7 @@ service bluetooth restart
 
 bluetoothctl
     power on
-    agent on
+    agent KeyboardOnly
     default-agent
     discoverable on
     pairable on

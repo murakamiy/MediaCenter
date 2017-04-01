@@ -1,3 +1,5 @@
 # Set bluetooth power up
 ACTION=="add", SUBSYSTEMS=="input", ATTRS{name}=="PLAYSTATION(R)3 Controller", RUN+="/usr/bin/rm -f /tmp/play-station-controller"
+ACTION=="add", SUBSYSTEMS=="input", ATTRS{name}=="Wireless Controller", RUN+="/usr/bin/rm -f /tmp/play-station-controller"
 ACTION=="add", KERNEL=="hci0", RUN+="/usr/bin/touch /home/mc/xdg-user-dirs/media/job/state/hci/hci0"
+ACTION=="add", KERNEL=="hidraw*", SUBSYSTEM=="hidraw", KERNELS=="0005:054C:09CC.*", MODE="0666"
