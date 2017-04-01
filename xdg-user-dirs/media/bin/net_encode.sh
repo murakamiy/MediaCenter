@@ -139,6 +139,7 @@ function gpu_encode() {
         if [ "$integrity" -lt 180 ];then
             if [ "$original_file" = "release" ];then
                 /bin/rm $input_ts_file
+                mv -f ${MC_DIR_THUMB}/${job_file_ts} ${MC_DIR_THUMB}/${job_file_mkv}
             fi
 
             mkvpropedit $job_file_mkv_abs --attachment-name record_description --add-attachment ${MC_DIR_ENCODING_GPU}/${job_file_xml}
