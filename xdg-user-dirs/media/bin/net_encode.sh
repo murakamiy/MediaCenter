@@ -210,7 +210,7 @@ function cpu_encode() {
         pid_ffmpeg_recieve=$!
         sleep 1
 
-        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh $job_file_xml | at -M now"
+        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/cpu_encode.sh $job_file_xml 1280 720 | at -M now"
         sleep 1
 
         gst-launch-1.0 -q \
