@@ -62,11 +62,15 @@ input=$1
 
 # --video-unscaled \
 
-mpv \
+
+nice mpv \
 --input-ar-delay 2000 \
 --input-ar-rate 1 \
 --fullscreen \
 --deinterlace=yes \
---vo=vaapi \
+--profile=opengl-hq \
 --hwdec=vaapi \
+--vo-vaapi-scaling=hq \
+--vo-vaapi-scaled-osd=yes \
+--vo=vaapi \
 $input
