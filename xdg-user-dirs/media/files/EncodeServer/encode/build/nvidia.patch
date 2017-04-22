@@ -1,11 +1,11 @@
---- PKGBUILD	2016-12-04 12:23:24.291986158 +0900
-+++ PKGBUILD	2016-12-04 12:23:56.078653743 +0900
+--- PKGBUILD	2017-04-18 20:28:46.406869371 +0900
++++ PKGBUILD	2017-04-18 20:30:12.576872728 +0900
 @@ -75,7 +75,13 @@
+     --enable-libxvid \
      --enable-netcdf \
      --enable-shared \
-     --enable-version3 \
--    --enable-x11grab
-+    --enable-x11grab \
+-    --enable-version3
++    --enable-version3 \
 +    --enable-nonfree \
 +    --enable-cuda \
 +    --enable-cuvid \
