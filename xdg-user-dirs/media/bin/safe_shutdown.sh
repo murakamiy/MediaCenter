@@ -4,6 +4,9 @@ source $(dirname $0)/00.conf
 function do_shutdown() {
     touch $MC_STAT_POWEROFF
 
+    sudo cpupower frequency-set --governor performance
+    rm -f /tmp/play-station-controller
+
     for p in $(ps -ef | grep $MC_BIN_HTTP_CACHE | awk '{ print $2 }' );do
         kill $p
     done
@@ -11,12 +14,13 @@ function do_shutdown() {
     sleep 5
     echo power off | sudo bluetoothctl
     $MC_BIN_DISK_CONTROL -m
+    sleep 5
 
-    time=$(awk 'BEGIN { print strftime("%Y%m%d%H%M", systime() + 60 + 10) }')
-cat << EOF | at -M -t $time
+cat << EOF | at -M now
 xfce4-session-logout --logout
 sudo $MC_BIN_WAKEUPTOOL -w -t $wakeup_time
 EOF
+
 }
 
 function do_safe_shutdown() {
