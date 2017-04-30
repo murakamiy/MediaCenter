@@ -88,14 +88,14 @@ function gpu_encode() {
             break
         fi
 
-        /bin/mv $xml $MC_DIR_ENCODING_GPU
-
         scp ${MC_DIR_ENCODING_GPU}/${job_file_xml} en@${ip_addr_send}:${EN_DIR_XML}
         ssh en@EncodeServer "ls ${EN_DIR_XML}/${job_file_xml}"
         if [ $? -ne 0 ];then
             log "gpu_encode failed: scp $job_file_xml $title $(hard_ware_info)"
             break
         fi
+
+        /bin/mv $xml $MC_DIR_ENCODING_GPU
 
         ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_gpu_encoder.sh"
 
