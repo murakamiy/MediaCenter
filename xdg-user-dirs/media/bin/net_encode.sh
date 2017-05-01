@@ -35,6 +35,68 @@ function router_wakeup() {
 )
 }
 
+function try_gpu_encode() {
+(
+    retry=$1
+    ip_addr_recive=$2
+    ip_addr_send=$3
+    job_file_mkv_abs=$4
+    job_file_xml=$5
+    input_ts_file=$6
+    volume_adjust=$7
+    skip_duration=$8
+    estimated_time=$9
+
+    if [ "$retry" = "yes" ];then
+        gpu_encode_sh=gpu_encode_no_hwaccel.sh
+    else
+        gpu_encode_sh=gpu_encode.sh
+    fi
+
+    ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_gpu_encoder.sh"
+
+    ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
+    pid_ffmpeg_recieve=$!
+    sleep 1
+
+    ssh en@EncodeServer "echo exec bash ${EN_DIR_BIN}/${gpu_encode_sh} $job_file_xml $volume_adjust $skip_duration | at -M now"
+    sleep 1
+
+    gst-launch-1.0 -q \
+      filesrc \
+      location=${input_ts_file} \
+      blocksize=499712000 \
+    ! queue \
+      silent=true \
+      max-size-buffers=1 \
+      max-size-bytes=0 \
+      max-size-time=0 \
+    ! tcpclientsink \
+      host=${ip_addr_send} \
+      port=${MC_PORT_NO_GPU_SEND} \
+      blocksize=4096000 &
+    pid_ffmpeg_send=$!
+
+    (
+        sleep $estimated_time
+        kill -KILL $pid_ffmpeg_send > /dev/null 2>&1
+        kill -KILL $pid_ffmpeg_recieve > /dev/null 2>&1
+    ) &
+
+    wait $pid_ffmpeg_send
+    wait $pid_ffmpeg_recieve
+
+    encode_stat=$(ssh en@EncodeServer "if [ -f ${EN_DIR_LOG}/gpu/${job_file_xml}.success ];then echo success; fi")
+    if [ "$encode_stat" = "success" ];then
+        return_code=0
+    else
+        return_code=1
+    fi
+
+    return $return_code
+)
+}
+
 function gpu_encode() {
 (
     time_limit=$1
@@ -88,7 +150,7 @@ function gpu_encode() {
             break
         fi
 
-        scp $xml en@${ip_addr_send}:${EN_DIR_XML}
+        scp $xml en@EncodeServer:${EN_DIR_XML}
         ssh en@EncodeServer "ls ${EN_DIR_XML}/${job_file_xml}"
         if [ $? -ne 0 ];then
             log "gpu_encode failed: scp $job_file_xml $title $(hard_ware_info)"
@@ -97,38 +159,13 @@ function gpu_encode() {
 
         /bin/mv $xml $MC_DIR_ENCODING_GPU
 
-        ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_gpu_encoder.sh"
-
-        ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
-        pid_ffmpeg_recieve=$!
-        sleep 1
-
-        ssh en@${ip_addr_send} "echo exec bash ${EN_DIR_BIN}/gpu_encode.sh $job_file_xml $volume_adjust $skip_duration | at -M now"
-        sleep 1
-
-        gst-launch-1.0 -q \
-          filesrc \
-          location=${input_ts_file} \
-          blocksize=499712000 \
-        ! queue \
-          silent=true \
-          max-size-buffers=1 \
-          max-size-bytes=0 \
-          max-size-time=0 \
-        ! tcpclientsink \
-          host=${ip_addr_send} \
-          port=${MC_PORT_NO_GPU_SEND} \
-          blocksize=4096000 &
-        pid_ffmpeg_send=$!
-
-        (
-            sleep $estimated_time
-            kill -KILL $pid_ffmpeg_send > /dev/null 2>&1
-            kill -KILL $pid_ffmpeg_recieve > /dev/null 2>&1
-        ) &
-
-        wait $pid_ffmpeg_send
-        wait $pid_ffmpeg_recieve
+        retry=no
+        try_gpu_encode $retry $ip_addr_recive $ip_addr_send $job_file_mkv_abs $job_file_xml $input_ts_file $volume_adjust $skip_duration $estimated_time
+        if [ $? -ne 0 ];then
+            estimated_time=$(( duration / 8 * 1 ))
+            retry=yes
+            try_gpu_encode $retry $ip_addr_recive $ip_addr_send $job_file_mkv_abs $job_file_xml $input_ts_file $volume_adjust $skip_duration $estimated_time
+        fi
 
         duration=0
         ffprobe -show_format $job_file_mkv_abs > /dev/null 2>&1
@@ -151,9 +188,9 @@ function gpu_encode() {
             time_end=$(awk 'BEGIN { print systime() }')
             (( took = (time_end - time_start) ))
             size=$(ls -sh $job_file_mkv_abs | awk '{ print $1 }')
-            log "gpu_encode end: $took sec $size $title $(hard_ware_info)"
+            log "gpu_encode end: retry=$retry $took sec $size $title $(hard_ware_info)"
         else
-            log "gpu_encode failed: $job_file_xml $title $(hard_ware_info)"
+            log "gpu_encode failed: retry=$retry $job_file_xml $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_GPU}/${job_file_xml} $MC_DIR_FAILED
         fi
 

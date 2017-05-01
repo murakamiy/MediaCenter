@@ -29,10 +29,8 @@ ffmpeg -y $seek_param \
 -loglevel error \
 -analyzeduration 30M \
 -probesize 100M \
--hwaccel cuvid \
--c:v mpeg2_cuvid \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
--filter:v "scale_npp=w=${encode_width}:h=${encode_height}:interp_algo=super" \
+-filter:v "hwupload_cuda,scale_npp=w=${encode_width}:h=${encode_height}:interp_algo=super" \
 -rc constqp \
 -qp 34 \
 -init_qpP 34 \
