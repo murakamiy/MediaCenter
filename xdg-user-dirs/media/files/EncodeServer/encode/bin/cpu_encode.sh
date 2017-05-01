@@ -10,7 +10,7 @@ ip_addr_send=$(nslookup MediaCenter | grep Address: | tail -n 1 | awk '{ print $
 
 nice \
 ffmpeg -y \
--loglevel warning \
+-loglevel error \
 -analyzeduration 30M \
 -probesize 100M \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE}?listen \

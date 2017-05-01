@@ -81,14 +81,14 @@ function gpu_encode() {
             duration=$rectime_max
         fi
         time_start=$(awk 'BEGIN { print systime() }')
-        estimated_time=$(( duration / 5 * 1 ))
+        estimated_time=$(( duration / 16 * 1 ))
         estimated_time_epoch=$(( time_start + estimated_time ))
         if [ $count -gt 0 -a $estimated_time_epoch -gt $time_limit ];then
             log "gpu_encode exceed time limit"
             break
         fi
 
-        scp ${MC_DIR_ENCODING_GPU}/${job_file_xml} en@${ip_addr_send}:${EN_DIR_XML}
+        scp $xml en@${ip_addr_send}:${EN_DIR_XML}
         ssh en@EncodeServer "ls ${EN_DIR_XML}/${job_file_xml}"
         if [ $? -ne 0 ];then
             log "gpu_encode failed: scp $job_file_xml $title $(hard_ware_info)"
