@@ -33,6 +33,8 @@ ffmpeg -y $seek_param \
 -c:v mpeg2_cuvid \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
 -filter:v "scale_npp=w=${encode_width}:h=${encode_height}:interp_algo=super" \
+-r 30000/1001 \
+-force_key_frames 'expr:gte(t,n_forced*3)' \
 -rc constqp \
 -qp 34 \
 -init_qpP 34 \
