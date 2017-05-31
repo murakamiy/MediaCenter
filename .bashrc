@@ -116,6 +116,12 @@ function vinfof() {
         echo
     done
 }
+function frame_info() {
+    ffprobe -hide_banner -select_streams v:0 \
+            -print_format compact \
+            -show_entries frame=pict_type $1 |
+    sort | uniq -c
+}
 function epgdumpy() {
     python2 /home/mc/xdg-user-dirs/media/bin/epgdump_py/epgdump.py $@
 }
