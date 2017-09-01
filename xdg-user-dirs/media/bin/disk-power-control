@@ -9,6 +9,7 @@ USAGE : $(basename $0) OPTIONS
         -m unmount hard disk
         -l print device file (large hard disk)
         -s print device file (small hard disk)
+        -S print device file (small hard disk partition)
         -o optimize hard disk parameter
 EOF
 exit 1
@@ -17,6 +18,13 @@ exit 1
 function print_device_small() {
     if [ -h /dev/disk/by-id/$MC_DEVICE_HD_SMALL ];then
         $MC_BIN_REALPATH /dev/disk/by-id/$MC_DEVICE_HD_SMALL
+    fi
+}
+
+print_device_small_partition() {
+    device=$(print_device_small)
+    if [ -n "$device" ];then
+        mount | grep $device | grep -w ext4 | awk '{ print $1 }'
     fi
 }
 
@@ -79,14 +87,14 @@ function optimize_param() {
     large_hd=$(print_device_large)
 
     # set Advanced Power Management feature to the highest I/O performance
-    hdparm -B 254 $small_hd
+#     hdparm -B 254 $small_hd
 
     # set standby (spindown) timeout to 10 minutes
     hdparm -S 120 $small_hd
     hdparm -S 120 $large_hd
 }
 
-while getopts 'hwmlso' opt;do
+while getopts 'hwmlsSo' opt;do
     case $opt in
         h)
             usage
@@ -106,6 +114,10 @@ while getopts 'hwmlso' opt;do
             ;;
         s)
             print_device_small
+            exit
+            ;;
+        S)
+            print_device_small_partition
             exit
             ;;
         o)

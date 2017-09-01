@@ -3,7 +3,7 @@ source $(dirname $0)/00.conf
 
 function has_free_space() {
 
-    used=$(df -Ph --sync | awk -v mount=/mnt/hd_small '{ if ($6 == mount) printf("%d\n", $5) }')
+    used=$(df -Ph --sync | awk -v mount=/ '{ if ($6 == mount) printf("%d\n", $5) }')
 
     if [ "$1" = "print" ];then
         log "used : $mount ${used}%"

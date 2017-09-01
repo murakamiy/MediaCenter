@@ -77,9 +77,16 @@ fi
 dev=$($MC_BIN_DISK_CONTROL -l)
 dev_base=$(sed -e 's@/dev/@@' <<< $dev)
 used=$(df -h | grep "^$dev" | awk '{ print $3 }')
-write_s=$(echo $(cat /sys/fs/ext4/$dev_base/session_write_kbytes) / 1024 / 1024 | bc)
-write_t=$(echo $(cat /sys/fs/ext4/$dev_base/lifetime_write_kbytes) / 1024 / 1024 | bc)
-log "disk used=$used session=${write_s}G total=${write_t}G"
+write_s=$(echo "$(cat /sys/fs/ext4/$dev_base/session_write_kbytes) / 1024 / 1024" | bc)
+write_t=$(echo "scale=2; $(cat /sys/fs/ext4/$dev_base/lifetime_write_kbytes) / 1024 / 1024 / 1024" | bc)
+log "hd  used=$used session=${write_s}G total=${write_t}T"
+
+dev=$($MC_BIN_DISK_CONTROL -S)
+dev_base=$(sed -e 's@/dev/@@' <<< $dev)
+used=$(df -h | grep "^$dev" | awk '{ print $3 }')
+write_s=$(echo "scale=2; $(cat /sys/fs/ext4/$dev_base/session_write_kbytes) / 1024 / 1024" | bc)
+write_t=$(echo "scale=2; $(cat /sys/fs/ext4/$dev_base/lifetime_write_kbytes) / 1024 / 1024 / 1024" | bc)
+log "ssd used=$used session=${write_s}G total=${write_t}T"
 
 if [ $wakeup_time -ne -1 ];then
     next_wakeup_time=$(awk -v epoc=$wakeup_time 'BEGIN { print strftime("%Y/%m/%d %H:%M:%S", epoc) }')
