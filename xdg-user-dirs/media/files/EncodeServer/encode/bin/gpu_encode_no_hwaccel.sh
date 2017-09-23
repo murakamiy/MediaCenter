@@ -30,7 +30,7 @@ ffmpeg -y $seek_param \
 -analyzeduration 30M \
 -probesize 100M \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
--filter:v "hwupload_cuda,scale_npp=w=${encode_width}:h=${encode_height}:interp_algo=super" \
+-filter:v "scale=w=${encode_width}:h=${encode_height},hwupload_cuda" \
 -r 30000/1001 \
 -force_key_frames 'expr:gte(t,n_forced*3)' \
 -rc constqp \

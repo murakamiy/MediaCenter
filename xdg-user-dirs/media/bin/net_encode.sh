@@ -54,6 +54,9 @@ function try_gpu_encode() {
     fi
 
     ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_gpu_encoder.sh"
+    if [ $? -eq 1 ];then
+        return 2
+    fi
 
     ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_GPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
     pid_ffmpeg_recieve=$!
@@ -161,10 +164,14 @@ function gpu_encode() {
 
         retry=no
         try_gpu_encode $retry $ip_addr_recive $ip_addr_send $job_file_mkv_abs $job_file_xml $input_ts_file $volume_adjust $skip_duration $estimated_time
-        if [ $? -ne 0 ];then
+        if [ $? -eq 1 ];then
             estimated_time=$(( duration / 8 * 1 ))
             retry=yes
             try_gpu_encode $retry $ip_addr_recive $ip_addr_send $job_file_mkv_abs $job_file_xml $input_ts_file $volume_adjust $skip_duration $estimated_time
+        elif [ $? -eq 2 ];then
+            log "gpu_encode failed: kill $job_file_xml $title $(hard_ware_info)"
+            /bin/mv ${MC_DIR_ENCODING_GPU}/${job_file_xml} $MC_DIR_FAILED
+            break
         fi
 
         duration=0
@@ -240,9 +247,13 @@ function cpu_encode() {
             break
         fi
 
-        /bin/mv $xml $MC_DIR_ENCODING_CPU
-
         ssh en@EncodeServer "bash ${EN_DIR_BIN}/kill_cpu_encoder.sh"
+        if [ $? -eq 1 ];then
+            log "cpu_encode failed: kill $job_file_xml $title $(hard_ware_info)"
+            break
+        fi
+
+        /bin/mv $xml $MC_DIR_ENCODING_CPU
 
         ffmpeg -y -loglevel quiet -i async:tcp://${ip_addr_recive}:${MC_PORT_NO_CPU_RECIEVE}?listen -vcodec copy -acodec copy -f matroska $job_file_mkv_abs &
         pid_ffmpeg_recieve=$!

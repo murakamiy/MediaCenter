@@ -10,7 +10,7 @@
 +    --enable-cuda \
 +    --enable-cuvid \
 +    --enable-libnpp \
-+    --extra-cflags="-march=native -I/opt/cuda/include" \
++    --extra-cflags="-I/opt/cuda/include" \
 +    --extra-ldflags="-L/opt/cuda/lib64"
  
    make

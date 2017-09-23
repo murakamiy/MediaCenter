@@ -31,8 +31,9 @@ ffmpeg -y $seek_param \
 -probesize 100M \
 -hwaccel cuvid \
 -c:v mpeg2_cuvid \
+-deint bob \
+-resize ${encode_width}x${encode_height} \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
--filter:v "scale_npp=w=${encode_width}:h=${encode_height}:interp_algo=super" \
 -r 30000/1001 \
 -force_key_frames 'expr:gte(t,n_forced*3)' \
 -rc constqp \
