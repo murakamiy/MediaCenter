@@ -129,7 +129,7 @@ function gpu_encode() {
             frame_count=$(cat ${MC_DIR_FRAME_INFO}/${job_file_ts} | wc -l)
             skip_duration=10
             if [ $frame_count -lt 300 ];then
-                skip_duration=20
+                skip_duration=30
             fi
         else
             continue
@@ -157,6 +157,12 @@ function gpu_encode() {
         ssh en@EncodeServer "ls ${EN_DIR_XML}/${job_file_xml}"
         if [ $? -ne 0 ];then
             log "gpu_encode failed: scp $job_file_xml $title $(hard_ware_info)"
+            break
+        fi
+
+        ssh en@EncodeServer "bash ${EN_DIR_BIN}/nvinit.sh"
+        if [ $? -ne 0 ];then
+            log "gpu_encode failed: nvinit $job_file_xml $title $(hard_ware_info)"
             break
         fi
 
@@ -344,6 +350,7 @@ if [ "$wake" = "false" ];then
     exit
 fi
 
+sleep 10
 ssh en@EncodeServer "bash ${EN_DIR_BIN}/init.sh"
 
 gpu_encode $time_limit &
@@ -355,6 +362,7 @@ pid_cpu_encode=$!
 wait $pid_gpu_encode
 wait $pid_cpu_encode
 
+ssh en@EncodeServer "bash ${EN_DIR_BIN}/nvinit.sh"
 ssh en@EncodeServer "echo exec bash ${EN_DIR_BIN}/shutdown.sh | at -M now"
 bash $MC_BIN_SAFE_SHUTDOWN
 
