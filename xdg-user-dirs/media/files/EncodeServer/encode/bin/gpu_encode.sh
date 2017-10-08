@@ -31,17 +31,17 @@ ffmpeg -y $seek_param \
 -probesize 100M \
 -hwaccel cuvid \
 -c:v mpeg2_cuvid \
--deint bob \
 -resize ${encode_width}x${encode_height} \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
--r 30000/1001 \
--force_key_frames 'expr:gte(t,n_forced*3)' \
+-c:v hevc_nvenc \
+-preset llhq \
+-zerolatency 1 \
+-strict_gop 1 \
 -rc constqp \
 -qp 34 \
 -init_qpP 34 \
 -init_qpB 34 \
 -init_qpI 34 \
--c:v hevc_nvenc \
 $volume_adjust_param -c:a aac \
 -f matroska \
 tcp://${ip_addr_send}:${EN_PORT_NO_GPU_SEND} > ${EN_DIR_LOG}/gpu/${job_file_xml} 2>&1

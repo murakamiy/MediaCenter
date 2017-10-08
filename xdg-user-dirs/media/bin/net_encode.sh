@@ -171,6 +171,7 @@ function gpu_encode() {
         retry=no
         try_gpu_encode $retry $ip_addr_recive $ip_addr_send $job_file_mkv_abs $job_file_xml $input_ts_file $volume_adjust $skip_duration $estimated_time
         if [ $? -eq 1 ];then
+            ssh en@EncodeServer "bash ${EN_DIR_BIN}/nvinit.sh"
             estimated_time=$(( duration / 8 * 1 ))
             retry=yes
             try_gpu_encode $retry $ip_addr_recive $ip_addr_send $job_file_mkv_abs $job_file_xml $input_ts_file $volume_adjust $skip_duration $estimated_time

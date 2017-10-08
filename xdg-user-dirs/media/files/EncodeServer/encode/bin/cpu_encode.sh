@@ -15,9 +15,9 @@ ffmpeg -y \
 -probesize 100M \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE}?listen \
 -vf yadif=mode=0:parity=-1:deint=1,scale=w=${width}:h=${height} \
+-c:v libx265 \
 -preset:v fast \
 -crf 28 \
--c:v libx265 \
 -c:a aac \
 -f matroska \
 tcp://${ip_addr_send}:${EN_PORT_NO_CPU_SEND} > ${EN_DIR_LOG}/cpu/${job_file_xml} 2>&1

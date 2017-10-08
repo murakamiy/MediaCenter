@@ -31,14 +31,15 @@ ffmpeg -y $seek_param \
 -probesize 100M \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_GPU_RECIEVE}?listen \
 -filter:v "yadif=mode=0:parity=-1:deint=1,scale=w=${encode_width}:h=${encode_height},hwupload_cuda" \
--r 30000/1001 \
--force_key_frames 'expr:gte(t,n_forced*3)' \
+-c:v hevc_nvenc \
+-preset llhq \
+-zerolatency 1 \
+-strict_gop 1 \
 -rc constqp \
 -qp 34 \
 -init_qpP 34 \
 -init_qpB 34 \
 -init_qpI 34 \
--c:v hevc_nvenc \
 $volume_adjust_param -c:a aac \
 -f matroska \
 tcp://${ip_addr_send}:${EN_PORT_NO_GPU_SEND} > ${EN_DIR_LOG}/gpu/${job_file_xml} 2>&1

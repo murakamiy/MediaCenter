@@ -2,9 +2,9 @@
 
 yaourt -G ffmpeg
 
-patch --dry-run -d ffmpeg/ -Np0 -i /home/en/encode/build/nvidia.patch
+patch --dry-run -d ffmpeg/ -Np0 -i ../nvidia.patch
 if [ $? -eq 0 ];then
-    patch -d ffmpeg/ -Np0 -i /home/en/encode/build/nvidia.patch
+    patch -d ffmpeg/ -Np0 -i ../nvidia.patch
 else
     exit
 fi
