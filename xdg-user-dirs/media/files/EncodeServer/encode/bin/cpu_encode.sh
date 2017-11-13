@@ -16,7 +16,7 @@ ffmpeg -y \
 -i async:tcp://${ip_addr_recive}:${EN_PORT_NO_CPU_RECIEVE}?listen \
 -vf yadif=mode=0:parity=-1:deint=1,scale=w=${width}:h=${height} \
 -c:v libx265 \
--preset:v fast \
+-preset:v medium \
 -crf 28 \
 -c:a aac \
 -f matroska \

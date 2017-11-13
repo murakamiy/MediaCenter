@@ -16,3 +16,8 @@ if [ -n "$battery_level" ];then
         echo disconnect | sudo /usr/bin/bluetoothctl
     done &
 fi
+
+(
+    sleep 10
+    pacmd set-card-profile alsa_card.pci-0000_00_0e.0 output:hdmi-stereo
+) &

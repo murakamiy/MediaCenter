@@ -106,6 +106,7 @@ for f in $(find $MC_DIR_RESERVED $MC_DIR_EPG -type f -name '*.xml');do
 done
 
 find $MC_DIR_TITLE_TS -type d -delete
+sudo fstrim -v /
 
 /bin/rm -f ${MC_DIR_RECORDING}/mkjob.xml
 

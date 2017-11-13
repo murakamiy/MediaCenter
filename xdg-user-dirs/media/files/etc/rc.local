@@ -6,8 +6,6 @@ echo 50   > /proc/sys/vm/dirty_background_ratio
 echo 80   > /proc/sys/vm/dirty_ratio
 echo 6000 > /proc/sys/vm/dirty_expire_centisecs
 
-cpupower frequency-set --max 1.8Ghz
-
 (
     hci_stat_dir=/home/mc/xdg-user-dirs/media/job/state/hci
     hci_stat_file=${hci_stat_dir}/hci0
