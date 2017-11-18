@@ -93,7 +93,7 @@ case $command in
             echo -e "$time_start\t$time_stop\t$channel\t$priority\t$foundby\t$title"
         done
         echo ENCODING
-        for f in $(find $MC_DIR_ENCODING -type f -not -name mkjob.xml);do
+        for f in $(find $MC_DIR_ENCODING $MC_DIR_ENCODING_CPU $MC_DIR_ENCODING_GPU -type f -not -name mkjob.xml);do
             title=$(print_title $f)
             time_start=$(xmlsel -t -m "//time[@type='start']" -v '.' $f | awk '{ print $2 }')
             time_stop=$(xmlsel -t -m "//time[@type='stop']" -v '.' $f | awk '{ print $2 }')

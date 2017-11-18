@@ -22,6 +22,7 @@ DIR_ENCODE = os.environ["MC_DIR_ENCODE_RESERVED"]
 DIR_DOWNSIZE_ENCODE = os.environ["MC_DIR_DOWNSIZE_ENCODE_RESERVED"]
 BIN_DO_JOB = os.environ["MC_BIN_DO_JOB"]
 BIN_NET_ENCODE = os.environ["MC_BIN_NET_ENCODE"]
+BIN_GPU_ENCDOE = os.environ["MC_BIN_DOWNSIZE_ENCODE"]
 LOG_FILE = os.environ["MC_FILE_LOG"]
 CRON_TIME = os.environ["MC_CRON_TIME"]
 
@@ -112,8 +113,7 @@ class ReserveMaker:
         self.finder = finder
         self.random_finder = random_finder
         self.now = datetime.now()
-        five_minute = timedelta(0, 60 * 5, 0)
-        self.now += five_minute
+        self.now += timedelta(0, 30, 0)
         self.logfd = open(LOG_FILE, "a")
         self.dry_run = dry_run
         self.re_schedule = re_schedule
@@ -129,7 +129,7 @@ class ReserveMaker:
         if self.dry_run == True:
             self.border_time = self.now + timedelta(1, 0, 0)
         else:
-            self.border_time = self.next_cron + timedelta(0, finder.finders[0].rectime_max, 0)
+            self.border_time = self.next_cron
         self.provider = rating.Provider()
     def log(self, message):
         if self.dry_run == False:
@@ -180,6 +180,7 @@ class ReserveMaker:
 
         span_list = self.create_span(isdb_set)
         span_list = self.optimize_span(span_list)
+        span_list = self.uniq_span(span_list)
         encode_span = self.create_encode_span(span_list)
 
         all_rinfo_list = []
@@ -201,6 +202,7 @@ class ReserveMaker:
         all_rinfo_list = self.create_reserve(all_rinfo_list)
         self.do_reserve(all_rinfo_list)
         self.do_reserve_encode(encode_span)
+        self.do_reserve_encode_gpu(span_list, all_rinfo_list)
 
     def remove_border_strech(self, rinfo_list):
         new_list = []
@@ -359,9 +361,32 @@ class ReserveMaker:
         for s in span_list_m2:
             self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
         return span_list_m2
+    def uniq_span(self, span_list):
+        start_list = []
+        for s in span_list:
+            if s[0] not in start_list:
+                start_list.append(s[0])
+        span_map = {}
+        for start in start_list:
+            for span in span_list:
+                if start < span[0]:
+                    break
+                if start == span[0]:
+                    if start in span_map:
+                        if span_map[start] < span[1]:
+                            span_map[start] = span[1]
+                    else:
+                        span_map[start] = span[1]
+        span_list_uniq = []
+        for k in sorted(span_map.keys()):
+            span_list_uniq.append([k, span_map[k]])
+        self.log("span_list_uniq:")
+        for s in span_list_uniq:
+            self.log(" %s %s" % (s[0].strftime('%Y/%m/%d %H:%M'), s[1].strftime('%Y/%m/%d %H:%M')))
+        return span_list_uniq
     def create_encode_span(self, span_list):
         longest_span = None
-        count = len(glob(DIR_ENCODE + '/' + '*.xml')) + len(glob(DIR_DOWNSIZE_ENCODE + '/' + '*.xml'))
+        count = len(glob(DIR_ENCODE + '/' + '*.xml'))
         if count == 0:
             return longest_span
         encode_time = timedelta(0, 60 * 60 * 2, 0)
@@ -407,6 +432,27 @@ class ReserveMaker:
                         encode_span[0].strftime('%d %H:%M'),
                         encode_span[1].strftime('%H:%M'),
                         "ENCODE_JOB"))
+    def do_reserve_encode_gpu(self, span_list, rinfo_list):
+        for s in span_list:
+            if self.next_cron < s[0]:
+                continue
+            for r in rinfo_list:
+                if s[0] <= r.pinfo.start:
+                    start = r.pinfo.start
+                    end = s[1]
+                    if self.next_cron < end:
+                        end = self.next_cron
+                    encode_command = "exec bash %s %d" % (BIN_GPU_ENCDOE, int(time.mktime(end.timetuple())))
+                    at_command = "at -M -t %s > /dev/null 2>&1" % (start.strftime("%Y%m%d%H%M"))
+                    system_command = "echo '%s' | %s" % (encode_command, at_command)
+                    if self.dry_run == False:
+                        os.system(system_command)
+                    self.log("reserved encode_gpu:")
+                    self.log(" %s %s %s" % (
+                                start.strftime('%d %H:%M'),
+                                end.strftime('%H:%M'),
+                                "ENCODE_JOB_GPU"))
+                    break
     def set_dry_run(self, dry_run):
         self.dry_run = dry_run
     def set_include_channel(self, channel):

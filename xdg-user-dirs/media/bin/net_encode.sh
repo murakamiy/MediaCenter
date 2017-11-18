@@ -306,8 +306,12 @@ function cpu_encode() {
 
             time_end=$(awk 'BEGIN { print systime() }')
             (( took = (time_end - time_start) ))
+            encode_time=$(awk -v epoch=$took 'BEGIN { print strftime("%H:%M:%S", epoch, 1) }')
+            ts_time=$(awk -v epoch=$duration 'BEGIN { print strftime("%H:%M:%S", epoch, 1) }')
+            encode_rate=$(awk -v ts_time=$duration -v encode_time=$took 'BEGIN { printf("%.2f", ts_time / encode_time) }')
             size=$(ls -sh $job_file_mkv_abs | awk '{ print $1 }')
-            log "cpu_encode end: $took sec $size $title $(hard_ware_info)"
+            log "cpu_encode end: ${encode_rate}x $ts_time $encode_time $size $title $(hard_ware_info)"
+
         else
             log "cpu_encode failed: $job_file_xml $title $(hard_ware_info)"
             /bin/mv ${MC_DIR_ENCODING_CPU}/${job_file_xml} $MC_DIR_FAILED
@@ -321,7 +325,7 @@ function cpu_encode() {
 )
 }
 
-log "start_encode"
+log "net_encode start"
 
 time_limit=$1
 if [ -z "$time_limit" ];then
@@ -354,17 +358,17 @@ fi
 sleep 10
 ssh en@EncodeServer "bash ${EN_DIR_BIN}/init.sh"
 
-gpu_encode $time_limit &
-pid_gpu_encode=$!
+# gpu_encode $time_limit &
+# pid_gpu_encode=$!
 
 cpu_encode $time_limit &
 pid_cpu_encode=$!
 
-wait $pid_gpu_encode
+# wait $pid_gpu_encode
 wait $pid_cpu_encode
 
 ssh en@EncodeServer "bash ${EN_DIR_BIN}/nvinit.sh"
 ssh en@EncodeServer "echo exec bash ${EN_DIR_BIN}/shutdown.sh | at -M now"
-bash $MC_BIN_SAFE_SHUTDOWN
+log "net_encode end"
 
-log "end_encode"
+bash $MC_BIN_SAFE_SHUTDOWN
