@@ -15,7 +15,7 @@ rm -f $MC_ABORT_SHUTDOWN
 
 $MC_BIN_DISK_CONTROL -o
 
-bash $MC_BIN_HTTP_CACHE &
+# bash $MC_BIN_HTTP_CACHE &
 bash $MC_BIN_FLUSH_REC &
 nice bash $MC_BIN_REC_DISPATCH &
 ds4drv --daemon --bindings exec_stuff --mapping keyboard --profiles kbmouse &

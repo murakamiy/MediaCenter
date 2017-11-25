@@ -14,6 +14,7 @@ echo 6000 > /proc/sys/vm/dirty_expire_centisecs
     fi
     ( sleep 30; rm -f $hci_stat_file ) &
 
+    echo on > /sys/class/bluetooth/hci0/power/control
     echo power on | sudo bluetoothctl
     python /home/mc/xdg-user-dirs/media/bin/bluetooth_wakeup.py
     dhcpcd --oneshot

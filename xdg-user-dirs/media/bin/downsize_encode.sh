@@ -7,13 +7,17 @@ if [ -z "$time_limit" ];then
     exit
 fi
 
+encording_task_num=$(find $MC_DIR_ENCODING_GPU -type f | wc -l)
+if [ $encording_task_num -ne 0 ];then
+    log "gpu_encode failed startup"
+    exit
+fi
+
 log "gpu_encode start"
 
 rectime_max=$((60 * 60 * 6))
 count=0
-exceed_time_limit=0
 
-for ((r = 0; r < 6; r++));do
 
     for xml in $(find $MC_DIR_DOWNSIZE_ENCODE_RESERVED -type f -name '*.xml' | sort);do
 
@@ -44,10 +48,9 @@ for ((r = 0; r < 6; r++));do
         fi
 
         time_start=$(awk 'BEGIN { print systime() }')
-        estimated_time=$(( duration / 2 + duration / 4 ))
+        estimated_time=$(( duration / 2 ))
         estimated_time_epoch=$(( time_start + estimated_time ))
         if [ $count -gt 0 -a $estimated_time_epoch -gt $time_limit ];then
-            exceed_time_limit=1
             log "gpu_encode exceed time limit"
             break
         fi
@@ -58,14 +61,10 @@ for ((r = 0; r < 6; r++));do
         grep 'max_volume:' | awk -F 'max_volume:' '{ print $2 }' |
         awk '{ print $1 }' | sort -n | tail -n 1 |
         awk '{ if ($1 < 0) print $1 * -1; else print 0 }')
-        vmtouch -q -e $input_ts_file
-
-        fifo=${MC_DIR_FIFO}/vaapi_$$
-        mkfifo -m 644 $fifo
 
         nice ffmpeg -y -loglevel quiet \
         -vaapi_device /dev/dri/renderD128 \
-        -i $fifo \
+        -i $input_ts_file \
         -vf 'format=nv12,hwupload,deinterlace_vaapi,scale_vaapi=w=640:h=360' \
         -vcodec hevc_vaapi \
         -level 31 -qp 32 \
@@ -76,29 +75,14 @@ for ((r = 0; r < 6; r++));do
         $job_file_mkv_abs &
         pid_ffmpeg=$!
 
-        gst-launch-1.0 -q \
-          filesrc \
-          location=${input_ts_file} \
-          blocksize=499712000 \
-        ! queue \
-          silent=true \
-          max-size-buffers=1 \
-          max-size-bytes=0 \
-          max-size-time=0 \
-        ! filesink location=$fifo \
-          blocksize=4096000 &
-        pid_read=$!
-
         (
-            sleep $estimated_time
+            sleep $duration
+            kill -TERM $pid_ffmpeg > /dev/null 2>&1
+            sleep 20
             kill -KILL $pid_ffmpeg > /dev/null 2>&1
-            sleep 1
-            kill -KILL $pid_read > /dev/null 2>&1
         ) &
 
-        wait $pid_read
         wait $pid_ffmpeg
-        rm -f $fifo
 
         duration=0
         ffprobe -show_format $job_file_mkv_abs > /dev/null 2>&1
@@ -136,12 +120,7 @@ for ((r = 0; r < 6; r++));do
         ((count++))
     done
 
-    if [ $exceed_time_limit -eq 1 ];then
-        break
-    fi
-    sleep 10
 
-done
 
 log "gpu_encode end"
 bash $MC_BIN_SAFE_SHUTDOWN
